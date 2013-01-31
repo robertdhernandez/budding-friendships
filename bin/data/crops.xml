@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<crops>
+	<!-- Turnip -->
+	<crop id="turnip" seedID="seed_turnip" cropID="turnip" season="spring" regrowth="0" image="data/farm/crops/turnip.png" x="0" y="0">
+		<stage length="2"/>
+		<stage length="2"/>
+	</crop>
+	
+	<!-- Potato -->
+	<crop id="potato" seedID="seed_potato" cropID="potato" season="spring" regrowth="0" image="data/tilesets/crops.png" x="0" y="32">
+		<stage length="3"/>
+		<stage length="4"/>
+	</crop>
+	
+	<!-- Cucumber -->
+	<crop id="cucumber" seedID="seed_cucumber" cropID="cucumber" season="spring" regrowth="2" image="data/farm/crops/cucumber.png" x="0" y="0">
+		<stage length="4"/>
+		<stage length="3"/>
+		<stage length="2"/>
+	</crop>
+	
+	<!-- Strawberry -->
+	<crop id="strawberry" seedID="seed_strawberry" cropID="strawberry" season="spring" regrowth="2" image="data/tilesets/crops.png" x="0" y="32">
+		<stage length="3"/>
+		<stage length="3"/>
+		<stage length="2"/>
+	</crop>
+</crops>

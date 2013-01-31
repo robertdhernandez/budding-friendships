@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<musics>
+	<music id="ponyville_spring" file="data/music/ponyville_sp.ogg" />
+	<music id="farm_spring" file="data/music/farm_sp.ogg" />
+	<music id="farm_summer" file="data/music/farm_su.ogg" />
+</musics>

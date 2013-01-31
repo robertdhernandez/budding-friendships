@@ -1,0 +1,218 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release (No Console)|Win32">
+      <Configuration>Release (No Console)</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{141F6C5E-ECF3-466B-876F-6F9C12F4EFC7}</ProjectGuid>
+    <RootNamespace>MLPBF</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release (No Console)|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release (No Console)|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>..\lib\include\SFML;..\src\tmx-parser;..\lib\include\lua;..\src\tinyxml;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LibraryPath>..\lib\msvc10;$(LibraryPath)</LibraryPath>
+    <OutDir>..\bin\msvc10\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>..\lib\include\SFML;..\lib\include\lua;..\src\tmx-parser;..\src\tinyxml;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release (No Console)|Win32'">
+    <IncludePath>..\lib\include\SFML;..\lib\include\lua;..\src\tmx-parser;..\src\tinyxml;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LibraryPath>..\lib\msvc10;$(LibraryPath)</LibraryPath>
+    <OutDir>..\bin\msvc10\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release (No Console)|Win32'">
+    <LibraryPath>..\lib\msvc10;$(LibraryPath)</LibraryPath>
+    <OutDir>..\bin\msvc10\Release\</OutDir>
+    <IntDir>Release\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4355;4290;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>sfml-main-d.lib;sfml-system-d.lib;sfml-graphics-d.lib;sfml-window-d.lib;sfml-audio-d.lib;lua.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;MAIN_TRY_CATCH;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4355;4290;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>sfml-main.lib;sfml-system.lib;sfml-graphics.lib;sfml-window.lib;sfml-audio.lib;lua.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>NotSet</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release (No Console)|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;MAIN_TRY_CATCH;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4355;4290;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>sfml-main.lib;sfml-system.lib;sfml-graphics.lib;sfml-window.lib;sfml-audio.lib;lua.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\mlpbf\mlpbf\character.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\console.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\console\command.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\console\function.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\database\base.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\database\item.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\database\map.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\database\sprite.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\direction.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\exception.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\global.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\graphics\animation.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\graphics\spritesheet.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\item\base.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\item\generic.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\item\inventory.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\map.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\map\object.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\map\sign.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\map\viewer.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\actor.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\player.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\resource\loader\font.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\resource\loader\texture.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\resource\manager\base.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\resource\manager\font.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\resource\manager\music.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\resource\manager\sound.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\resource\manager\texture.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\state\base.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\state\map.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\time.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\time\clock.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\time\date.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\time\day_of_week.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\time\hour.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\time\season.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\ui\base.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\ui\clock.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\ui\window.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\utility\controller\general.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\utility\controller\key.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\utility\controller\mouse.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\utility\controller\text.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\utility\listener\general.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\utility\listener\key.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\utility\listener\mouse.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\utility\listener\text.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\utility\rich_text.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\utility\saveable.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\utility\save_chunk.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\utility\timer.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\xml\exception.h" />
+    <ClInclude Include="..\src\mlpbf\mlpbf\xml\helper.h" />
+    <ClInclude Include="..\src\mlpbf\resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="TinyXML.vcxproj">
+      <Project>{12ddfc8e-f779-4d99-9e51-e9704faa418b}</Project>
+    </ProjectReference>
+    <ProjectReference Include="TmxParser.vcxproj">
+      <Project>{798fc53d-6da5-4634-8c4e-1ca2368f27ea}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\bin\data\Icon2.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="MLPBF.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\mlpbf\actor.cpp" />
+    <ClCompile Include="..\src\mlpbf\animation.cpp" />
+    <ClCompile Include="..\src\mlpbf\character.cpp" />
+    <ClCompile Include="..\src\mlpbf\console.cpp" />
+    <ClCompile Include="..\src\mlpbf\console_commands.cpp" />
+    <ClCompile Include="..\src\mlpbf\controller.cpp" />
+    <ClCompile Include="..\src\mlpbf\database.cpp" />
+    <ClCompile Include="..\src\mlpbf\ui_dialogue.cpp" />
+    <ClCompile Include="..\src\mlpbf\item.cpp" />
+    <ClCompile Include="..\src\mlpbf\main.cpp" />
+    <ClCompile Include="..\src\mlpbf\map.cpp" />
+    <ClCompile Include="..\src\mlpbf\map_object.cpp" />
+    <ClCompile Include="..\src\mlpbf\player.cpp" />
+    <ClCompile Include="..\src\mlpbf\resource.cpp" />
+    <ClCompile Include="..\src\mlpbf\rich_text.cpp" />
+    <ClCompile Include="..\src\mlpbf\spritesheet.cpp" />
+    <ClCompile Include="..\src\mlpbf\state.cpp" />
+    <ClCompile Include="..\src\mlpbf\state_map.cpp" />
+    <ClCompile Include="..\src\mlpbf\time.cpp" />
+    <ClCompile Include="..\src\mlpbf\ui.cpp" />
+    <ClCompile Include="..\src\mlpbf\ui_inventory.cpp" />
+    <ClCompile Include="..\src\mlpbf\xml.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

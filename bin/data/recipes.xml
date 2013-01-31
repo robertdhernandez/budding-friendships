@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<recipes>
+	<recipe produce="cucumber">
+		<ingredient item="seed_cucumber"/>
+		<ingredient item="turnip"/>
+	</recipe>
+</recipes>

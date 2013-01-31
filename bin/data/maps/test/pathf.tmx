@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="30" height="30" tilewidth="32" tileheight="32">
+ <properties>
+  <property name="north" value="path_c, 0"/>
+  <property name="south" value="path_i, 0"/>
+  <property name="west" value="path_e, 0"/>
+ </properties>
+ <tileset firstgid="1" name="collision" tilewidth="32" tileheight="32">
+  <image source="data/tilesets/collision.png" width="32" height="32"/>
+ </tileset>
+ <tileset firstgid="2" name="terrain" tilewidth="32" tileheight="32">
+  <image source="data/tilesets/punky/bf terrain .png" width="352" height="1600"/>
+ </tileset>
+ <tileset firstgid="552" name="bf ponyville decoration elements" tilewidth="32" tileheight="32">
+  <image source="data/tilesets/punky/bf ponyville decoration elements.png" width="288" height="736"/>
+ </tileset>
+ <layer name="Terrain" width="30" height="30">
+  <data encoding="base64" compression="zlib">
+   eJydlkFuwzAMBO1rDz32Af2qIeiXgeFH9NwEsYDFeKikPRCKZUXkcpek27os7W5brGn9tBbPH3e7LU/7PN/1eN/CeqxdnrdYt4iD92yn3yP8djH6NSwdPrmXdwy/D5/H6TfjzPg79tt6xcA40w/t4XcXvIkrfVo+2+pxMd/JifFLDjfsVViMH+Mr87yH3w1nLA7mwri0u5jnXXRFXFYPxGaapmaa+KVOrBarGJhv6jPzYHgtvr5e80bOTA+W49TVHnVkOIiP+pthtt/Us9VoxmJcGufMGfGwfnmOvFR9y3qI9ZeqX1H/VpvM78/yd1tW71eVPqiVxzr6e67j99DseM73h+jKeKpq5oZ7brEyHp61flXNQXL8/Q/7Wq9zcDY/K45nfdpmCOvIeK10ZTmp5idjNT3PepP13GpO2iwd+6N+j8BLjvlf62nvzC7rz+/gNa1b/53xlHPQ6shmSJU761Hsd+yn/K6jLumXe3aWz/bb5iD9zHqk8WC8sO/Sr8044qwwWl5Mk5nnY7nOo2qWEiPr1+Ij/9V3O/2+4tzmsGEY7+w7djZ/yRPx2izjPcPvsfj3s/UHrtyzfWrtlZ5ncyDP/AL6J9tr
+  </data>
+ </layer>
+ <layer name="Decoration" width="30" height="30">
+  <data encoding="base64" compression="zlib">
+   eJzt1KERADAMA7FeJ/X+U4QGmhVUwo8/91RSdgCvNb/yNGDzDeBXA4t/Ak0=
+  </data>
+ </layer>
+ <layer name="Decoration Upper" width="30" height="30">
+  <properties>
+   <property name="render" value="above"/>
+  </properties>
+  <data encoding="base64" compression="zlib">
+   eJzt1KENACAQQ9ELc2GxWPbfhBV+ScUl9Omm8ldF/GcOz0a1wCfZqDb4JBvVAZ9kE9FBuvG2UaUbEf3Qtrk7Sdvm7iRtm7uTtG3uTl7YRwhD
+  </data>
+ </layer>
+ <layer name="Collision" width="30" height="30">
+  <data encoding="base64" compression="zlib">
+   eJxjYCAeMJIpRykYtXfU3lF7R+0dSHsZScTUspdaYNTeUXsHg71DIR+N2jtq76i9o/aORHsBKBYATQ==
+  </data>
+ </layer>
+</map>

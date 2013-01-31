@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="10" height="7" tilewidth="32" tileheight="32">
+ <properties>
+  <property name="music" value="farm_summer"/>
+  <property name="type" value="interior"/>
+ </properties>
+ <tileset firstgid="1" name="interior" tilewidth="32" tileheight="32">
+  <image source="data/tilesets/interior.png" width="320" height="224"/>
+ </tileset>
+ <tileset firstgid="71" name="ground2" tilewidth="32" tileheight="32">
+  <image source="data/tilesets/ground2.png" width="256" height="192"/>
+ </tileset>
+ <tileset firstgid="119" name="collision" tilewidth="32" tileheight="32">
+  <image source="data/tilesets/collision.png" width="32" height="32"/>
+ </tileset>
+ <tileset firstgid="120" name="Furniture" tilewidth="32" tileheight="32">
+  <image source="data/farm/home/Furniture.png" width="480" height="480"/>
+ </tileset>
+ <tileset firstgid="345" name="Bed1" tilewidth="32" tileheight="32">
+  <image source="data/farm/home/Bed1.png" width="64" height="32"/>
+ </tileset>
+ <layer name="House" width="10" height="7">
+  <data encoding="base64" compression="zlib">
+   eJxjYGBgYMaDGRkQgBcP5kZSJ44Hi9JY3UMgfgTEj/GogwF3LGIwAAB1RgX9
+  </data>
+ </layer>
+ <layer name="Furniture Lower" width="10" height="7">
+  <data encoding="base64" compression="zlib">
+   eJxjYCAdnAPi81C2KyMDQzOQ9mBEyEcC2VFAfBfIvgcVCwHyJwHpcEYGqoADQHwQiA9RxzgMAADCKQii
+  </data>
+ </layer>
+ <layer name="Furniture Upper" width="10" height="7">
+  <properties>
+   <property name="render" value="upper"/>
+  </properties>
+  <data encoding="base64" compression="zlib">
+   eJxjYBhcYCMQbwLizQPsDgAUdwIX
+  </data>
+ </layer>
+ <layer name="Collision" width="10" height="7" opacity="0.34">
+  <properties>
+   <property name="type" value="collision"/>
+  </properties>
+  <data encoding="base64" compression="zlib">
+   eJwrZ2BgKKcyhgF0Ni51uAA+dZSYh6welx8AsiAUdQ==
+  </data>
+ </layer>
+ <objectgroup name="Furniture Object" width="10" height="7">
+  <object name="bed" type="bed" x="32" y="64" width="64" height="32"/>
+ </objectgroup>
+ <objectgroup name="Teleport" width="10" height="7">
+  <object name="to_farm" type="door_exit" x="96" y="160" width="32" height="64">
+   <properties>
+    <property name="dest" value="15,36"/>
+    <property name="door" value="farm_door"/>
+    <property name="map" value="farm"/>
+   </properties>
+  </object>
+ </objectgroup>
+</map>

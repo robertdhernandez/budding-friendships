@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="35" height="58" tilewidth="32" tileheight="32">
+ <properties>
+  <property name="east" value="ponyville, -13"/>
+  <property name="music" value="farm_summer"/>
+ </properties>
+ <tileset firstgid="1" name="_Collision" tilewidth="32" tileheight="32">
+  <image source="data/tilesets/collision.png" width="32" height="32"/>
+ </tileset>
+ <tileset firstgid="2" name="Ground" tilewidth="32" tileheight="32">
+  <image source="data/tilesets/ground.png" width="544" height="352"/>
+ </tileset>
+ <tileset firstgid="189" name="Water" tilewidth="32" tileheight="32">
+  <image source="data/tilesets/WaterEdges.png" width="160" height="160"/>
+ </tileset>
+ <tileset firstgid="214" name="House" tilewidth="32" tileheight="32">
+  <image source="data/tilesets/house.png" width="256" height="192"/>
+ </tileset>
+ <tileset firstgid="262" name="Fence" tilewidth="32" tileheight="32">
+  <image source="data/tilesets/fence.png" width="160" height="96"/>
+ </tileset>
+ <tileset firstgid="277" name="Interior1" tilewidth="32" tileheight="32">
+  <image source="data/tilesets/interior.png" width="320" height="224"/>
+ </tileset>
+ <tileset firstgid="347" name="Interior2" tilewidth="32" tileheight="32">
+  <image source="data/farm/home/Furniture.png" width="480" height="480"/>
+ </tileset>
+ <tileset firstgid="572" name="Bridge" tilewidth="32" tileheight="32">
+  <image source="data/tilesets/ponyville/Bridge.png" width="288" height="224"/>
+ </tileset>
+ <tileset firstgid="635" name="Road" tilewidth="32" tileheight="32">
+  <image source="data/tilesets/road.png" width="286" height="286"/>
+ </tileset>
+ <layer name="Base Under" width="35" height="58">
+  <data encoding="base64" compression="zlib">
+   eJzt2CEOgDAMQNGxhISrcBKQIEFyVwwkEAIHYnMTEFKxrQlf/KqKJ6pqjTE2c4trVeDAggULFl8VKSxYsGDBgkWL5cCCBQsWLMnC8g9LXeixzIosksqgnJbyISxYsGCJZQlNjRutzW/xdW6pV2IZ3NKYyPLlmWz6v/ebRXq7W8R2oeWM2CW0HAnCgkXSDbLB98I=
+  </data>
+ </layer>
+ <layer name="Base Above" width="35" height="58">
+  <data encoding="base64" compression="zlib">
+   eJzt2EEKgzAQRuHBgykWFbot9BSF2hsUb6A9cQUXlvDTxZBmKrwPZuEi8AISomYAgE/3dcbM83C2PL2b+GJyrqNFo0WjRaNFo0WjRaNFo0WjRfunlnmdJfO8vJsAEKq17fv5FNzRJc99SMUmPa+9Z20OtGi0aEdqqSuzpoppOdv+77C0X9wHva7RAYkhOiBxMX3nvRV6bwGU9QYwWTlR
+  </data>
+ </layer>
+ <layer name="Building Lower" width="35" height="58">
+  <data encoding="base64" compression="zlib">
+   eJztmE1LAlEYRu+MiYJRGP4e3WV/o631m1P7UlPzK42ysrOYYIh3MWpzvcFz4OAgLh7OXDfXOSGEOCzVyLlSYvmPP4+j7bacbvn7PKkFtEVdbNTFRl1s1MVGXWzUxUZdbNTFRl1s1MUm1C432MYOdvEW7/AeHzxsSXd5xB72cYBPOMQRjj1sSXd5xglOcYZzXOALLj1sSXdZ4Wvy/IbvuMYP/PSwJd3lCzfJc8T3MRbwCIseznio/6NDE1KXkz3uX37fr1T2vH/ZhZBa6ozZ/Mcu9di5RpzvlixdztnQxIuct+i82GTpcpnzu/nhLMOWFluu8NrTJiGEP74BLQImXw==
+  </data>
+ </layer>
+ <layer name="Building Upper" width="35" height="58">
+  <properties>
+   <property name="render" value="upper"/>
+  </properties>
+  <data encoding="base64" compression="zlib">
+   eJztzsENgCAUBUFCq/YMCtqLzyp+YmaSvW9rAAAAAHxGmulMV1pppzs9hV8AANQ7evUB8Gcve/YHMg==
+  </data>
+ </layer>
+ <layer name="Collision" width="35" height="58" opacity="0.45">
+  <data encoding="base64" compression="zlib">
+   eJzt0kEKwCAMAMH4/09781ao2qSIE9irGYItIpokaZQ5LCwsLCwsLCwsLCwsby0ZZpYcy9Mbt1oyhuUby05/7V25JQvLaZYKw+xdKlws5/+XSot0Qx1bQgTe
+  </data>
+ </layer>
+ <objectgroup name="Objects" width="35" height="58">
+  <object name="farm_door" type="door" x="480" y="1120" width="32" height="64">
+   <properties>
+    <property name="dest" value="3,4"/>
+    <property name="img_close" value="data/tilesets/Door.png"/>
+    <property name="img_open" value="data/tilesets/Door.png"/>
+    <property name="map" value="farm_house"/>
+    <property name="pos_close" value="0,0"/>
+    <property name="pos_open" value="32,0"/>
+   </properties>
+  </object>
+  <object name="field" type="field" x="384" y="320" width="640" height="640"/>
+ </objectgroup>
+</map>

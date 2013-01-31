@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="30" height="30" tilewidth="32" tileheight="32">
+ <properties>
+  <property name="east" value="path_b, 0"/>
+  <property name="south" value="path_d, 0"/>
+ </properties>
+ <tileset firstgid="1" name="collision" tilewidth="32" tileheight="32">
+  <image source="data/tilesets/collision.png" width="32" height="32"/>
+ </tileset>
+ <tileset firstgid="2" name="terrain" tilewidth="32" tileheight="32">
+  <image source="data/tilesets/punky/bf terrain .png" width="352" height="1600"/>
+ </tileset>
+ <tileset firstgid="552" name="bf ponyville decoration elements" tilewidth="32" tileheight="32">
+  <image source="data/tilesets/punky/bf ponyville decoration elements.png" width="288" height="736"/>
+ </tileset>
+ <layer name="Terrain" width="30" height="30">
+  <data encoding="base64" compression="zlib">
+   eJyllcFuhDAMROHaA+ee+6soyl+uEB/RawvSRvI+3rBSe7AIkMT2zNhu8zS1Ymux873j2cq/9eZ7tV72jXf6WMs9HXvW2eOr+2x/ja3Jv3q24d4mfjvO9vkai+XCexlPPVPXxC59ox/DgTyu8zUW8pI4Mp7JnWHGO7k2nRFb44D6S/kRr3d6Ipfmw/BecQ95IHeMKWk64WX6SLWb+DMtpzo3Mx1YPSXdEadU7+kewzFha/gm7qk54kuu3/m2nMmH9Uqr06RV4y/VusVKTdz12fr+M03T9z/NNJp0PezjsP04uz3tXD/wHGvuGf9Nf2leVL9bubP62oq/h8QznmkGJH3UfM87Po/11x/MOLV+0uF35LJAB9anGf/d7LG+1OF3f/q13mM1QSzTHEy5D36HX5vTvMe+W2zWA4aZX+v5PGu4NJy56wm1jpb5Na/E4x3P/Me4x7rqeZmvuNEXubLeYP2dMdX6XbDP5p6tbR5YLaS+seCszRbikOJMedZ8d9SRacT0TA0kPlK+5NfMaoj1lng1XNiv2APsPPtZmo9Wh7VfpXyJD2MiD1YDCb+kZ2rSuBs+fgF0MeBq
+  </data>
+ </layer>
+ <layer name="Decoration" width="30" height="30">
+  <data encoding="base64" compression="zlib">
+   eJzt1DERAAAIxDAOpfhXgQkmPpk7twrgl+mbBsjhG0CqBdXuAYk=
+  </data>
+ </layer>
+ <layer name="Decoration Upper" width="30" height="30">
+  <properties>
+   <property name="render" value="above"/>
+  </properties>
+  <data encoding="base64" compression="zlib">
+   eJzt1LENACAMA8GIuWjT0rL/JqxgRylA/NUvl44A/jNHT+NKYVNpXEvYVBrXFjaVBrgBv1FrXPwG8C5+sta4un/yAItwBxU=
+  </data>
+ </layer>
+ <layer name="Collision" width="30" height="30">
+  <data encoding="base64" compression="zlib">
+   eJzt08EJAEAIA0Htv+mrQdDLZxZ8DwSskiRt1Ys3dRNxub/d1B9dbsHlcrlJ9wFZZwA9
+  </data>
+ </layer>
+ <objectgroup name="Objects" width="30" height="30">
+  <object name="signpost1" type="sign" x="864" y="384" width="32" height="32">
+   <properties>
+    <property name="text" value="Congratulations! {i}You're reading a {s:500}sign"/>
+    <property name="texture" value="data/tilesets/sign.png"/>
+   </properties>
+  </object>
+ </objectgroup>
+</map>

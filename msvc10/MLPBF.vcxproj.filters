@@ -1,0 +1,306 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Icon">
+      <UniqueIdentifier>{4554dba5-f5bf-4fba-b1b4-7ef84ebce71d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\database">
+      <UniqueIdentifier>{b2039110-6ddf-458c-8480-ae23c96dfd6c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\console">
+      <UniqueIdentifier>{2008faf6-2bd3-4592-96b8-63ec9ea64e37}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\graphics">
+      <UniqueIdentifier>{e13d3c75-f303-4a23-bc41-9edb44179bd6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\resource">
+      <UniqueIdentifier>{c693b292-1df6-4233-8935-1a2d2d019a94}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\resource\manager">
+      <UniqueIdentifier>{cbdb1265-8150-4a1c-a747-f72c218a76c7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\resource\loader">
+      <UniqueIdentifier>{65cd852e-3531-432f-8af6-17b17707f228}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\state">
+      <UniqueIdentifier>{10991523-2dd5-4829-999c-5dc052d0c389}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\time">
+      <UniqueIdentifier>{3cb925de-012e-43fa-aba9-5ec631dd82e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\utility">
+      <UniqueIdentifier>{5a72f541-34b6-4751-b636-213ea2f49730}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\utility\controller">
+      <UniqueIdentifier>{8d02c4ed-526a-4be0-9186-15548d0ec4c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\utility\listener">
+      <UniqueIdentifier>{cd79e0de-4720-475e-a2c5-e6b42e934d72}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\xml">
+      <UniqueIdentifier>{2fb4b702-d39f-41d9-a1dd-0c0c542083ee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\map">
+      <UniqueIdentifier>{622032be-67b1-41a0-87bc-f6b4f7576c2d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ui">
+      <UniqueIdentifier>{09196534-f467-4fa7-8472-9b495dc1fe05}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\item">
+      <UniqueIdentifier>{f0b9a42e-cd68-4465-be94-a6b8be0dc8b1}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\mlpbf\resource.h">
+      <Filter>Icon</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\console.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\direction.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\exception.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\global.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\console\command.h">
+      <Filter>Header Files\console</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\console\function.h">
+      <Filter>Header Files\console</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\database\base.h">
+      <Filter>Header Files\database</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\database\item.h">
+      <Filter>Header Files\database</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\database\sprite.h">
+      <Filter>Header Files\database</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\graphics\animation.h">
+      <Filter>Header Files\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\graphics\spritesheet.h">
+      <Filter>Header Files\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\resource\manager\base.h">
+      <Filter>Header Files\resource\manager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\resource\manager\font.h">
+      <Filter>Header Files\resource\manager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\resource\manager\music.h">
+      <Filter>Header Files\resource\manager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\resource\manager\sound.h">
+      <Filter>Header Files\resource\manager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\resource\manager\texture.h">
+      <Filter>Header Files\resource\manager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\resource\loader\texture.h">
+      <Filter>Header Files\resource\loader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\state\base.h">
+      <Filter>Header Files\state</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\time\day_of_week.h">
+      <Filter>Header Files\time</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\time\hour.h">
+      <Filter>Header Files\time</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\time\season.h">
+      <Filter>Header Files\time</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\utility\save_chunk.h">
+      <Filter>Header Files\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\utility\saveable.h">
+      <Filter>Header Files\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\utility\timer.h">
+      <Filter>Header Files\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\utility\controller\general.h">
+      <Filter>Header Files\utility\controller</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\utility\controller\key.h">
+      <Filter>Header Files\utility\controller</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\utility\controller\mouse.h">
+      <Filter>Header Files\utility\controller</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\utility\controller\text.h">
+      <Filter>Header Files\utility\controller</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\utility\listener\general.h">
+      <Filter>Header Files\utility\listener</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\utility\listener\key.h">
+      <Filter>Header Files\utility\listener</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\utility\listener\mouse.h">
+      <Filter>Header Files\utility\listener</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\utility\listener\text.h">
+      <Filter>Header Files\utility\listener</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\xml\exception.h">
+      <Filter>Header Files\xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\xml\helper.h">
+      <Filter>Header Files\xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\time\date.h">
+      <Filter>Header Files\time</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\map.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\database\map.h">
+      <Filter>Header Files\database</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\map\viewer.h">
+      <Filter>Header Files\map</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\ui\base.h">
+      <Filter>Header Files\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\character.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\state\map.h">
+      <Filter>Header Files\state</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\player.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\actor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\time.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\time\clock.h">
+      <Filter>Header Files\time</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\ui\clock.h">
+      <Filter>Header Files\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\resource\loader\font.h">
+      <Filter>Header Files\resource\loader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\utility\rich_text.h">
+      <Filter>Header Files\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\map\object.h">
+      <Filter>Header Files\map</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\map\sign.h">
+      <Filter>Header Files\map</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\item\base.h">
+      <Filter>Header Files\item</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\item\generic.h">
+      <Filter>Header Files\item</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\ui\window.h">
+      <Filter>Header Files\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mlpbf\mlpbf\item\inventory.h">
+      <Filter>Header Files\item</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\bin\data\Icon2.ico">
+      <Filter>Icon</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="MLPBF.rc">
+      <Filter>Icon</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\mlpbf\animation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\mlpbf\console.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\mlpbf\controller.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\mlpbf\database.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\mlpbf\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\mlpbf\spritesheet.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\mlpbf\state.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\mlpbf\xml.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\mlpbf\console_commands.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\mlpbf\resource.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\mlpbf\time.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\mlpbf\map.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\mlpbf\ui.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\mlpbf\state_map.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\mlpbf\player.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\mlpbf\rich_text.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\mlpbf\map_object.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\mlpbf\item.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\mlpbf\ui_dialogue.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\mlpbf\ui_inventory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\mlpbf\actor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\mlpbf\character.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

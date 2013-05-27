@@ -1,4 +1,5 @@
 #include "mlpbf/utility/rich_text.h"
+#include "mlpbf/exception.h"
 
 #include <cctype>
 #include <SFML/Graphics/RenderTarget.hpp>
@@ -25,7 +26,7 @@ void textColor( RichText& text, const Arguments& args )
 	else if ( size == 3 )
 		text.changeColor( sf::Color( std::stoi( args[ 0 ] ), std::stoi( args[ 1 ] ), std::stoi( args[ 2 ] ) ) );
 	else
-		throw std::exception( "Color modifier must have zero or exactly three arguments" );
+		throw Exception( "Color modifier must have zero or exactly three arguments" );
 }
 
 void textItalic( RichText& text, const Arguments& args )

@@ -2,13 +2,13 @@
 #include "mlpbf/utility/timer.h"
 
 #include "mlpbf/exception.h"
+#include "mlpbf/resource.h"
 #include "mlpbf/xml/helper.h"
-#include "mlpbf/resource/manager/texture.h"
 
 #include <tinyxml.h>
 #include <sstream>
 
-#include <SFML\Graphics\Sprite.hpp>
+#include <SFML/Graphics/Sprite.hpp>
 
 namespace bf
 {

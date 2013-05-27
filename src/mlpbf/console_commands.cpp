@@ -5,6 +5,7 @@
 #include "mlpbf/global.h"
 #include "mlpbf/player.h"
 #include "mlpbf/time.h"
+#include "mlpbf/exception.h"
 
 #include <functional>
 #include <sstream>
@@ -47,7 +48,7 @@ static class HELP : public con::Command
 		{
 			auto find = std::find_if( cmds.begin(), cmds.end(), std::bind( &con::Command::operator==, std::placeholders::_1, args[ 0 ] ) );
 			if ( find == cmds.end() )
-				throw std::exception( "Unknown console command" );
+				throw Exception( "Unknown console command" );
 			(*find)->help( c );
 		}
 	}

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../resource/loader/texture.h"
+#include "../resource.h"
 #include <SFML/Graphics/Sprite.hpp>
 
 class TiXmlElement;

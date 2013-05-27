@@ -3,7 +3,7 @@
 
 #include "mlpbf/global.h"
 #include "mlpbf/exception.h"
-#include "mlpbf/resource/manager/font.h"
+#include "mlpbf/resource.h"
 
 #include <algorithm>
 #include <functional>
@@ -31,7 +31,7 @@ std::vector< std::string > parseArguments( const std::string& str )
 	if ( str.empty() ) return args;
 
 	auto startWord	= str.find_first_not_of( ' ', 0 );
-    auto endWord	= str.find_first_of( ' ', startWord );
+	auto endWord	= str.find_first_of( ' ', startWord );
 
 	while ( startWord != std::string::npos || endWord != std::string::npos )
 	{
@@ -39,7 +39,7 @@ std::vector< std::string > parseArguments( const std::string& str )
 		{
 			auto endQuote = str.find( '\"', startWord + 1 );
 			if ( endQuote == std::string::npos )
-				throw std::exception( "argument(s) missing closing quote" );
+				throw Exception( "argument(s) missing closing quote" );
 
 			args.push_back( str.substr( startWord + 1, endQuote - startWord - 1 ) );
 
@@ -62,7 +62,7 @@ std::vector< std::string > parseArguments( const std::string& str )
 class UnknownCommandException : public Exception 
 { 
 public: 
-	UnknownCommandException() 
+	UnknownCommandException() throw()
 	{ 
 		*this << "Unknown command"; 
 	} 
@@ -71,7 +71,7 @@ public:
 class TooFewArgumentsException : public Exception
 {
 public:
-	TooFewArgumentsException( const std::string& name, unsigned minArgs )
+	TooFewArgumentsException( const std::string& name, unsigned minArgs ) throw()
 	{
 		*this << "Requires at least " << minArgs << " arguments\nSee \"help " << name << "\" for more details";
 	}
@@ -88,7 +88,7 @@ Console& Console::singleton()
 Console::Console() :
 	m_active( false ),
 	m_index( 0 ),
-	m_font( res::FontManager::singleton().load( "data/fonts/console.ttf" ) ),
+	m_font( res::loadFont( "data/fonts/console.ttf" ) ),
 	m_bufferOffset( 0 ),
 	m_bufferColor( DEFAULT_COLOR )
 {
@@ -201,7 +201,7 @@ void Console::onKeyPressed( const sf::Event::KeyEvent& ev )
 	{
 		switch ( ev.code )
 		{
-		case sf::Keyboard::Back: 
+		case sf::Keyboard::BackSpace: 
 			if ( !m_input.empty() && m_index > 0 ) 
 			{
 				m_input.erase( m_input.begin() + m_index - 1 ); 
@@ -280,7 +280,7 @@ void Console::draw( sf::RenderTarget& target, sf::RenderStates states ) const
 	target.draw( bg );
 
 	sf::Text text( "", *m_font, FONT_SIZE );
-	int height = text.getFont().getLineSpacing( FONT_SIZE );
+	int height = text.getFont()->getLineSpacing( FONT_SIZE );
 	float yPos = SCREEN_HEIGHT - CONSOLE_OFFSET - height;
 
 	// Current input
@@ -345,28 +345,24 @@ void con::Command::operator()( Console& c, const std::vector< std::string >& arg
 
 /***************************************************************************/
 
-Console& con::endl( Console& c )
+void con::endl( Console& c )
 {
 	c.pushBuffer();
-	return c;
 }
 
-Console& con::setcdef( Console& c )
+void con::setcdef( Console& c )
 {
 	c.setBufferColor( Console::DEFAULT_COLOR );
-	return c;
 }
 
-Console& con::setcerr( Console& c )
+void con::setcerr( Console& c )
 {
 	c.setBufferColor( Console::ERROR_COLOR );
-	return c;
 }
 
-Console& con::setcinfo( Console& c )
+void con::setcinfo( Console& c )
 {
 	c.setBufferColor( Console::INFO_COLOR );
-	return c;
 }
 
 /***************************************************************************/

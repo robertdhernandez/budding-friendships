@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<sprites>
-	<sprite id="player_a" file="data/sprites/player_a.xml" />
-	<sprite id="derpy" file="data/sprites/derpy.xml" />
-	<sprite id="rarity" file="data/sprites/rarity.xml" />
-</sprites>

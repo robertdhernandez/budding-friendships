@@ -6,6 +6,8 @@ namespace bf
 {
 	namespace util
 	{
+		class TextController;
+	
 		//-------------------------------------------------------------------------
 		// Classes that implement this interface can be interacted via text input
 		//-------------------------------------------------------------------------

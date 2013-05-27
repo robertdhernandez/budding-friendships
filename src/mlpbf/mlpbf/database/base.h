@@ -3,6 +3,7 @@
 #include "../xml/helper.h"
 
 #include <SFML/System/NonCopyable.hpp>
+#include <memory>
 #include <string>
 #include <tinyxml.h>
 #include <unordered_map>
@@ -19,7 +20,7 @@ namespace bf
 		{
 			auto find = m_data.find( id );
 			if ( find == m_data.end() )
-				throw std::runtime_error( "Cannot find " + id );
+				throw InvalidElementException( id );
 			return *find->second.get();
 		}
 
@@ -27,6 +28,21 @@ namespace bf
 		{
 			return get( id );
 		}
+		
+		class InvalidElementException : public std::exception
+		{
+			std::string m_err;
+		
+		public:
+			InvalidElementException( const std::string & id ) throw()
+			{
+				m_err = "Cannot find " + id;
+			}
+			
+			~InvalidElementException() throw() {}
+			
+			const char * what() const throw() { return m_err.c_str(); }
+		};
 
 	protected:
 		Database() {}

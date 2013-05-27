@@ -8,17 +8,12 @@
 #include <unordered_map>
 #include <memory>
 
+#include "direction.h"
 #include "map/object.h"
+#include "time/season.h"
 
 namespace bf
 {
-	namespace time
-	{
-		enum Season;
-	}
-
-	enum Direction;
-
 	class Map : private sf::NonCopyable
 	{
 	public:

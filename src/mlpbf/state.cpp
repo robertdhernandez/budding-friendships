@@ -2,6 +2,7 @@
 #include "mlpbf/utility/listener/key.h"
 
 #include "mlpbf/console.h"
+#include "mlpbf/exception.h"
 
 namespace bf
 {
@@ -13,7 +14,7 @@ static std::unique_ptr< state::Base > GLOBAL_STATE( nullptr );
 state::Base& state::global()
 {
 	if ( !GLOBAL_STATE )
-		throw std::logic_error( "No state loaded!" );
+		throw Exception( "No state loaded!" );
 	return *GLOBAL_STATE;
 }
 

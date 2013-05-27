@@ -23,7 +23,7 @@ namespace bf
 	{
 	public:
 		static Console& singleton();
-		static const sf::Keyboard::Key KEY = sf::Keyboard::Tilde;
+		static const sf::Keyboard::Key KEY = sf::Keyboard::Tab;
 
 		void state( bool state ) { m_active = state; }
 		bool state() const { return m_active; }
@@ -47,18 +47,8 @@ namespace bf
 
 	public:
 		template< typename T >
-		Console& operator<<( T t )
-		{
-			m_buffer << t;
-			return *this;
-		}
-
-		template<>
-		Console& operator<<( Console& (*fn)( Console& ) )
-		{
-			return (*fn)( *this );
-		}
-
+		friend Console & operator<<( Console &, T );
+	
 		void setBufferColor( int c ) { m_bufferColor = c; }
 		void pushBuffer();
 
@@ -87,13 +77,27 @@ namespace bf
 
 		std::vector< con::Command* > m_cmds;
 	};
+	
+	template< typename T >
+	Console & operator<<( Console & c, T t )
+	{
+		c.m_buffer << t;
+		return c;
+	}
+
+	template<>
+	inline Console& operator<<( Console & c, void (*fn)( Console& ) )
+	{
+		(*fn)( c );
+		return c;
+	}
 
 	namespace con
 	{
-		Console& endl( Console& );
+		void endl( Console& );
 
-		Console& setcdef( Console& );  // Default color 
-		Console& setcerr( Console& );  // Error color
-		Console& setcinfo( Console& ); // Info color
+		void setcdef( Console& );  // Default color 
+		void setcerr( Console& );  // Error color
+		void setcinfo( Console& ); // Info color
 	}
 }

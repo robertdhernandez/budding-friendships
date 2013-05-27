@@ -29,7 +29,7 @@
 #include <zlib.h>
 
 #include "TmxUtil.h"
-#include "base64/base64.h"
+#include "base64.h"
 
 namespace Tmx {
 	std::string Util::DecodeBase64(const std::string &str) 

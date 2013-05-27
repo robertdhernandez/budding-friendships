@@ -1,9 +1,10 @@
 #include "mlpbf/global.h"
 #include "mlpbf/player.h"
 #include "mlpbf/direction.h"
+#include "mlpbf/exception.h"
 
 #include "mlpbf/item/inventory.h"
-#include "mlpbf/resource/loader/texture.h"
+#include "mlpbf/resource.h"
 #include "mlpbf/ui/window.h"
 
 #include <SFML/Graphics/RenderTarget.hpp>
@@ -213,7 +214,7 @@ private:
 void showInventory()
 {
 	if ( ui::Window::getGlobal() )
-		throw std::exception( "window in use" );
+		throw Exception( "window in use" );
 	ui::Window::setGlobal( new Inventory() );
 }
 

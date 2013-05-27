@@ -12,6 +12,7 @@ namespace bf
 		{
 		public:
 			static db::Map& singleton();
+			void initialize();
 
 			// Non-const
 

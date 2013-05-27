@@ -46,7 +46,10 @@ db::Map& db::Map::singleton()
 db::Map::Map()
 {
 	init();
+}
 
+void db::Map::initialize()
+{
 	for ( auto it = m_ids.begin(); it != m_ids.end(); ++it )
 		(*it)->loadNeighbors();
 }

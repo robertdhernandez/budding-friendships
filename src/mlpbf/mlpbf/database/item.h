@@ -1,7 +1,7 @@
 #pragma once
 
 #include "base.h"
-#include "../resource/loader/texture.h"
+#include "../resource.h"
 
 #include <set>
 

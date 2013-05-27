@@ -8,9 +8,14 @@ namespace bf
 	class Exception : public std::exception
 	{
 	public:
-		virtual ~Exception() {}
-
-		const char* what() const
+		Exception() throw() {}
+		Exception( const char * str ) throw() : m_err( str ) {}
+		Exception( const std::string & str ) throw() : m_err( str ) {}
+		Exception( const std::string && str ) throw() : m_err( str ) {}
+		
+		virtual ~Exception() throw() {}
+	
+		const char* what() const throw()
 		{
 			return m_err.c_str();
 		}

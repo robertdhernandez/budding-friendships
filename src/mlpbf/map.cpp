@@ -6,8 +6,9 @@
 #include "mlpbf/console.h"
 #include "mlpbf/character.h"
 #include "mlpbf/direction.h"
+#include "mlpbf/exception.h"
 #include "mlpbf/database/map.h"
-#include "mlpbf/resource/manager/texture.h"
+#include "mlpbf/resource.h"
 #include "mlpbf/time/season.h"
 
 #include <algorithm>
@@ -21,9 +22,9 @@ namespace bf
 inline void assertBounds( const sf::Vector2u& pos, unsigned width, unsigned height )
 {
 	if ( pos.x < 0 || width <= pos.x )
-		throw std::out_of_range( "x-position is out of map bounds" );
+		throw Exception( "x-position is out of map bounds" );
 	if ( pos.y < 0 || height <= pos.y )
-		throw std::out_of_range( "y-position is out of map bounds" );
+		throw Exception( "y-position is out of map bounds" );
 }
 
 inline void renderLayer( sf::RenderTarget& target, sf::RenderStates& states, 
@@ -76,7 +77,7 @@ static Map* GLOBAL_MAP = nullptr;
 Map& Map::global()
 {
 	if ( !GLOBAL_MAP )
-		throw std::logic_error( "No map loaded!" );
+		throw Exception( "No map loaded!" );
 	return *GLOBAL_MAP;
 }
 
@@ -142,7 +143,7 @@ void Map::load( unsigned id, const std::string& map )
 	m_map.ParseFile( map );
 
 	if ( m_map.HasError() )
-		throw std::exception( m_map.GetErrorText().c_str() );
+		throw Exception( m_map.GetErrorText().c_str() );
 
 	m_collision = nullptr;
 	std::fill( m_neighbors.begin(), m_neighbors.end(), std::make_pair( nullptr, 0 ) );
@@ -158,7 +159,7 @@ void Map::load( unsigned id, const std::string& map )
 			file = base.substr( 0, base.find_last_of( '/' ) + 1 );
 		file += (*it)->GetImage()->GetSource();
 
-		std::shared_ptr< sf::Texture > texture = res::TextureManager::singleton().load( file );
+		std::shared_ptr< sf::Texture > texture = res::loadTexture( file );
 		m_textures.insert( std::make_pair( *it, texture ) );
 	}
 

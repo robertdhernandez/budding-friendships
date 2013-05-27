@@ -1,6 +1,8 @@
 #pragma once
 
 #include "actor.h"
+#include "direction.h"
+#include "movespeed.h"
 #include "graphics/spritesheet.h"
 #include "utility/listener/key.h"
 
@@ -10,10 +12,7 @@
 
 namespace bf
 {
-	enum Direction;
 	class Map;
-
-	enum MoveSpeed { Idle, Walk, Trot, Run };
 
 	//TODO: reorganize functions
 	class Character : public Actor, private sf::NonCopyable

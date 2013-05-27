@@ -1,7 +1,7 @@
 #pragma once
 
 #include "object.h"
-#include "../resource/loader/texture.h"
+#include "../resource.h"
 
 namespace bf
 {

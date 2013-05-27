@@ -1,6 +1,5 @@
 #include "base.h"
-#include "../resource/loader/texture.h"
-#include "../resource/loader/font.h"
+#include "../resource.h"
 
 namespace bf
 {

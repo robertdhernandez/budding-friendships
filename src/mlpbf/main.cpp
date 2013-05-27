@@ -2,9 +2,11 @@
 
 #include "mlpbf/global.h"
 #include "mlpbf/direction.h"
+#include "mlpbf/resource.h"
 
 #include "mlpbf/database/item.h"
 #include "mlpbf/database/sprite.h"
+#include "mlpbf/database/map.h"
 
 #include "mlpbf/state/map.h"
 
@@ -36,8 +38,10 @@ bool bf::SHOW_FPS = true;
 class FPS : public sf::Drawable, bf::res::FontLoader<>
 {
 public:
-	FPS() : m_frames( 0U ), m_fps( 0U )
+	void init()
 	{
+		m_frames = 0U;
+		m_fps = 0U;
 		loadFont( "data/fonts/console.ttf" );
 	}
 
@@ -70,16 +74,33 @@ private:
 	sf::Clock m_clock;
 } FPS;
 
-using namespace bf;
+void init()
+{
+	bf::res::init(); // Initialize resource managers
+	
+	FPS.init();
+}
+
+void cleanup()
+{
+	bf::res::cleanup(); // Free resource managers
+}
 
 int main( int argc, char* argv[] )
 {
+	using namespace bf;
+
 #ifdef MAIN_TRY_CATCH
 	try
 	{
 #endif
+		init();
+
 		sf::RenderWindow window( sf::VideoMode( SCREEN_WIDTH, SCREEN_HEIGHT ), "Budding Friendships", sf::Style::Close );
 		window.setFramerateLimit( 60U );
+		
+		//TODO: make function to initialize all global variables
+		db::Map::singleton().initialize();
 
 		Map::global( 0 );
 		state::global( std::unique_ptr< state::Base >( new state::Map() ) );
@@ -87,7 +108,7 @@ int main( int argc, char* argv[] )
 		sf::Clock clock;
 		Console& console = Console::singleton();
 
-		Player::singleton().setMap( "path_a", sf::Vector2f( 448.0f , 448.0f ) );
+		Player::singleton().setMap( "farm", sf::Vector2f( 448.0f , 448.0f ) );
 		
 		while ( window.isOpen() )
 		{
@@ -112,6 +133,8 @@ int main( int argc, char* argv[] )
 
 			window.display();
 		}
+		
+		cleanup();
 
 		return EXIT_SUCCESS;
 #ifdef MAIN_TRY_CATCH
@@ -123,6 +146,7 @@ int main( int argc, char* argv[] )
 #else
 		std::cout << err.what() << std::endl;
 #endif
+		cleanup();
 		return EXIT_FAILURE;
 	}
 #endif

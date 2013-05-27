@@ -1,6 +1,7 @@
 #pragma once
 
 #include "base.h"
+#include "../direction.h"
 #include "../utility/listener/key.h"
 #include "../map/viewer.h"
 #include "../ui/clock.h"
@@ -9,8 +10,6 @@
 
 namespace bf
 {
-	enum Direction;
-
 	namespace state
 	{
 		//-------------------------------------------------------------------------

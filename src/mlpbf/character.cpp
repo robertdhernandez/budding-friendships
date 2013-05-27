@@ -4,6 +4,7 @@
 #include "mlpbf/direction.h"
 #include "mlpbf/map.h"
 #include "mlpbf/database/map.h"
+#include "mlpbf/exception.h"
 
 #include <sstream>
 #include <SFML/Graphics/Sprite.hpp>
@@ -21,7 +22,7 @@ const std::string strDirection( Direction d )
 	case Left:	return "left";
 	case Right:	return "right";
 	}
-	throw std::exception( "strDirection recieved a bad Direction enum" );
+	throw Exception( "strDirection recieved a bad Direction enum" );
 }
 
 const std::string strMoveSpeed( MoveSpeed m )
@@ -33,7 +34,7 @@ const std::string strMoveSpeed( MoveSpeed m )
 	case Trot:	return "trot";
 	case Run:	return "run";
 	}
-	throw std::exception( "strMoveSpeed recieved a bad MoveSpeed enum" );
+	throw Exception( "strMoveSpeed recieved a bad MoveSpeed enum" );
 }
 
 inline sf::Vector2f getMoveSpeed( MoveSpeed m, Direction d )
@@ -56,7 +57,7 @@ inline sf::Vector2f getMoveSpeed( MoveSpeed m, Direction d )
 	case Right:	return sf::Vector2f( speed, 0.0f );
 	}
 
-	throw std::exception( "getMoveSpeed could not generate a move speed" );
+	throw Exception( "getMoveSpeed could not generate a move speed" );
 }
 
 sf::Vector2u convert( const sf::Vector2f& pos )

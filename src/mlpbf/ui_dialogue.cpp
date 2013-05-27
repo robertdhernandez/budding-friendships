@@ -1,8 +1,9 @@
 #include "mlpbf/global.h"
 #include "mlpbf/console.h"
+#include "mlpbf/exception.h"
 
 #include "mlpbf/state/base.h"
-#include "mlpbf/resource/loader/font.h"
+#include "mlpbf/resource.h"
 #include "mlpbf/ui/window.h"
 #include "mlpbf/utility/rich_text.h"
 #include "mlpbf/utility/timer.h"
@@ -18,16 +19,16 @@ namespace bf
 static const sf::Vector2f	DIALOGUE_SPEAKER_OFFSET		= sf::Vector2f( 15.0f, 5.0f );
 static const unsigned		DIALOGUE_SPEAKER_SIZE		= 30U;
 static const sf::Color		DIALOGUE_SPEAKER_COLOR		= sf::Color( 85U, 68U, 0U );
-static const std::string	DIALOGUE_SPEAKER_FONT		= "data/fonts/CelestiaMediumRedux1.5.ttf";
+static const std::string	DIALOGUE_SPEAKER_FONT			= "data/fonts/CelestiaMediumRedux1.5.ttf";
 
 static const sf::Vector2f	DIALOGUE_MESSAGE_OFFSET		= sf::Vector2f( 30.0f, 45.0f );
 static const unsigned		DIALOGUE_MESSAGE_SIZE		= 16U;
 static const sf::Color		DIALOGUE_MESSAGE_COLOR		= sf::Color( 85U, 68U, 0U );
-static const std::string	DIALOGUE_MESSAGE_FONT		= "data/fonts/mvboli.ttf";
+static const std::string	DIALOGUE_MESSAGE_FONT			= "data/fonts/mvboli.ttf";
 static const float			DIALOGUE_MESSAGE_WIDTH		= 548.0f;
 static const unsigned		DIALOGUE_MESSAGE_NUMLINES	= 3U;
 
-static const float			DIALOGUE_OFFSET				= SCREEN_HEIGHT * ( 5.0f / 6.0f );
+static const float			DIALOGUE_OFFSET			= SCREEN_HEIGHT * ( 5.0f / 6.0f );
 static const sf::Time		DIALOGUE_MOVE_TIME			= sf::milliseconds( 375 );
 
 static const sf::Time		DIALOGUE_UPDATE_TIME		= sf::milliseconds( 30 );
@@ -349,7 +350,7 @@ private:
 		}
 	}
 
-	void Dialogue::onKeyReleased( const sf::Event::KeyEvent& ev )
+	void onKeyReleased( const sf::Event::KeyEvent& ev )
 	{
 		Message& message = getMessage();
 
@@ -454,7 +455,7 @@ void showText( const std::string& message, const std::string& speaker )
 	{
 		Dialogue* d = dynamic_cast< Dialogue* >( ui::Window::getGlobal() );
 		if ( d == nullptr )
-			throw std::exception( "window in use" );
+			throw Exception( "window in use" );
 		d->addLine( speaker, message );
 	}
 	else

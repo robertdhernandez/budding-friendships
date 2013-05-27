@@ -17,20 +17,20 @@ namespace bf
 {
 
 static const sf::Keyboard::Key KEY_MOVE_UP		= sf::Keyboard::Up;
-static const sf::Keyboard::Key KEY_MOVE_DOWN	= sf::Keyboard::Down;
-static const sf::Keyboard::Key KEY_MOVE_LEFT	= sf::Keyboard::Left;
+static const sf::Keyboard::Key KEY_MOVE_DOWN		= sf::Keyboard::Down;
+static const sf::Keyboard::Key KEY_MOVE_LEFT		= sf::Keyboard::Left;
 static const sf::Keyboard::Key KEY_MOVE_RIGHT	= sf::Keyboard::Right;
 
-static const sf::Keyboard::Key KEY_MOVE_FAST	= sf::Keyboard::LShift;
-static const sf::Keyboard::Key KEY_MOVE_SLOW	= sf::Keyboard::LControl;
+static const sf::Keyboard::Key KEY_MOVE_FAST		= sf::Keyboard::LShift;
+static const sf::Keyboard::Key KEY_MOVE_SLOW		= sf::Keyboard::LControl;
 
 static const sf::Keyboard::Key KEY_PRIMARY		= sf::Keyboard::Z;
-static const sf::Keyboard::Key KEY_SECONDARY	= sf::Keyboard::X;
+static const sf::Keyboard::Key KEY_SECONDARY		= sf::Keyboard::X;
 
-static const sf::Keyboard::Key KEY_INVENTORY	= sf::Keyboard::I;
+static const sf::Keyboard::Key KEY_INVENTORY		= sf::Keyboard::I;
 
 //DEBUG
-static Character rarity( "rarity" );
+static Character * rarity;
 static std::size_t inventoryIndex;
 
 /***************************************************************************/
@@ -45,10 +45,12 @@ state::Map::Map() :
 {
 	setKeyListener( *this );
 
-	m_viewer.addCharacter( rarity );
 	m_viewer.addCharacter( Player::singleton() );
+	
+	rarity = new Character( "rarity" );
+	m_viewer.addCharacter( *rarity );
 
-	rarity.reposition( sf::Vector2i( 14, 14 ), "path_a" )
+	rarity->reposition( sf::Vector2i( 14, 14 ), "path_a" )
 		  .repeatBegin( 2U )
 			.repeatBegin( 3U )
 			  .move( Right, Walk, 4U )
@@ -313,7 +315,7 @@ void state::Map::update( const sf::Time& time )
 	player.update( time );
 
 	//DEBUG: Update Rarity's path
-	rarity.update( time );
+	rarity->update( time );
 
 	// Update the clock UI
 	m_clock.update();

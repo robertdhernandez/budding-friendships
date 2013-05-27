@@ -6,6 +6,8 @@ namespace bf
 {
 	namespace util
 	{
+		class KeyController;
+	
 		//-------------------------------------------------------------------------
 		// Classes that inherit this interface can be interacted via keyboard input
 		//-------------------------------------------------------------------------
@@ -14,7 +16,7 @@ namespace bf
 		public:
 			KeyListener() : m_keyParent( nullptr ) {}
 			virtual ~KeyListener() { unregisterKey(); }
-
+			
 			friend class KeyController;
 
 			virtual void onKeyPressed( const sf::Event::KeyEvent& ) = 0;

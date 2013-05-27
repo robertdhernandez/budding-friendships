@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../resource/loader/font.h"
+#include "../resource.h"
 
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/Color.hpp>

@@ -1,5 +1,8 @@
 #pragma once
 
+#include "movespeed.h"
+#include "direction.h"
+
 #include <SFML/System/Time.hpp>
 #include <SFML/System/Vector2.hpp>
 
@@ -9,14 +12,12 @@
 
 namespace bf
 {
-	enum Direction;
-	enum MoveSpeed;
-	class Character;
-
 	namespace time
 	{
 		class Hour;
 	}
+	
+	class Character;
 
 	class Actor
 	{

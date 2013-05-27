@@ -22,7 +22,7 @@ namespace time
 class DateOutOfRangeException : public Exception
 {
 public:
-	DateOutOfRangeException( int d )
+	DateOutOfRangeException( int d ) throw()
 	{
 		*this << "Day must be between 1 and 30: " << d;
 	}
@@ -31,7 +31,7 @@ public:
 class EmptyDayOfWeekStringException : public Exception
 {
 public:
-	EmptyDayOfWeekStringException( const std::string& str )
+	EmptyDayOfWeekStringException( const std::string& str ) throw()
 	{
 		*this << "No day of week could be read from: " << str;
 	}
@@ -40,7 +40,7 @@ public:
 class MultipleDaysOfWeekStringException : public Exception
 {
 public:
-	MultipleDaysOfWeekStringException( const std::string& str )
+	MultipleDaysOfWeekStringException( const std::string& str ) throw()
 	{
 		*this << "Could not get a single day of a wekk because days of the week exist in: " << str;
 	}
@@ -49,7 +49,7 @@ public:
 class YearOutOfRangeException : public Exception
 {
 public:
-	YearOutOfRangeException( int d )
+	YearOutOfRangeException( int d ) throw()
 	{
 		*this << "Year must be 1 or greater: " << d;
 	}
@@ -58,7 +58,7 @@ public:
 class InvalidHourFormatException : public Exception
 {
 public:
-	InvalidHourFormatException( const std::string& str )
+	InvalidHourFormatException( const std::string& str ) throw()
 	{
 		*this << "Invalid hour format: " << str;
 	}
@@ -67,7 +67,7 @@ public:
 class EmptySeasonStringException : public Exception
 {
 public:
-	EmptySeasonStringException( const std::string& str )
+	EmptySeasonStringException( const std::string& str ) throw()
 	{
 		*this << "No season could be read from: " << str;
 	}
@@ -76,7 +76,7 @@ public:
 class MultipleSeasonStringException : public Exception
 {
 public:
-	MultipleSeasonStringException( const std::string& str )
+	MultipleSeasonStringException( const std::string& str ) throw()
 	{
 		*this << "Could not get a single season because multiple seasons exist in: " << str;
 	}
@@ -115,7 +115,7 @@ void Clock::setTimescale( float amt )
 	else if ( amt == 0.0f )
 		m_timer.setState( false );
 	else
-		throw std::exception( "Timescale must be greater than or equal to 0" );
+		throw Exception( "Timescale must be greater than or equal to 0" );
 }
 
 /***************************************************************************/
@@ -168,7 +168,7 @@ Season Date::getSeason() const
 	case 3: return Winter;
 	}
 
-	throw std::logic_error( "Date::getSeason reached an impossible location" );
+	throw Exception( "Date::getSeason reached an impossible location" );
 }
 
 DayOfWeek Date::getDayOfWeek() const
@@ -184,7 +184,7 @@ DayOfWeek Date::getDayOfWeek() const
 	case 6:	return Saturday;
 	}
 
-	throw std::logic_error( "Date::getDayOfWeek reached an impossible location" );
+	throw Exception( "Date::getDayOfWeek reached an impossible location" );
 }
 
 unsigned Date::getDay() const
@@ -241,7 +241,7 @@ DayOfWeek parseDayOfWeek( std::string str )
 	if ( bit[ Friday ] )	return Friday;
 	if ( bit[ Saturday ] )	return Saturday;
 
-	throw std::logic_error( "parseDayOfWeek reached an impossible location" );
+	throw Exception( "parseDayOfWeek reached an impossible location" );
 }
 
 DaysOfWeek parseDaysOfWeek( std::string str )
@@ -287,9 +287,9 @@ void Hour::increment( int minutes )
 void Hour::set( int hour, int minute )
 {
 	if ( hour < 0 || 23 < hour )
-		throw std::exception( "Hour must be [0,23]" );
+		throw Exception( "Hour must be [0,23]" );
 	if ( minute < 0 || 59 < minute )
-		throw std::exception( "Minute must be [0,59]" );
+		throw Exception( "Minute must be [0,59]" );
 
 	m_time = hour * 60 + minute;
 }
@@ -385,14 +385,14 @@ const std::string Hour::to24HourString() const
 // Hour colors
 const static sf::Color COLOR_SUNRISE	= sf::Color( 255, 102,   0,  64 );
 const static sf::Color COLOR_DAY		= sf::Color( 255, 255, 255,   0 );
-const static sf::Color COLOR_SUNSET		= sf::Color( 255, 102,   0,  64 );
+const static sf::Color COLOR_SUNSET	= sf::Color( 255, 102,   0,  64 );
 const static sf::Color COLOR_NIGHT		= sf::Color( 32,   16,  64, 102 );
 
 // Color time areas -- Previous color to Next color
 typedef std::pair< Hour, Hour > Vector2H;
-const static Vector2H TIME_NIGHT_TO_MORNING = Vector2H( Hour( 5,   0 ), Hour( 6,  30 ) );	// Night to Sunrise
+const static Vector2H TIME_NIGHT_TO_MORNING 	= Vector2H( Hour( 5,   0 ), Hour( 6,  30 ) );	// Night to Sunrise
 const static Vector2H TIME_MORNING_TO_DAY	= Vector2H( Hour( 6,  30 ), Hour( 8,  0  ) );	// Sunrise to Day
-const static Vector2H TIME_DAY				= Vector2H( Hour( 8,   0 ), Hour( 17, 0  ) );	// Day to Day
+const static Vector2H TIME_DAY			= Vector2H( Hour( 8,   0 ), Hour( 17, 0  ) );	// Day to Day
 const static Vector2H TIME_DAY_TO_EVENING	= Vector2H( Hour( 17,  0 ), Hour( 18, 30 ) );	// Day to Sunset
 const static Vector2H TIME_EVENING_TO_NIGHT	= Vector2H( Hour( 18, 30 ), Hour( 20, 0  ) );	// Sunset to Day
 const static Vector2H TIME_NIGHT			= Vector2H( Hour( 20,  0 ), Hour( 5,  0  ) );	// Night to Night
@@ -504,7 +504,7 @@ Season parseSeason( std::string str )
 	if ( bit[ Fall ] )		return Fall;
 	if ( bit[ Winter ] )	return Winter;
 
-	throw std::logic_error( "parseSeason reached an impossible location" );
+	throw Exception( "parseSeason reached an impossible location" );
 }
 
 Seasons parseSeasons( std::string str )

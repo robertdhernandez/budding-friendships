@@ -108,7 +108,7 @@ int main( int argc, char* argv[] )
 		sf::Clock clock;
 		Console& console = Console::singleton();
 
-		Player::singleton().setMap( "farm", sf::Vector2f( 448.0f , 448.0f ) );
+		Player::singleton().setMap( "path_a", sf::Vector2f( 448.0f , 448.0f ) );
 		
 		while ( window.isOpen() )
 		{

@@ -1,92 +1,237 @@
-#include "mlpbf/database/item.h"
-#include "mlpbf/database/map.h"
-#include "mlpbf/database/sprite.h"
-
+#include "mlpbf/database.h"
+#include "mlpbf/exception.h"
 #include "mlpbf/map.h"
 #include "mlpbf/graphics/animation.h"
 #include "mlpbf/graphics/spritesheet.h"
+#include "mlpbf/xml/helper.h"
+
+#include <memory>
+#include <string>
+#include <tinyxml.h>
+#include <unordered_map>
+
+#include <SFML/System/NonCopyable.hpp>
 
 namespace bf
 {
 
 /***************************************************************************/
 
-db::Item& db::Item::singleton()
+template< typename T >
+class Database : sf::NonCopyable
 {
-	static db::Item db;
-	return db;
+public:
+	virtual ~Database() {}
+
+	virtual void init()
+	{
+		TiXmlDocument xml = xml::open( getSourceFile() );
+		const TiXmlElement& root = *xml.RootElement();
+		
+		const std::string element = getElementType();
+
+		const TiXmlNode * it = nullptr;
+		while ( it = root.IterateChildren( element.c_str(), it ) )
+		{
+			const TiXmlElement& elem = static_cast< const TiXmlElement& >( *it );
+
+			std::string id = xml::attribute( elem, "id" );
+
+			std::unique_ptr< T > entry( new T() );
+			load( elem, *entry );
+
+			m_data.insert( std::make_pair( id, std::move( entry ) ) );
+		}
+	}
+
+	const T & get( const std::string & id ) const
+	{
+		auto find = m_data.find( id );
+		if ( find == m_data.end() )
+			throw InvalidElementException( id );
+		return *find->second.get();
+	}
+	
+	class InvalidElementException : public Exception { public: InvalidElementException( const std::string & id ) throw() { *this << "Cannot find " << id; } };
+
+private:
+	virtual const std::string getSourceFile() const = 0;
+	virtual const std::string getDatabaseName() const = 0;
+	virtual const std::string getElementType() const = 0;
+
+	virtual void load( const TiXmlElement &, T & ) const = 0;
+
+private:
+	std::unordered_map< std::string, std::unique_ptr< T > > m_data;
+};
+
+/***************************************************************************/
+
+class ItemDatabase : public Database< data::Item >
+{
+	const std::string getSourceFile() const 
+	{
+		return "data/items.xml"; 
+	}
+	
+	const std::string getDatabaseName() const 
+	{ 
+		return "item database"; 
+	}
+	
+	const std::string getElementType() const 
+	{ 
+		return "item"; 
+	}
+
+	void load( const TiXmlElement & elem, data::Item & data ) const 
+	{ 
+		data.id		= xml::attribute( elem, "id" );
+		data.name		= xml::attribute( elem, "name" );
+		data.desc		= xml::attribute( elem, "desc" );
+		data.image	= xml::attribute( elem, "icon" );
+
+		data.buy		= std::stoi( xml::attribute( elem, "buy" ) );
+		data.sell		= std::stoi( xml::attribute( elem, "sell" ) );
+
+		const TiXmlNode* it = nullptr;
+		while ( it = elem.IterateChildren( "attribute", it ) )
+		{
+			const TiXmlElement& child = static_cast< const TiXmlElement& >( *it );
+			data.attributes.insert( xml::attribute( child, "type" ) );
+		}
+	}
+} * g_dbItem = nullptr;
+
+/***************************************************************************/
+
+class MapDatabase : public Database< bf::Map >
+{
+	mutable std::vector< bf::Map * > m_ids;
+
+	const std::string getSourceFile() const 
+	{ 
+		return "data/maps.xml"; 
+	}
+	
+	const std::string getDatabaseName() const 
+	{ 
+		return "map database"; 
+	}
+	
+	const std::string getElementType() const 
+	{ 
+		return "map";
+	}
+	
+	void load( const TiXmlElement & elem, bf::Map & map ) const
+	{
+		map.load( m_ids.size(), xml::attribute( elem, "file" ) );
+		m_ids.push_back( &map );
+	}
+
+public:
+	void init()
+	{
+		Database< bf::Map >::init();
+		
+		for ( bf::Map * map : m_ids )
+			map->loadNeighbors();
+	}
+
+	bf::Map & getFromID( unsigned i )
+	{ 
+		return *m_ids[ i ]; 
+	}
+} * g_dbMap = nullptr;
+
+/***************************************************************************/
+
+class SpriteDatabase : public Database< std::string >
+{
+	const std::string getSourceFile() const 
+	{ 
+		return "data/sprites.xml";
+	}
+	
+	const std::string getDatabaseName() const 
+	{ 
+		return "sprite database";
+	}
+	
+	const std::string getElementType() const 
+	{ 
+		return "sprite";
+	}
+
+	void load( const TiXmlElement& elem, std::string & file ) const 
+	{ 
+		file = xml::attribute( elem, "file" );
+	}
+	
+public:
+	void generate( const std::string & id, gfx::Spritesheet * sheet )
+	{
+		// Animations
+		TiXmlDocument xml = xml::open( get( id ) );
+		const TiXmlElement& root = *xml.RootElement();
+
+		const TiXmlNode * it = nullptr;
+		while ( it = root.IterateChildren( "animation", it ) )
+		{
+			std::unique_ptr< gfx::Animation > anim( new gfx::Animation( static_cast< const TiXmlElement& >( *it ) ) );
+			std::string id = anim->getID();
+
+			sheet->addAnimation( id, std::move( anim ) );
+		}
+	}
+} * g_dbSprite = nullptr;
+
+/***************************************************************************/
+
+void db::init()
+{
+	g_dbItem = new ItemDatabase();
+	g_dbItem->init();
+	
+	g_dbMap = new MapDatabase();
+	g_dbMap->init();
+	
+	g_dbSprite = new SpriteDatabase();
+	g_dbSprite->init();
 }
 
-void data::Item::load( const TiXmlElement& elem )
+void db::cleanup()
 {
-	m_id	= xml::attribute( elem, "id" );
-	m_name	= xml::attribute( elem, "name" );
-	m_desc	= xml::attribute( elem, "desc" );
-	m_image	= xml::attribute( elem, "icon" );
-
-	m_buy	= std::stoi( xml::attribute( elem, "buy" ) );
-	m_sell	= std::stoi( xml::attribute( elem, "sell" ) );
-
-	const TiXmlNode* it = nullptr;
-	while ( it = elem.IterateChildren( "attribute", it ) )
-	{
-		const TiXmlElement& child = static_cast< const TiXmlElement& >( *it );
-		m_attributes.insert( xml::attribute( child, "type" ) );
-	}
+	delete g_dbSprite;
+	delete g_dbMap;
+	delete g_dbItem;
+	
+	g_dbItem = nullptr;
+	g_dbMap = nullptr;
+	g_dbSprite = nullptr;
 }
 
 /***************************************************************************/
 
-db::Map& db::Map::singleton()
+const data::Item & db::getItem( const std::string & id )
 {
-	static db::Map db;
-	return db;
+	return g_dbItem->get( id );
 }
 
-db::Map::Map()
+void db::genSprite( const std::string & id, gfx::Spritesheet * sheet )
 {
-	init();
+	g_dbSprite->generate( id, sheet );
 }
 
-void db::Map::initialize()
+bf::Map & db::getMap( unsigned id )
 {
-	for ( auto it = m_ids.begin(); it != m_ids.end(); ++it )
-		(*it)->loadNeighbors();
+	return g_dbMap->getFromID( id );
 }
 
-void db::Map::load( const TiXmlElement& elem, bf::Map& map ) const
+bf::Map & db::getMap( const std::string & id )
 {
-	map.load( m_ids.size(), xml::attribute( elem, "file" ) );
-	m_ids.push_back( &map );
-}
-
-/***************************************************************************/
-
-db::Sprite& db::Sprite::singleton()
-{
-	static db::Sprite db;
-	return db;
-}
-
-void data::Sprite::load( const TiXmlElement& elem )
-{
-	m_file = xml::attribute( elem, "file" );
-}
-
-void data::Sprite::generate( gfx::Spritesheet& sheet ) const
-{
-	// Animations
-	TiXmlDocument xml = xml::open( m_file );
-	const TiXmlElement& root = *xml.RootElement();
-
-	const TiXmlNode* it = nullptr;
-	while ( it = root.IterateChildren( "animation", it ) )
-	{
-		std::unique_ptr< gfx::Animation > anim( new gfx::Animation( static_cast< const TiXmlElement& >( *it ) ) );
-		std::string id = anim->getID();
-
-		sheet.addAnimation( id, std::move( anim ) );
-	}
+	return const_cast< bf::Map & >( g_dbMap->get( id ) );
 }
 
 /***************************************************************************/

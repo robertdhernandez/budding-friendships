@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <functional>
+#include <iostream>
 #include <iterator>
 
 #include <SFML/Graphics/RectangleShape.hpp>
@@ -169,6 +170,8 @@ void Console::pushLine( const std::string& str, unsigned color )
 
 	while ( m_history.size() > MAX_LINES )
 		m_history.erase( m_history.begin() );
+		
+	std::clog << str << std::endl;
 }
 
 void Console::execute( const std::string& line )

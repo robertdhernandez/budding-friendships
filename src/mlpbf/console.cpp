@@ -220,6 +220,7 @@ void Console::onKeyPressed( const sf::Event::KeyEvent& ev )
 		case sf::Keyboard::Return:
 			if ( !m_input.empty() )
 			{
+				std::clog << ">";
 				pushLine( m_input );
 				execute( m_input );
 				m_index = 0;

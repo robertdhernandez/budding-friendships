@@ -2,7 +2,7 @@
 #include "mlpbf/item/inventory.h"
 
 #include "mlpbf/exception.h"
-#include "mlpbf/database/item.h"
+#include "mlpbf/database.h"
 
 #include <algorithm>
 
@@ -22,9 +22,9 @@ class IndexOutOfRangeException : public Exception { public: IndexOutOfRangeExcep
 Generic::Generic( const std::string& item, sf::Uint8 quality ) :
 	m_canRemove( false ),
 	m_quality( std::min( ( sf::Uint8 ) 100U, quality ) ),
-	m_data( db::Item::singleton()[ item ] )
+	m_data( db::getItem( item ) )
 {
-	loadTexture( m_data.getImage() );
+	loadTexture( m_data.image );
 }
 
 Generic::Generic( const data::Item& item, sf::Uint8 quality ) :
@@ -32,7 +32,7 @@ Generic::Generic( const data::Item& item, sf::Uint8 quality ) :
 	m_quality( std::min( ( sf::Uint8 ) 100U, quality ) ),
 	m_data( item )
 {
-	loadTexture( m_data.getImage() );
+	loadTexture( m_data.image );
 }
 
 ItemPtr Generic::clone() const
@@ -42,17 +42,17 @@ ItemPtr Generic::clone() const
 
 const std::string& Generic::getName() const
 {
-	return m_data.getName();
+	return m_data.name;
 }
 
 const std::string& Generic::getDesc() const
 {
-	return m_data.getDesc();
+	return m_data.desc;
 }
 
 const std::string& Generic::getID() const
 {
-	return m_data.getID();
+	return m_data.id;
 }
 
 const sf::Texture& Generic::getIcon() const
@@ -62,12 +62,12 @@ const sf::Texture& Generic::getIcon() const
 
 unsigned Generic::getBuy() const
 {
-	return m_data.getBuy();
+	return m_data.buy;
 }
 
 unsigned Generic::getSell() const
 {
-	return static_cast< unsigned >( m_data.getSell() * ( m_quality / 100.0f ) );
+	return static_cast< unsigned >( m_data.sell * ( m_quality / 100.0f ) );
 }
 
 /***************************************************************************/

@@ -4,9 +4,7 @@
 #include "mlpbf/direction.h"
 #include "mlpbf/resource.h"
 
-#include "mlpbf/database/item.h"
-#include "mlpbf/database/sprite.h"
-#include "mlpbf/database/map.h"
+#include "mlpbf/database.h"
 
 #include "mlpbf/state/map.h"
 
@@ -77,12 +75,14 @@ private:
 void init()
 {
 	bf::res::init(); // Initialize resource managers
+	bf::db::init(); // Initialize databases
 	
 	FPS.init();
 }
 
 void cleanup()
 {
+	bf::db::cleanup(); // Free databases
 	bf::res::cleanup(); // Free resource managers
 }
 
@@ -100,8 +100,6 @@ int main( int argc, char* argv[] )
 		window.setFramerateLimit( 60U );
 		
 		//TODO: make function to initialize all global variables
-		db::Map::singleton().initialize();
-
 		Map::global( 0 );
 		state::global( std::unique_ptr< state::Base >( new state::Map() ) );
 

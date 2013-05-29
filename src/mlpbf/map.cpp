@@ -5,9 +5,9 @@
 #include "mlpbf/global.h"
 #include "mlpbf/console.h"
 #include "mlpbf/character.h"
+#include "mlpbf/database.h"
 #include "mlpbf/direction.h"
 #include "mlpbf/exception.h"
-#include "mlpbf/database/map.h"
 #include "mlpbf/resource.h"
 #include "mlpbf/time/season.h"
 
@@ -64,7 +64,7 @@ inline void setNeighbor( const std::map< std::string, std::string >& map, const 
 		std::string::size_type pos = find->second.find( ',' );
 		std::string _map = ( ( pos != std::string::npos ) ? find->second.substr( 0, pos ) : find->second );
 
-		m.first = &db::Map::singleton()[ _map ];
+		m.first = &db::getMap( _map );
 		if ( pos != std::string::npos )
 			std::istringstream( find->second.substr( pos + 1 ) ) >> m.second;
 	}
@@ -83,12 +83,12 @@ Map& Map::global()
 
 Map& Map::global( unsigned id )
 {
-	return *( GLOBAL_MAP = &db::Map::singleton()[ id ] );
+	return *( GLOBAL_MAP = &db::getMap( id ) );
 }
 
 Map& Map::global( const std::string& map )
 {
-	return *( GLOBAL_MAP = &db::Map::singleton()[ map ] );
+	return *( GLOBAL_MAP = &db::getMap( map ) );
 }
 
 /***************************************************************************/

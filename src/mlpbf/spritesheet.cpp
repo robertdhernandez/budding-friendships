@@ -1,5 +1,5 @@
 #include "mlpbf/graphics/spritesheet.h"
-#include "mlpbf/database/sprite.h"
+#include "mlpbf/database.h"
 
 #include "mlpbf/exception.h"
 #include <sstream>
@@ -63,7 +63,7 @@ void Spritesheet::animate( const std::string& anim, bool loop )
 void Spritesheet::load( const std::string& sprite )
 {
 	m_animations.clear();
-	db::Sprite::singleton().get( sprite ).generate( *this );
+	db::genSprite( sprite, this );
 }
 
 bool Spritesheet::finished() const

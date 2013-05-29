@@ -3,7 +3,7 @@
 #include "mlpbf/global.h"
 #include "mlpbf/direction.h"
 #include "mlpbf/map.h"
-#include "mlpbf/database/map.h"
+#include "mlpbf/database.h"
 #include "mlpbf/exception.h"
 
 #include <sstream>
@@ -83,7 +83,7 @@ void Character::setMap( const std::string& map )
 
 void Character::setMap( const std::string& map, const sf::Vector2f& pos )
 {
-	m_mapID = db::Map::singleton()[ map ].getID();
+	m_mapID = db::getMap( map ).getID();
 	m_pos = pos;
 }
 
@@ -91,7 +91,7 @@ void Character::update( const sf::Time& time )
 {
 	updateCharacter( *this );
 
-	const Map& m = db::Map::singleton()[ m_mapID ];
+	const Map& m = db::getMap( m_mapID );
 
 	sf::Vector2f move = std::get< 1 >( m_move ) * ( time.asMilliseconds() / 10.0f );
 	if ( move == sf::Vector2f( 0.0f, 0.0f ) ) return;
@@ -192,7 +192,7 @@ void Character::update( const sf::Time& time )
 	m_pos.y = bound.top + ( bound.height / 2.0f );
 
 	// Change the character's current map if they left the map bounds
-	const Map& curMap = db::Map::singleton()[ m_mapID ], *nextMap = nullptr;
+	const Map& curMap = db::getMap( m_mapID ), *nextMap = nullptr;
 	if ( ( nextMap = curMap.getNeighbor( Up ) ) != nullptr && m_pos.y < 0.0f )
 	{
 		m_mapID = nextMap->getID();

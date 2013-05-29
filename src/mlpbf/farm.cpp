@@ -23,14 +23,15 @@ inline unsigned convert( unsigned x, unsigned y )
 
 class Crop : public field::Object
 {
+	const Seed & m_seed;
+	const field::Tile & m_tile;
+
 public:
-	Crop( const Seed & seed ) :
-		m_seed( seed )
+	Crop( const Seed & seed, const field::Tile & tile ) :
+		m_seed( seed ),
+		m_tile( tile )
 	{
 	}
-	
-private:
-	const Seed & m_seed;
 };
 
 /***************************************************************************/
@@ -63,8 +64,8 @@ void field::plant( unsigned x, unsigned y, const Seed & seed )
 	if ( tile.object != nullptr )
 		throw Exception( "tile already contains an object" );
 
-	Crop * crop = new Crop( seed );
-	g_Field.tiles[ convert( x, y ) ].object = crop;
+	Crop * crop = new Crop( seed, tile );
+	tile.object = crop;
 	g_Field.objects.push_back( crop );
 }
 

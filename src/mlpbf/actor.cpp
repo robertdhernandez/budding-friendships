@@ -6,7 +6,7 @@
 #include "mlpbf/time.h"
 
 #include "mlpbf/map.h"
-#include "mlpbf/database/map.h"
+#include "mlpbf/database.h"
 
 #include "mlpbf/utility/timer.h"
 
@@ -91,7 +91,7 @@ private:
 			m_distance += distance( std::get< 1 >( m_last ), c.getPosition() );
 		else
 		{
-			const Map& lastMap = db::Map::singleton()[ std::get< 0 >( m_last ) ];
+			const Map& lastMap = db::getMap( std::get< 0 >( m_last ) );
 			const sf::Vector2f& lastPos = std::get< 1 >( m_last );
 			sf::Vector2f pos( lastPos );
 

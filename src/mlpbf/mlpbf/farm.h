@@ -46,7 +46,11 @@ namespace bf
 				friend void farm::cleanup();
 			};
 			
+			// Returns an individual tile
 			const Tile & getTile( unsigned x, unsigned y );
+			
+			// Returns the tile array -- size == field::WIDTH * field::HEIGHT
+			const Tile * getTiles();
 			
 			void plant( unsigned x, unsigned y, const Seed & seed );
 		}

@@ -58,6 +58,11 @@ const field::Tile & field::getTile( unsigned x, unsigned y )
 	return g_Field.tiles[ convert( x, y ) ];
 }
 
+const field::Tile * field::getTiles()
+{
+	return g_Field.tiles;
+}
+
 void field::plant( unsigned x, unsigned y, const Seed & seed )
 {
 	field::Tile & tile = g_Field.tiles[ convert( x, y ) ];

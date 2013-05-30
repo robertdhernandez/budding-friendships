@@ -67,3 +67,9 @@ packages/
 
 #Test files
 *.testsettings
+
+#Manually added
+*~
+budding-friendships
+*.a
+data/

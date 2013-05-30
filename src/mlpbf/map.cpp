@@ -1,6 +1,4 @@
 #include "mlpbf/map.h"
-#include "mlpbf/map/object.h"
-#include "mlpbf/map/viewer.h"
 
 #include "mlpbf/global.h"
 #include "mlpbf/console.h"
@@ -72,6 +70,84 @@ inline void setNeighbor( const std::map< std::string, std::string >& map, const 
 
 /***************************************************************************/
 
+//-------------------------------------------------------------------------
+// A map object is an abstract class for an object that appears on a map
+// The object must implement methods when the player interacts with the object in several ways
+// 
+// FUNCTION EXPLANATIONS
+//
+//		const sf::FloatRect& getBounds() const
+//			Returns the FloatRect of the object's bounds
+//			NOTE: left != getPosition().x and top != getPosition().y
+//
+//	IMPLEMENTABLE METHODS
+//
+//		void load( const Tmx::Object&, Instance&, Map& )
+//			Called once when the object is being created
+//			Retrieve references to external classes here and load from data from the TMX object
+//
+//		void update( sf::Uint32, const sf::Vector2f& )
+//			Called continiously every frame regardless if the player is inside the object
+//			NOTE: the coordinate inputted is relative to the object
+//
+//		void onEnter( sf::Uint32, const sf::Vector2f& )
+//			Called once when the player enters the object
+//			NOTE: the coordinate inputted is relative to the object
+//
+//		void onInside( sf::Uint32, const sf::Vector2f& )
+//			Called continuously while the player is inside the object
+//			NOTE: the coordinate inputted is relative to the object
+//
+//		void onExit( sf::Uint32, const sf::Vector2f& )
+//			Called once when the player exits the object
+//			NOTE: the coordinate inputted is relative to the object
+//
+//		void onInteract( const sf::Vector2f& )
+//			Called once when the player interacts with the object with the primary key (default: z)
+//			Takes in the absolute coordinate that was interacted with
+//			NOTE: the coordinate inputted is relative to the object
+//
+//		bool hasCollision( const sf::Vector2f& )
+//			Returns if the position at the inputted absolute coordinate has collision
+//			NOTE: the coordinate inputted is relative to the object
+//-------------------------------------------------------------------------
+
+class Map::Object : public sf::Drawable, private sf::Transformable
+{
+public:
+	friend Map::Object * generateObject( const Tmx::Object & );
+	virtual ~Object() {}
+
+	const std::string & getName() const { return m_name; }
+	const sf::FloatRect & getBounds() const { return m_bounds; }
+
+	using sf::Transformable::getPosition;
+	using sf::Transformable::setPosition;
+
+public:
+	virtual void load( const Tmx::Object& object ) = 0;
+	virtual void update( sf::Uint32 frameTime, const sf::Vector2f& pos ) {}
+
+	virtual void onEnter( sf::Uint32 frameTime, const sf::Vector2f& pos ) {}
+	virtual void onInside( sf::Uint32 frameTime, const sf::Vector2f& pos ) {}
+	virtual void onExit( sf::Uint32 frameTime, const sf::Vector2f& pos ) {}
+
+	virtual void onInteract( const sf::Vector2f& pos ) {};
+
+	virtual bool hasCollision( const sf::Vector2f& pos ) const = 0;
+
+protected:
+	using sf::Transformable::getTransform;
+
+private:
+	std::string m_name;
+	sf::FloatRect m_bounds;
+};
+
+Map::Object * generateObject( const Tmx::Object & tmxObject );
+
+/***************************************************************************/
+
 static Map* GLOBAL_MAP = nullptr;
 
 Map& Map::global()
@@ -92,6 +168,13 @@ Map& Map::global( const std::string& map )
 }
 
 /***************************************************************************/
+
+Map::~Map()
+{
+	for ( Map::Object * obj : m_objects )
+		delete obj;
+	m_objects.clear();
+}
 
 bool Map::adjustSprite( const Tmx::Layer& layer, sf::Vector2u pos, sf::Sprite& sprite ) const
 {
@@ -130,7 +213,7 @@ bool Map::checkObjectCollision( const sf::Vector2f& pos ) const
 
 	for ( auto it = m_objects.begin(); it != m_objects.end(); ++it )
 	{
-		const map::Object& obj = **it;
+		const Map::Object& obj = **it;
 		if ( obj.getBounds().contains( pos ) && obj.hasCollision( obj.getPosition() - pos ) )
 			return true;
 	}
@@ -207,7 +290,7 @@ void Map::load( unsigned id, const std::string& map )
 
 			try
 			{
-				m_objects.push_back( map::Object::create( object ) );
+				m_objects.push_back( generateObject( object ) );
 			}
 			catch ( std::exception& err )
 			{
@@ -232,7 +315,7 @@ void Map::loadNeighbors()
 
 void Map::update( sf::Uint32 frameTime, const sf::Vector2f& pos )
 {
-	std::vector< map::Object* > remove;
+	std::vector< Map::Object* > remove;
 
 	// Check if the player has left any of the active objects
 	for ( auto it = m_activeObjects.begin(); it != m_activeObjects.end(); ++it )
@@ -258,10 +341,10 @@ void Map::update( sf::Uint32 frameTime, const sf::Vector2f& pos )
 	for ( auto it = m_objects.begin(); it != m_objects.end(); ++it )
 	{
 		const sf::FloatRect& rect = (*it)->getBounds();
-		if ( rect.contains( pos ) && std::find( m_activeObjects.begin(), m_activeObjects.end(), it->get() ) != m_activeObjects.end() )
+		if ( rect.contains( pos ) && std::find( m_activeObjects.begin(), m_activeObjects.end(), *it ) != m_activeObjects.end() )
 		{
 			(*it)->onEnter( frameTime, pos - (*it)->getPosition() );
-			m_activeObjects.push_back( it->get() );
+			m_activeObjects.push_back( *it );
 		}
 	}
 }
@@ -279,31 +362,31 @@ bool Map::interact( const sf::Vector2f& pos )
 
 /***************************************************************************/
 
-map::Viewer::Viewer( const Map& map ) :
+MapViewer::MapViewer( const Map& map ) :
 	m_map( &map ),
 	m_area( 0.0f, 0.0f, (float) SCREEN_WIDTH, (float) SCREEN_HEIGHT )
 {
 }
 
-void map::Viewer::center( const sf::Vector2f& pos )
+void MapViewer::center( const sf::Vector2f& pos )
 {
 	sf::Vector2f p = round( pos );
 	m_area.left = p.x - m_area.width  / 2.0f;
 	m_area.top  = p.y - m_area.height / 2.0f;
 }
 
-const sf::Vector2f map::Viewer::center() const
+const sf::Vector2f MapViewer::center() const
 {
 	return sf::Vector2f( m_area.left - m_area.width / 2.0f, m_area.top - m_area.height / 2.0f );
 }
 
-void map::Viewer::dimension( const sf::Vector2f& dim )
+void MapViewer::dimension( const sf::Vector2f& dim )
 {
 	m_area.width = dim.x;
 	m_area.height = dim.y;
 }
 
-void map::Viewer::draw( sf::RenderTarget& target, sf::RenderStates states ) const
+void MapViewer::draw( sf::RenderTarget& target, sf::RenderStates states ) const
 {
 	states.transform *= getTransform();
 
@@ -330,7 +413,7 @@ void map::Viewer::draw( sf::RenderTarget& target, sf::RenderStates states ) cons
 		const sf::FloatRect& objRect = (*it)->getBounds();
 		if ( rect.intersects( objRect ) )
 		{
-			map::Object& object = const_cast< map::Object& >( **it );
+			Map::Object& object = const_cast< Map::Object& >( **it );
 			object.setPosition( objRect.left - rect.left, objRect.top - rect.top );
 
 			target.draw( **it, states );
@@ -378,13 +461,13 @@ void map::Viewer::draw( sf::RenderTarget& target, sf::RenderStates states ) cons
 
 /***************************************************************************/
 
-void map::MultiViewer::draw( sf::RenderTarget& target, sf::RenderStates states ) const
+void MultiMapViewer::draw( sf::RenderTarget& target, sf::RenderStates states ) const
 {
 	const Map& m = map();
 	const sf::FloatRect& area = getViewArea();
 	sf::Vector2f center = this->center(), offset;
 
-	Viewer child( *this );
+	MapViewer child( *this );
 
 	// Draw west map
 	if ( m.getNeighbor( Left ) &&  area.left < 0 )
@@ -441,7 +524,74 @@ void map::MultiViewer::draw( sf::RenderTarget& target, sf::RenderStates states )
 	}
 
 	// Draw the original map
-	Viewer::draw( target, states );	
+	MapViewer::draw( target, states );	
+}
+
+/***************************************************************************/
+
+class Sign : public Map::Object, private res::TextureLoader<>
+{
+	std::string m_text;
+
+	void onInteract( const sf::Vector2f& pos )
+	{
+		showText( m_text );
+	}
+	
+	bool hasCollision( const sf::Vector2f& pos ) const 
+	{ 
+		return true; 
+	}
+
+	void load( const Tmx::Object& object )
+	{
+		const auto& list = object.GetProperties().GetList();
+
+		//auto findTexture = list.find( "texture" );
+		//auto findText = list.find( "text" );
+
+		//TODO: error checking
+
+		loadTexture( list.at( "texture" ) );
+		m_text = list.at( "text" );
+	}
+	
+	void draw( sf::RenderTarget& target, sf::RenderStates states ) const
+	{
+		states.transform *= getTransform();
+		const sf::FloatRect& rect = getBounds();
+
+		sf::Sprite sprite;
+		sprite.setTexture( getTexture() );
+		sprite.setTextureRect( sf::IntRect( 0, 0, (int) rect.width, (int) rect.height ) );
+
+		target.draw( sprite, states );
+	}
+};
+
+/***************************************************************************/
+
+class UnknownObjectException : public Exception { public: UnknownObjectException( const Tmx::Object& object ) { *this << "unknown object type \"" << object.GetType() << "\""; } };
+
+Map::Object * generateObject( const Tmx::Object & tmxObject )
+{
+	Map::Object * object = nullptr;
+
+	std::string type = tmxObject.GetType();
+	std::transform( type.begin(), type.end(), type.begin(), ::tolower );
+
+	if ( type == "sign" )
+		object = new Sign();
+	else
+		throw UnknownObjectException( tmxObject );
+	
+	object->setPosition( (float) tmxObject.GetX(), (float) tmxObject.GetY());
+
+	object->m_name = tmxObject.GetName();
+	object->m_bounds = sf::FloatRect( (float) tmxObject.GetX(), (float) tmxObject.GetY(), (float) tmxObject.GetWidth(), (float) tmxObject.GetHeight() );
+
+	object->load( tmxObject );
+	return object;
 }
 
 /***************************************************************************/

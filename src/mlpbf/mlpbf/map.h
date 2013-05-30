@@ -1,23 +1,32 @@
 #pragma once
 
 #include <array>
-#include <SFML/System/NonCopyable.hpp>
-#include <SFML/Graphics/Sprite.hpp>
-#include <string>
-#include <Tmx.h>
-#include <unordered_map>
 #include <memory>
+#include <string>
+#include <unordered_map>
+#include <vector>
+
+#include <SFML/Graphics/Drawable.hpp>
+#include <SFML/Graphics/Sprite.hpp>
+#include <SFML/Graphics/Transformable.hpp>
+#include <SFML/System/NonCopyable.hpp>
+#include <Tmx.h>
 
 #include "direction.h"
-#include "map/object.h"
 #include "time/season.h"
 
 namespace bf
 {
+	class Character;
+
 	class Map : private sf::NonCopyable
 	{
 	public:
-		void load( unsigned, const std::string& );
+		~Map();
+	
+		class Object;
+	
+		void load( unsigned id, const std::string& );
 		void loadNeighbors();
 
 		void update( sf::Uint32 frameTime, const sf::Vector2f& pos );
@@ -35,7 +44,7 @@ namespace bf
 
 		unsigned getID() const { return m_mapID; }
 
-		const std::vector< std::unique_ptr< map::Object > >& getObjects() const { return m_objects; }
+		const std::vector< Map::Object * >& getObjects() const { return m_objects; }
 
 		const std::vector< const Tmx::Layer* >& getLowerLayers() const { return m_lower; }
 		const std::vector< const Tmx::Layer* >& getUpperLayers() const { return m_upper; }
@@ -68,7 +77,45 @@ namespace bf
 		std::array< std::pair< bf::Map*, int >, 4 > m_neighbors;
 
 		// Map Objects
-		std::vector< std::unique_ptr< map::Object > > m_objects;
-		std::vector< map::Object* > m_activeObjects;
+		std::vector< Map::Object * > m_objects;
+		std::vector< Map::Object * > m_activeObjects;
+	};
+	
+	class MapViewer : public sf::Drawable, public sf::Transformable
+	{
+	public:
+		MapViewer( const Map & map );
+		virtual ~MapViewer() {}
+
+		void addCharacter( const Character & c ) { m_characters.push_back( &c ); }
+
+		void center( const sf::Vector2f& pos );
+		const sf::Vector2f center() const;
+
+		void dimension( const sf::Vector2f & dim );
+		const sf::Vector2f dimension() const;
+
+		void map( const Map& map ) { m_map = &map; }
+		const Map & map() const { return *m_map; }
+
+		const sf::FloatRect& getViewArea() const { return m_area; }
+
+	protected:
+		virtual void draw( sf::RenderTarget&, sf::RenderStates ) const;
+
+	private:
+		const Map * m_map;
+		sf::FloatRect m_area;
+
+		std::vector< const Character* > m_characters;
+	};
+
+	class MultiMapViewer : public MapViewer
+	{
+	public:
+		MultiMapViewer( const Map & m ) : MapViewer( m ) {}
+
+	private:
+		void draw( sf::RenderTarget&, sf::RenderStates ) const;
 	};
 }

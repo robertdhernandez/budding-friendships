@@ -3,7 +3,7 @@
 #include "base.h"
 #include "../direction.h"
 #include "../utility/listener/key.h"
-#include "../map/viewer.h"
+#include "../map.h"
 #include "../ui/clock.h"
 
 #include <array>
@@ -34,7 +34,7 @@ namespace bf
 			void draw( sf::RenderTarget&, sf::RenderStates ) const;
 
 		private:
-			map::MultiViewer m_viewer;
+			MultiMapViewer m_viewer;
 			ui::Clock m_clock;
 
 			// Movement variables

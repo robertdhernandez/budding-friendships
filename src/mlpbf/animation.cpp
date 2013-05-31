@@ -3,7 +3,7 @@
 
 #include "mlpbf/exception.h"
 #include "mlpbf/resource.h"
-#include "mlpbf/xml/helper.h"
+#include "mlpbf/xml.h"
 
 #include <tinyxml.h>
 #include <sstream>

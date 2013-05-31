@@ -1,9 +1,7 @@
 #pragma once
 
-#include "../exception.h"
-
-class TiXmlDocument;
-class TiXmlElement;
+#include "exception.h"
+#include <tinyxml.h>
 
 namespace bf
 {
@@ -37,5 +35,16 @@ namespace bf
 		{
 			public: NoChildElementsException( const TiXmlElement& element ) throw ();
 		};
-	} // namespace xml
-} // namespace game
+	
+		// This file contains helper functions to make reading XML easier
+		// All functions will throw an exception if they fail, so all return values WILL be valid
+
+		// Helper function to open a new XmlDocument
+		TiXmlDocument open( const std::string& file ) 
+			throw ( DocumentException, MissingRootElementException );
+
+		// Retreive an attribute and checks that it exists
+		std::string attribute( const TiXmlElement& element, const std::string& attribute ) 
+			throw ( MissingAttributeException );
+	}
+}

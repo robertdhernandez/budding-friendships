@@ -3,7 +3,7 @@
 #include "mlpbf/map.h"
 #include "mlpbf/graphics/animation.h"
 #include "mlpbf/graphics/spritesheet.h"
-#include "mlpbf/xml/helper.h"
+#include "mlpbf/xml.h"
 
 #include <memory>
 #include <string>

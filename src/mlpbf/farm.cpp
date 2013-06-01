@@ -32,6 +32,15 @@ public:
 		m_tile( tile )
 	{
 	}
+	
+	bool hasCollision() const
+	{
+		return false;
+	}
+	
+	void draw( sf::RenderTarget & target, sf::RenderStates states ) const
+	{
+	}
 };
 
 /***************************************************************************/
@@ -53,12 +62,12 @@ void cleanup()
 
 /***************************************************************************/
 
-const field::Tile & field::getTile( unsigned x, unsigned y )
+field::Tile & field::getTile( unsigned x, unsigned y )
 {
 	return g_Field.tiles[ convert( x, y ) ];
 }
 
-const field::Tile * field::getTiles()
+field::Tile * field::getTiles()
 {
 	return g_Field.tiles;
 }

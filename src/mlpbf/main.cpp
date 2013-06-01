@@ -5,6 +5,7 @@
 #include "mlpbf/resource.h"
 
 #include "mlpbf/database.h"
+#include "mlpbf/farm.h"
 
 #include "mlpbf/state/map.h"
 
@@ -74,16 +75,19 @@ private:
 
 void init()
 {
-	bf::res::init(); // Initialize resource managers
-	bf::db::init(); // Initialize databases
+	bf::res::init(); // resource managers
+	bf::db::init(); // databases
+	
+	bf::farm::init(); // farm 
 	
 	FPS.init();
 }
 
 void cleanup()
 {
-	bf::db::cleanup(); // Free databases
-	bf::res::cleanup(); // Free resource managers
+	bf::farm::cleanup(); // farm
+	bf::db::cleanup(); // databases
+	bf::res::cleanup(); // resource managers
 }
 
 int main( int argc, char* argv[] )

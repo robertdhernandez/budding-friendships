@@ -1,11 +1,11 @@
-#include "mlpbf/map.h"
-
-#include "mlpbf/global.h"
-#include "mlpbf/console.h"
 #include "mlpbf/character.h"
+#include "mlpbf/console.h"
 #include "mlpbf/database.h"
 #include "mlpbf/direction.h"
 #include "mlpbf/exception.h"
+#include "mlpbf/farm.h"
+#include "mlpbf/global.h"
+#include "mlpbf/map.h"
 #include "mlpbf/resource.h"
 #include "mlpbf/time/season.h"
 
@@ -70,48 +70,6 @@ inline void setNeighbor( const std::map< std::string, std::string >& map, const 
 
 /***************************************************************************/
 
-//-------------------------------------------------------------------------
-// A map object is an abstract class for an object that appears on a map
-// The object must implement methods when the player interacts with the object in several ways
-// 
-// FUNCTION EXPLANATIONS
-//
-//		const sf::FloatRect& getBounds() const
-//			Returns the FloatRect of the object's bounds
-//			NOTE: left != getPosition().x and top != getPosition().y
-//
-//	IMPLEMENTABLE METHODS
-//
-//		void load( const Tmx::Object&, Instance&, Map& )
-//			Called once when the object is being created
-//			Retrieve references to external classes here and load from data from the TMX object
-//
-//		void update( sf::Uint32, const sf::Vector2f& )
-//			Called continiously every frame regardless if the player is inside the object
-//			NOTE: the coordinate inputted is relative to the object
-//
-//		void onEnter( sf::Uint32, const sf::Vector2f& )
-//			Called once when the player enters the object
-//			NOTE: the coordinate inputted is relative to the object
-//
-//		void onInside( sf::Uint32, const sf::Vector2f& )
-//			Called continuously while the player is inside the object
-//			NOTE: the coordinate inputted is relative to the object
-//
-//		void onExit( sf::Uint32, const sf::Vector2f& )
-//			Called once when the player exits the object
-//			NOTE: the coordinate inputted is relative to the object
-//
-//		void onInteract( const sf::Vector2f& )
-//			Called once when the player interacts with the object with the primary key (default: z)
-//			Takes in the absolute coordinate that was interacted with
-//			NOTE: the coordinate inputted is relative to the object
-//
-//		bool hasCollision( const sf::Vector2f& )
-//			Returns if the position at the inputted absolute coordinate has collision
-//			NOTE: the coordinate inputted is relative to the object
-//-------------------------------------------------------------------------
-
 class Map::Object : public sf::Drawable, private sf::Transformable
 {
 public:
@@ -129,7 +87,7 @@ public:
 	virtual void update( sf::Uint32 frameTime, const sf::Vector2f& pos ) {}
 
 	virtual void onEnter( sf::Uint32 frameTime, const sf::Vector2f& pos ) {}
-	virtual void onInside( sf::Uint32 frameTime, const sf::Vector2f& pos ) {}
+	virtual void whileInside( sf::Uint32 frameTime, const sf::Vector2f& pos ) {}
 	virtual void onExit( sf::Uint32 frameTime, const sf::Vector2f& pos ) {}
 
 	virtual void onInteract( const sf::Vector2f& pos ) {};
@@ -214,7 +172,7 @@ bool Map::checkObjectCollision( const sf::Vector2f& pos ) const
 	for ( auto it = m_objects.begin(); it != m_objects.end(); ++it )
 	{
 		const Map::Object& obj = **it;
-		if ( obj.getBounds().contains( pos ) && obj.hasCollision( obj.getPosition() - pos ) )
+		if ( obj.getBounds().contains( pos ) && obj.hasCollision( pos - obj.getPosition() ) )
 			return true;
 	}
 	return false;
@@ -335,7 +293,7 @@ void Map::update( sf::Uint32 frameTime, const sf::Vector2f& pos )
 
 	// Update all active objects
 	for ( auto it = m_activeObjects.begin(); it != m_activeObjects.end(); ++it )
-		(*it)->onInside( frameTime, pos - (*it)->getPosition() );
+		(*it)->whileInside( frameTime, pos - (*it)->getPosition() );
 
 	// Check if the player has entered any new objects
 	for ( auto it = m_objects.begin(); it != m_objects.end(); ++it )
@@ -351,13 +309,14 @@ void Map::update( sf::Uint32 frameTime, const sf::Vector2f& pos )
 
 bool Map::interact( const sf::Vector2f& pos )
 {
-	for ( auto it = m_objects.begin(); it != m_objects.end(); ++it )
-		if ( (*it)->getBounds().contains( pos ) )
+	bool ret = false;
+	for ( Map::Object * obj : m_objects )
+		if ( obj->getBounds().contains( pos ) )
 		{
-			(*it)->onInteract( pos - (*it)->getPosition() );
-			return true;
+			obj->onInteract( pos - obj->getPosition() );
+			ret = true;
 		}
-	return false;
+	return ret;
 }
 
 /***************************************************************************/
@@ -529,6 +488,118 @@ void MultiMapViewer::draw( sf::RenderTarget& target, sf::RenderStates states ) c
 
 /***************************************************************************/
 
+//-------------------------------------------------------------------------
+// A map object is an abstract class for an object that appears on a map
+// The object must implement methods when the player interacts with the object in several ways
+// 
+// FUNCTION EXPLANATIONS
+//
+//		const sf::FloatRect& getBounds() const
+//			Returns the FloatRect of the object's bounds
+//			NOTE: left != getPosition().x and top != getPosition().y
+//
+//	IMPLEMENTABLE METHODS
+//
+//		void load( const Tmx::Object&, Instance&, Map& ) [pure virtual]
+//			Called once when the object is being created
+//			Retrieve references to external classes here and load from data from the TMX object
+//
+//		void update( sf::Uint32, const sf::Vector2f & )
+//			Called continiously every frame regardless if the player is inside the object
+//			NOTE: the coordinate inputted is relative to the object
+//
+//		void onEnter( sf::Uint32, const sf::Vector2f & )
+//			Called once when the player enters the object
+//			NOTE: the coordinate inputted is relative to the object
+//
+//		void whileInside( sf::Uint32, const sf::Vector2f & )
+//			Called continuously while the player is inside the object
+//			NOTE: the coordinate inputted is relative to the object
+//
+//		void onExit( sf::Uint32, const sf::Vector2f & )
+//			Called once when the player exits the object
+//			NOTE: the coordinate inputted is relative to the object
+//
+//		void onInteract( const sf::Vector2f & )
+//			Called once when the player interacts with the object with the primary key (default: z)
+//			Takes in the absolute coordinate that was interacted with
+//			NOTE: the coordinate inputted is relative to the object
+//
+//		bool hasCollision( const sf::Vector2f & ) const [pure virtual]
+//			Returns if the position at the inputted absolute coordinate has collision
+//			NOTE: the coordinate inputted is relative to the object
+//-------------------------------------------------------------------------
+
+/***************************************************************************/
+
+class Field : public Map::Object, res::TextureLoader<>
+{
+	static const int FIELD_SIZE = farm::field::WIDTH * farm::field::HEIGHT;
+	std::vector< farm::field::Tile * > highlight;
+
+	void clearHighlighted()
+	{
+		for ( farm::field::Tile * tile : highlight )
+			tile->highlight = false;
+		highlight.clear();
+	}
+	
+	const sf::Vector2i convert( const sf::Vector2f & pos ) const
+	{
+		return sf::Vector2i( (unsigned) pos.x / 32U, (unsigned) pos.y / 32U );
+	}
+
+	void load( const Tmx::Object & )
+	{
+		// texture that contains (watered) tilled graphics
+		loadTexture( "data/tilesets/crops.png" );
+	}
+	
+	void onInteract( const sf::Vector2f & pos )
+	{
+		//DEBUG: till the field when used
+		const sf::Vector2i fpos = convert( pos );
+		farm::field::Tile & tile = farm::field::getTile( fpos.x, fpos.y );
+		tile.till = 1U;
+	}
+	
+	bool hasCollision( const sf::Vector2f & pos ) const
+	{
+		const sf::Vector2i fpos = convert( pos );
+		const farm::field::Tile & tile = farm::field::getTile( fpos.x, fpos.y );
+		return tile.object != nullptr && tile.object->hasCollision();
+	}
+	
+	void draw( sf::RenderTarget & target, sf::RenderStates states ) const
+	{
+		using namespace bf::farm;
+	
+		states.transform *= getTransform();
+		
+		sf::Sprite sprite( getTexture() );
+		const field::Tile * tiles = farm::field::getTiles();
+		
+		for ( int i = 0; i < FIELD_SIZE; i++ )
+		{
+			const field::Tile & tile = tiles[i];
+			sprite.setPosition( i % farm::field::WIDTH * TILE_WIDTH, i / farm::field::WIDTH * TILE_HEIGHT );
+			
+			// draw till
+			if ( tile.till > 0 )
+			{
+				sprite.setTextureRect( sf::IntRect( tile.water ? 32 : 0, 0, 32, 32 ) );
+				target.draw( sprite, states );
+			}
+
+			// draw object
+			if ( tile.object != nullptr )
+				target.draw( *tile.object, states );
+		}
+	}
+};
+
+/***************************************************************************/
+
 class Sign : public Map::Object, private res::TextureLoader<>
 {
 	std::string m_text;
@@ -577,21 +648,31 @@ Map::Object * generateObject( const Tmx::Object & tmxObject )
 {
 	Map::Object * object = nullptr;
 
-	std::string type = tmxObject.GetType();
-	std::transform( type.begin(), type.end(), type.begin(), ::tolower );
-
-	if ( type == "sign" )
-		object = new Sign();
-	else
-		throw UnknownObjectException( tmxObject );
+	try
+	{
+		std::string type = tmxObject.GetType();
+		std::transform( type.begin(), type.end(), type.begin(), ::tolower );
+		
+		if ( type == "sign" )
+			object = new Sign();
+		else if ( type == "field" )
+			object = new Field();
+		else
+			throw UnknownObjectException( tmxObject );
 	
-	object->setPosition( (float) tmxObject.GetX(), (float) tmxObject.GetY());
+		object->setPosition( (float) tmxObject.GetX(), (float) tmxObject.GetY());
 
-	object->m_name = tmxObject.GetName();
-	object->m_bounds = sf::FloatRect( (float) tmxObject.GetX(), (float) tmxObject.GetY(), (float) tmxObject.GetWidth(), (float) tmxObject.GetHeight() );
+		object->m_name = tmxObject.GetName();
+		object->m_bounds = sf::FloatRect( (float) tmxObject.GetX(), (float) tmxObject.GetY(), (float) tmxObject.GetWidth(), (float) tmxObject.GetHeight() );
 
-	object->load( tmxObject );
-	return object;
+		object->load( tmxObject );
+		return object;
+	}
+	catch ( ... )
+	{
+		delete object;
+		throw;
+	}
 }
 
 /***************************************************************************/

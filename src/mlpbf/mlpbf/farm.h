@@ -16,11 +16,11 @@ namespace bf
 		{
 			enum
 			{
-				WIDTH = 40,
-				HEIGHT = 40
+				WIDTH = 20,
+				HEIGHT = 20
 			};
 			
-			class Object
+			class Object : public sf::Drawable
 			{
 			public:
 				virtual ~Object() {}
@@ -47,10 +47,10 @@ namespace bf
 			};
 			
 			// Returns an individual tile
-			const Tile & getTile( unsigned x, unsigned y );
+			Tile & getTile( unsigned x, unsigned y );
 			
 			// Returns the tile array -- size == field::WIDTH * field::HEIGHT
-			const Tile * getTiles();
+			Tile * getTiles();
 			
 			void plant( unsigned x, unsigned y, const Seed & seed );
 		}

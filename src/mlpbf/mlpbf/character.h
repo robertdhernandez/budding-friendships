@@ -15,7 +15,7 @@ namespace bf
 	class Map;
 
 	//TODO: reorganize functions
-	class Character : public Actor, private sf::NonCopyable
+	class Character : public Actor, public virtual sf::NonCopyable
 	{
 	public:
 		Character( const std::string& spritesheet );

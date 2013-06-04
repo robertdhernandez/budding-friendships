@@ -1,3 +1,4 @@
+#include "mlpbf/console.h"
 #include "mlpbf/database.h"
 #include "mlpbf/exception.h"
 #include "mlpbf/map.h"
@@ -34,14 +35,19 @@ public:
 		const TiXmlNode * it = nullptr;
 		while ( it = root.IterateChildren( element.c_str(), it ) )
 		{
-			const TiXmlElement& elem = static_cast< const TiXmlElement& >( *it );
-
+			const TiXmlElement& elem = static_cast< const TiXmlElement & >( *it );
 			std::string id = xml::attribute( elem, "id" );
 
-			std::unique_ptr< T > entry( new T() );
-			load( elem, *entry );
-
-			m_data.insert( std::make_pair( id, std::move( entry ) ) );
+			try
+			{
+				std::unique_ptr< T > entry( new T() );
+				load( elem, *entry );
+				m_data.insert( std::make_pair( id, std::move( entry ) ) );
+			}
+			catch ( std::exception & err )
+			{
+				Console::singleton() << con::setcerr << "Error loading \"" << id << "\" to " << getDatabaseName() << ": " << err.what() << con::endl;
+			}
 		}
 	}
 

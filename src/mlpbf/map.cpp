@@ -560,7 +560,10 @@ class Field : public Map::Object, res::TextureLoader<>
 		//DEBUG: till the field when used
 		const sf::Vector2i fpos = convert( pos );
 		farm::field::Tile & tile = farm::field::getTile( fpos.x, fpos.y );
-		tile.till = 1U;
+		if ( tile.till > 0 )
+			tile.water = true;
+		else
+			tile.till = 1U;
 	}
 	
 	bool hasCollision( const sf::Vector2f & pos ) const

@@ -40,7 +40,7 @@ public:
 	void init()
 	{
 		m_frames = 0U;
-		m_fps = 0U;
+		m_fps = 60U;
 		loadFont( "data/fonts/console.ttf" );
 	}
 

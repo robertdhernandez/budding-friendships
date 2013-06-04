@@ -20,24 +20,24 @@ namespace bf
 	
 		struct Item
 		{
-			string id; 
-			string name;
-			string desc; 
-			string image;
-			unsigned buy;
-			unsigned sell;
-			std::set< std::string > attributes;
+			string id;	// internal ID to be referenced by
+			string name;	// name string
+			string desc; 	// description string
+			string image;	// string path to image
+			unsigned buy;	// purchase value
+			unsigned sell; // selling value
+			std::set< string > attributes; // set of attributes
 		};
 		
 		struct Crop
 		{
-			string id;
-			const Item * seed;
-			const Item * crop; 
-			string image;
-			time::Seasons seasons;
-			unsigned regrowth;
-			std::vector< unsigned > growth;
+			string id;			// internal ID to be referenced by
+			const Item * seed;		// item of the seed
+			const Item * crop; 		// item of the crop
+			string image;			// string path to image
+			time::Seasons seasons;	// season(s) to grow in
+			unsigned regrowth;		// index of growth stage to revert once harvest -- 0 mean single harvest
+			std::vector< unsigned > growth; // vector of length of growth for each stage
 		};
 	}
 

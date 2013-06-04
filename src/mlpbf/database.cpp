@@ -93,16 +93,6 @@ class CropDatabase : public Database< data::Crop >
 	
 	void load( const TiXmlElement & elem, data::Crop & data ) const
 	{
-		/*
-			string id;
-			string seedID;
-			string cropID; 
-			string image;
-			Seasons seasons;
-			unsigned regrowth;
-			std::vector< unsigned > growth;
-		*/
-		
 		data.id 		= xml::attribute( elem, "id" );
 		data.seed 	= &db::getItem( xml::attribute( elem, "seedID" ) );
 		data.crop 	= &db::getItem( xml::attribute( elem, "cropID" ) );
@@ -114,7 +104,7 @@ class CropDatabase : public Database< data::Crop >
 		while ( it = elem.IterateChildren( "stage", it ) )
 			data.growth.push_back( std::stoi( xml::attribute( static_cast< const TiXmlElement & >( *it ), "length" ) ) );
 			
-		if ( data.regrowth != 0 && data.regrowth >= data.growth.size() )
+		if ( data.regrowth != 0 && data.regrowth > data.growth.size() )
 			throw Exception( "regrowth index is invalid" );
 	}
 } * g_dbCrop = nullptr;
@@ -219,7 +209,7 @@ class SpriteDatabase : public Database< std::string >
 	}
 
 	void load( const TiXmlElement& elem, std::string & file ) const 
-	{ 
+	{
 		file = xml::attribute( elem, "file" );
 	}
 	
@@ -248,6 +238,9 @@ void db::init()
 	g_dbItem = new ItemDatabase();
 	g_dbItem->init();
 	
+	g_dbCrop = new CropDatabase();
+	g_dbCrop->init();
+	
 	g_dbMap = new MapDatabase();
 	g_dbMap->init();
 	
@@ -260,10 +253,12 @@ void db::cleanup()
 	delete g_dbSprite;
 	delete g_dbMap;
 	delete g_dbItem;
+	delete g_dbCrop;
 	
 	g_dbItem = nullptr;
 	g_dbMap = nullptr;
 	g_dbSprite = nullptr;
+	g_dbCrop = nullptr;
 }
 
 /***************************************************************************/

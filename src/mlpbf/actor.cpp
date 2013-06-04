@@ -19,38 +19,87 @@ namespace bf
 
 /***************************************************************************/
 
-bool Actor::Action::execute( Character& c )
+class Actor::Action
 {
-	if ( !m_init )
-	{
-		m_init = true;
-		init( c );
-	}
-	return play( c );
-}
+public:
+	Action() : m_init( false ) {}
+	virtual ~Action() {}
 
-void Actor::Repeater::init( Character& )
-{
-	m_index = 0U;
-	onInit();
-}
-
-bool Actor::Repeater::play( Character& c )
-{
-	while ( m_index < m_actions.size() && m_actions[ m_index ]->execute( c ) )
+	bool execute( Character & c )
 	{
-		m_actions[ m_index ]->reinit();
-		if ( ++m_index == m_actions.size() )
+		if ( !m_init )
 		{
-			if ( canFinish() )
-				return true;
-			else
-				m_index = 0;
+			m_init = true;
+			init( c );
 		}
+		return play( c );
+	}
+	void reinit() { m_init = false; }
+
+private:
+	virtual void init( Character& ) = 0;
+	virtual bool play( Character& ) = 0;
+
+private:
+	bool m_init;
+};
+
+class Actor::Repeater : public Actor::Action
+{
+public:
+	Repeater( Repeater * last ) : 
+		m_lastRepeater( last ), 
+		m_index( 0U ) 
+	{}
+	
+	virtual ~Repeater() 
+	{ 
+		for ( Action * a : m_actions ) 
+			delete a; 
 	}
 
-	return false;
-}
+	void addAction( Action * action ) 
+	{
+		m_actions.push_back( action ); 
+	}
+	
+	Repeater * getLastRepeater() 
+	{ 
+		return m_lastRepeater;
+	}
+
+private:
+	void init( Character & )
+	{
+		m_index = 0U;
+		onInit();
+	}
+	
+	bool play( Character & c )
+	{
+		while ( m_index < m_actions.size() && m_actions[ m_index ]->execute( c ) )
+		{
+			m_actions[ m_index ]->reinit();
+			if ( ++m_index == m_actions.size() )
+			{
+				if ( canFinish() )
+					return true;
+				else
+					m_index = 0;
+			}
+		}
+
+		return false;
+	}
+
+	virtual void onInit() = 0;
+	virtual bool canFinish() = 0;
+
+private:
+	Repeater * const m_lastRepeater;
+	std::size_t m_index;
+	std::vector< Action * > m_actions;
+};
 
 /***************************************************************************/
 
@@ -277,33 +326,39 @@ private:
 
 /***************************************************************************/
 
-Actor& Actor::move( Direction dir, MoveSpeed speed, unsigned tiles )
+Actor::~Actor()
+{
+	for ( Action * a : m_actions )
+		delete a;
+}
+
+Actor & Actor::move( Direction dir, MoveSpeed speed, unsigned tiles )
 {
 	return addAction( new Move( dir, speed, tiles ) );
 }
 
-Actor& Actor::face( Direction dir, bool force )
+Actor & Actor::face( Direction dir, bool force )
 {
 	//TODO: force direction
 	return addAction( new Face( dir ) );
 }
 
-Actor& Actor::reposition( const sf::Vector2i& pos, const std::string& map )
+Actor & Actor::reposition( const sf::Vector2i & pos, const std::string & map )
 {
 	return addAction( new Reposition( pos, map ) );
 }
 
-Actor& Actor::wait( const sf::Time& time )
+Actor & Actor::wait( const sf::Time & time )
 {
 	return addAction( new WaitTime( time ) );
 }
 
-Actor& Actor::wait( const time::Hour& hour )
+Actor & Actor::wait( const time::Hour & hour )
 {
 	return addAction( new WaitHour( hour ) );
 }
 
-Actor& Actor::repeatBegin( unsigned numTimes )
+Actor & Actor::repeatBegin( unsigned numTimes )
 {
 	RepeaterNumTimes* a = new RepeaterNumTimes( m_curRepeater, numTimes );
 	addAction( a );
@@ -311,25 +366,25 @@ Actor& Actor::repeatBegin( unsigned numTimes )
 	return *this;
 }
 
-Actor& Actor::repeatEnd()
+Actor & Actor::repeatEnd()
 {
 	assert( m_curRepeater != nullptr );
 	m_curRepeater = m_curRepeater->getLastRepeater();
 	return *this;
 }
 
-void Actor::updateCharacter( Character& c )
+void Actor::updateCharacter( Character & c )
 {
 	while ( !m_actions.empty() && ( *m_actions.begin() )->execute( c ) )
 		m_actions.erase( m_actions.begin() );
 }
 
-Actor& Actor::addAction( Action* action )
+Actor & Actor::addAction( Action * action )
 {
 	if ( m_curRepeater )
 		m_curRepeater->addAction( action );
 	else
-		m_actions.push_back( std::unique_ptr< Action >( action ) );
+		m_actions.push_back( action );
 	return *this;
 }
 

@@ -557,14 +557,14 @@ class Field : public Map::Object, res::TextureLoader<>
 		try
 		{
 			const sf::Vector2i fpos = convert( pos );
+			farm::field::Tile & tile = farm::field::getTile( fpos.x, fpos.y );	
 			
-//			farm::field::Tile & tile = farm::field::getTile( fpos.x, fpos.y );	
-//			if ( tile.till > 0 )
-//				tile.water = true;
-//			else
-//				tile.till = 1U;
-
-			farm::field::placeStone( fpos.x, fpos.y, 1 );
+			if ( tile.water )
+				farm::field::placeStone( fpos.x, fpos.y, 1 );
+			else if ( tile.till > 0 )
+				tile.water = true;
+			else
+				tile.till = 1U;
 		}
 		catch ( std::exception & err )
 		{

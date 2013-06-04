@@ -3,6 +3,7 @@
 #include "mlpbf/map.h"
 #include "mlpbf/graphics/animation.h"
 #include "mlpbf/graphics/spritesheet.h"
+#include "mlpbf/time/season.h"
 #include "mlpbf/xml.h"
 
 #include <memory>
@@ -64,6 +65,53 @@ private:
 private:
 	std::unordered_map< std::string, std::unique_ptr< T > > m_data;
 };
+
+/***************************************************************************/
+
+class CropDatabase : public Database< data::Crop >
+{
+	const std::string getSourceFile() const
+	{
+		return "data/crops.xml";
+	}
+	
+	const std::string getDatabaseName() const
+	{
+		return "crop database";
+	}
+	
+	const std::string getElementType() const
+	{
+		return "crop";
+	}
+	
+	void load( const TiXmlElement & elem, data::Crop & data ) const
+	{
+		/*
+			string id;
+			string seedID;
+			string cropID; 
+			string image;
+			Seasons seasons;
+			unsigned regrowth;
+			std::vector< unsigned > growth;
+		*/
+		
+		data.id 		= xml::attribute( elem, "id" );
+		data.seed 	= &db::getItem( xml::attribute( elem, "seedID" ) );
+		data.cropID 	= &db::getItem( xml::attribute( elem, "cropID" ) );
+		data.image 	= xml::attribute( elem, "image" );
+		data.seasons	= time::parseSeasons( xml::attribute( elem, "season" ) );
+		data.regrowth	= std::stoi( xml::attribute( elem, "regrowth" ) );
+		
+		const TiXmlNode * it = nullptr;
+		while ( it = elem.IterateChildren( "stage", it ) )
+			data.growth.push_back( std::stoi( xml::attribute( static_cast< const TiXmlElement & >( *it ), "length" ) ) );
+			
+		if ( data.regrowth != 0 && data.regrowth >= data.growth.size() )
+			throw Exception( "regrowth index is invalid" );
+	}
+} * g_dbCrop = nullptr;
 
 /***************************************************************************/
 

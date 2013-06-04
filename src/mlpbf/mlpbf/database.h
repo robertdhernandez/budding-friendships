@@ -1,5 +1,6 @@
 #pragma once
 
+#include "time/season.h"
 #include <set>
 #include <string>
 
@@ -14,11 +15,28 @@ namespace bf
 
 	namespace data
 	{
+		using std::string;
+	
 		struct Item
 		{
-			std::string id, name, desc, image;
-			int buy, sell;
+			string id; 
+			string name;
+			string desc; 
+			string image;
+			unsigned buy;
+			unsigned sell;
 			std::set< std::string > attributes;
+		};
+		
+		struct Crop
+		{
+			string id;
+			const Item * seed;
+			const Item * crop; 
+			string image;
+			Seasons seasons;
+			unsigned regrowth;
+			std::vector< unsigned > growth;
 		};
 	}
 
@@ -29,6 +47,9 @@ namespace bf
 		
 		// Returns the item data with inputted id
 		const data::Item & getItem( const std::string & id );
+		
+		// Return the crop data with the inputted id
+		const data::Crop & getCrop( const std::string & id );
 		
 		// Generates the inputted spritesheet
 		void genSprite( const std::string & id, gfx::Spritesheet * sheet );

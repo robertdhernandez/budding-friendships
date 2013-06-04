@@ -4,6 +4,7 @@
 #include "mlpbf/resource.h"
 
 #include <SFML/Graphics/Sprite.hpp>
+#include <SFML/Graphics/Transformable.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <vector>
 
@@ -68,13 +69,12 @@ public:
 
 /***************************************************************************/
 
-class Stone : public field::Object, res::TextureLoader<>
+class Stone : public field::Object, sf::Transformable, res::TextureLoader<>
 {
 	unsigned m_size;
-	sf::Vector2i m_pos;
 	
 public:
-	Stone( unsigned x, unsigned y, unsigned size ) : m_size( size ), m_pos( x, y )
+	Stone( unsigned x, unsigned y, unsigned size ) : m_size( size )
 	{
 		if ( size < 1 || size > 3 )
 			throw Exception( "stone must have size from 1 to 3" );
@@ -92,13 +92,14 @@ public:
 		for ( int y = 0; y < size; y++ )
 			for ( int x = 0; x < size; x++ )
 				g_Field.tiles[ convert( x, y ) ].object = this;
+				
+		setPosition( x * TILE_WIDTH, y * TILE_HEIGHT );
 	}
 	
 	void draw( sf::RenderTarget & target, sf::RenderStates states ) const
 	{
-		sf::Sprite sprite( getTexture() );
-		sprite.setPosition( m_pos.x * TILE_WIDTH, m_pos.y * TILE_HEIGHT );
-		target.draw( sprite, states );
+		states.transform *= getTransform();
+		target.draw( sf::Sprite( getTexture() ), states );
 	}
 	
 	bool hasCollision() const

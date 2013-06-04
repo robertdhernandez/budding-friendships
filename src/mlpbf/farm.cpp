@@ -1,6 +1,10 @@
-#include "mlpbf/farm.h"
 #include "mlpbf/exception.h"
+#include "mlpbf/farm.h"
+#include "mlpbf/global.h"
+#include "mlpbf/resource.h"
 
+#include <SFML/Graphics/Sprite.hpp>
+#include <SFML/Graphics/RenderTarget.hpp>
 #include <vector>
 
 namespace bf
@@ -19,6 +23,15 @@ inline unsigned convert( unsigned x, unsigned y )
 	return y * field::WIDTH + x;
 }
 
+inline bool areaClear( unsigned x, unsigned y, unsigned width, unsigned height )
+{
+	for ( int j = 0; j < height; j++ )
+		for ( int i = 0; i < width; i++ )
+			if ( g_Field.tiles[ convert( x + i, y + j ) ].object != nullptr )
+				return false;
+	return true;
+}
+
 /***************************************************************************/
 
 class Crop : public field::Object
@@ -33,13 +46,74 @@ public:
 	{
 	}
 	
+	void draw( sf::RenderTarget & target, sf::RenderStates states ) const
+	{
+	}
+	
 	bool hasCollision() const
 	{
 		return false;
 	}
 	
+	unsigned getWidth() const
+	{
+		return 1;
+	}
+	
+	unsigned getHeight() const
+	{
+		return 1;
+	}
+};
+
+/***************************************************************************/
+
+class Stone : public field::Object, res::TextureLoader<>
+{
+	unsigned m_size;
+	sf::Vector2i m_pos;
+	
+public:
+	Stone( unsigned x, unsigned y, unsigned size ) : m_size( size ), m_pos( x, y )
+	{
+		if ( size < 1 || size > 3 )
+			throw Exception( "stone must have size from 1 to 3" );
+		
+		if ( !areaClear( x, y, size, size ) )
+			throw Exception( "area to place stone is not cleared" );
+		
+		switch ( size )
+		{
+			case 1: loadTexture( "data/farm/clutter/rock_s.png" ); break;
+			case 2: loadTexture( "data/farm/clutter/rock_m.png" ); break;
+			case 3: loadTexture( "data/farm/clutter/rock_l.png" ); break;
+		}
+		
+		for ( int y = 0; y < size; y++ )
+			for ( int x = 0; x < size; x++ )
+				g_Field.tiles[ convert( x, y ) ].object = this;
+	}
+	
 	void draw( sf::RenderTarget & target, sf::RenderStates states ) const
 	{
+		sf::Sprite sprite( getTexture() );
+		sprite.setPosition( m_pos.x * TILE_WIDTH, m_pos.y * TILE_HEIGHT );
+		target.draw( sprite, states );
+	}
+	
+	bool hasCollision() const
+	{
+		return true;
+	}
+	
+	unsigned getWidth() const
+	{
+		return m_size;
+	}
+	
+	unsigned getHeight() const
+	{
+		return m_size;
 	}
 };
 
@@ -72,7 +146,19 @@ field::Tile * field::getTiles()
 	return g_Field.tiles;
 }
 
-void field::plant( unsigned x, unsigned y, const Seed & seed )
+const std::vector< field::Object * > & field::getObjects()
+{
+	return g_Field.objects;
+}
+
+/***************************************************************************/
+
+void field::placeStone( unsigned x, unsigned y, unsigned size )
+{
+	g_Field.objects.push_back( new Stone( x, y, size ) );
+}
+
+void field::plantSeed( unsigned x, unsigned y, const Seed & seed )
 {
 	field::Tile & tile = g_Field.tiles[ convert( x, y ) ];
 	if ( tile.object != nullptr )

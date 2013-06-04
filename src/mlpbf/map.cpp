@@ -557,13 +557,22 @@ class Field : public Map::Object, res::TextureLoader<>
 	
 	void onInteract( const sf::Vector2f & pos )
 	{
-		//DEBUG: till the field when used
-		const sf::Vector2i fpos = convert( pos );
-		farm::field::Tile & tile = farm::field::getTile( fpos.x, fpos.y );
-		if ( tile.till > 0 )
-			tile.water = true;
-		else
-			tile.till = 1U;
+		try
+		{
+			const sf::Vector2i fpos = convert( pos );
+			
+//			farm::field::Tile & tile = farm::field::getTile( fpos.x, fpos.y );	
+//			if ( tile.till > 0 )
+//				tile.water = true;
+//			else
+//				tile.till = 1U;
+
+			farm::field::placeStone( fpos.x, fpos.y, 1 );
+		}
+		catch ( std::exception & err )
+		{
+			Console::singleton() << con::setcerr << err.what() << con::endl;
+		}
 	}
 	
 	bool hasCollision( const sf::Vector2f & pos ) const
@@ -580,12 +589,13 @@ class Field : public Map::Object, res::TextureLoader<>
 		states.transform *= getTransform();
 		
 		sf::Sprite sprite( getTexture() );
-		const field::Tile * tiles = farm::field::getTiles();
+		const field::Tile * tiles = field::getTiles();
 		
+		// draw tiles
 		for ( int i = 0; i < FIELD_SIZE; i++ )
 		{
 			const field::Tile & tile = tiles[i];
-			sprite.setPosition( i % farm::field::WIDTH * TILE_WIDTH, i / farm::field::WIDTH * TILE_HEIGHT );
+			sprite.setPosition( i % field::WIDTH * TILE_WIDTH, i / field::WIDTH * TILE_HEIGHT );
 			
 			// draw till
 			if ( tile.till > 0 )
@@ -593,11 +603,12 @@ class Field : public Map::Object, res::TextureLoader<>
 				sprite.setTextureRect( sf::IntRect( tile.water ? 32 : 0, 0, 32, 32 ) );
 				target.draw( sprite, states );
 			}
-
-			// draw object
-			if ( tile.object != nullptr )
-				target.draw( *tile.object, states );
 		}
+		
+		// draw objects
+		const std::vector< field::Object * > & objects = field::getObjects();
+		for ( field::Object * obj : objects )
+			target.draw( *obj, states );
 	}
 };
 

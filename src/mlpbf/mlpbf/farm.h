@@ -2,6 +2,7 @@
 
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/System/NonCopyable.hpp>
+#include <vector>
 
 namespace bf
 {
@@ -25,10 +26,10 @@ namespace bf
 			public:
 				virtual ~Object() {}
 				
-				virtual bool hasCollision() const { return true; }
+				virtual bool hasCollision() const = 0;
 				
-				virtual unsigned getWidth() const { return 1; }
-				virtual unsigned getHeight() const { return 1; }
+				virtual unsigned getWidth() const = 0;
+				virtual unsigned getHeight() const = 0;
 			};
 			
 			class Tile : sf::NonCopyable
@@ -52,7 +53,14 @@ namespace bf
 			// Returns the tile array -- size == field::WIDTH * field::HEIGHT
 			Tile * getTiles();
 			
-			void plant( unsigned x, unsigned y, const Seed & seed );
+			// Returns the object array -- size param gets set to size of the array
+			const std::vector< Object * > & getObjects();
+			
+			// Places a stone -- size must be [1,3] and area must be empty
+			void placeStone( unsigned x, unsigned y, unsigned size );
+			
+			// Plants a seed
+			void plantSeed( unsigned x, unsigned y, const Seed & seed );
 		}
 	}
 }

@@ -90,7 +90,7 @@ public:
 	virtual void whileInside( sf::Uint32 frameTime, const sf::Vector2f& pos ) {}
 	virtual void onExit( sf::Uint32 frameTime, const sf::Vector2f& pos ) {}
 
-	virtual void onInteract( const sf::Vector2f& pos ) {};
+	virtual void onInteract( const sf::Vector2f& pos ) {}
 
 	virtual bool hasCollision( const sf::Vector2f& pos ) const = 0;
 
@@ -169,12 +169,9 @@ bool Map::checkObjectCollision( const sf::Vector2f& pos ) const
 	if ( !m_collision ) 
 		return false;
 
-	for ( auto it = m_objects.begin(); it != m_objects.end(); ++it )
-	{
-		const Map::Object& obj = **it;
-		if ( obj.getBounds().contains( pos ) && obj.hasCollision( pos - obj.getPosition() ) )
+	for ( Map::Object * obj : m_objects )
+		if ( obj->getBounds().contains( pos ) && obj->hasCollision( pos - obj->getPosition() ) )
 			return true;
-	}
 	return false;
 }
 

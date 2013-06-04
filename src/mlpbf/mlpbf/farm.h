@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SFML/Graphics/Drawable.hpp>
+#include <SFML/Graphics/Transformable.hpp>
 #include <SFML/System/NonCopyable.hpp>
 #include <vector>
 
@@ -21,7 +22,7 @@ namespace bf
 				HEIGHT = 20
 			};
 			
-			class Object : public sf::Drawable
+			class Object : public sf::Drawable, sf::Transformable
 			{
 			public:
 				virtual ~Object() {}
@@ -30,6 +31,11 @@ namespace bf
 				
 				virtual unsigned getWidth() const = 0;
 				virtual unsigned getHeight() const = 0;
+				
+				using sf::Transformable::getPosition;
+				using sf::Transformable::setPosition;
+				
+				using sf::Transformable::getTransform;
 			};
 			
 			class Tile : sf::NonCopyable

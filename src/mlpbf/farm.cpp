@@ -26,9 +26,9 @@ inline unsigned convert( unsigned x, unsigned y )
 
 inline bool areaClear( unsigned x, unsigned y, unsigned width, unsigned height )
 {
-	for ( int j = 0; j < height; j++ )
-		for ( int i = 0; i < width; i++ )
-			if ( g_Field.tiles[ convert( x + i, y + j ) ].object != nullptr )
+	for ( unsigned j = y; j < y + height; j++ )
+		for ( unsigned i = x; i < x + width; i++ )
+			if ( g_Field.tiles[ convert( i, j ) ].object != nullptr )
 				return false;
 	return true;
 }
@@ -53,7 +53,7 @@ public:
 	
 	bool hasCollision() const
 	{
-		return false;
+		return true;
 	}
 	
 	unsigned getWidth() const
@@ -69,18 +69,15 @@ public:
 
 /***************************************************************************/
 
-class Stone : public field::Object, sf::Transformable, res::TextureLoader<>
+class Stone : public field::Object, res::TextureLoader<>
 {
 	unsigned m_size;
 	
 public:
-	Stone( unsigned x, unsigned y, unsigned size ) : m_size( size )
+	Stone( unsigned size ) : m_size( size )
 	{
 		if ( size < 1 || size > 3 )
 			throw Exception( "stone must have size from 1 to 3" );
-		
-		if ( !areaClear( x, y, size, size ) )
-			throw Exception( "area to place stone is not cleared" );
 		
 		switch ( size )
 		{
@@ -88,12 +85,6 @@ public:
 			case 2: loadTexture( "data/farm/clutter/rock_m.png" ); break;
 			case 3: loadTexture( "data/farm/clutter/rock_l.png" ); break;
 		}
-		
-		for ( int y = 0; y < size; y++ )
-			for ( int x = 0; x < size; x++ )
-				g_Field.tiles[ convert( x, y ) ].object = this;
-				
-		setPosition( x * TILE_WIDTH, y * TILE_HEIGHT );
 	}
 	
 	void draw( sf::RenderTarget & target, sf::RenderStates states ) const
@@ -154,20 +145,37 @@ const std::vector< field::Object * > & field::getObjects()
 
 /***************************************************************************/
 
+void addObject( unsigned x, unsigned y, field::Object * obj )
+{
+	try
+	{
+		// check that the position is free
+		if ( !areaClear( x, y, obj->getWidth(), obj->getHeight() ) )
+			throw Exception( "area not free" );
+			
+		// set the tiles
+		for ( int j = 0; j < obj->getHeight(); j++ )
+			for ( int i = 0; i < obj->getWidth(); i++ )
+				g_Field.tiles[ convert( x + i, y + j ) ].object = obj;
+
+		obj->setPosition( x * TILE_WIDTH, y * TILE_HEIGHT );
+		g_Field.objects.push_back( obj );
+	}
+	catch ( ... )
+	{
+		delete obj;
+		throw;
+	}
+}
+
 void field::placeStone( unsigned x, unsigned y, unsigned size )
 {
-	g_Field.objects.push_back( new Stone( x, y, size ) );
+	addObject( x, y, new Stone( size ) );
 }
 
 void field::plantSeed( unsigned x, unsigned y, const Seed & seed )
 {
-	field::Tile & tile = g_Field.tiles[ convert( x, y ) ];
-	if ( tile.object != nullptr )
-		throw Exception( "tile already contains an object" );
-
-	Crop * crop = new Crop( seed, tile );
-	tile.object = crop;
-	g_Field.objects.push_back( crop );
+	addObject( x, y, new Crop( seed, getTile( x, y ) ) );
 }
 
 /***************************************************************************/

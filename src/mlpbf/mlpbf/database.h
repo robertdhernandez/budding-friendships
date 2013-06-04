@@ -3,6 +3,7 @@
 #include "time/season.h"
 #include <set>
 #include <string>
+#include <vector>
 
 namespace bf
 {
@@ -34,7 +35,7 @@ namespace bf
 			const Item * seed;
 			const Item * crop; 
 			string image;
-			Seasons seasons;
+			time::Seasons seasons;
 			unsigned regrowth;
 			std::vector< unsigned > growth;
 		};

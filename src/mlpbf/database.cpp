@@ -99,7 +99,7 @@ class CropDatabase : public Database< data::Crop >
 		
 		data.id 		= xml::attribute( elem, "id" );
 		data.seed 	= &db::getItem( xml::attribute( elem, "seedID" ) );
-		data.cropID 	= &db::getItem( xml::attribute( elem, "cropID" ) );
+		data.crop 	= &db::getItem( xml::attribute( elem, "cropID" ) );
 		data.image 	= xml::attribute( elem, "image" );
 		data.seasons	= time::parseSeasons( xml::attribute( elem, "season" ) );
 		data.regrowth	= std::stoi( xml::attribute( elem, "regrowth" ) );

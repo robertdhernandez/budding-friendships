@@ -28,7 +28,7 @@ sf::Vector2f Player::getUsePosition() const
 	const sf::Vector2f& pos = getPosition();
 	switch ( getDirection() )
 	{
-	case Up:	return sf::Vector2f( pos.x, pos.y - ( rect.height / 2.0f ) - USE_OFFSET );
+	case Up:		return sf::Vector2f( pos.x, pos.y - ( rect.height / 2.0f ) - USE_OFFSET );
 	case Down:	return sf::Vector2f( pos.x, pos.y + ( rect.height / 2.0f ) + USE_OFFSET );
 	case Left:	return sf::Vector2f( pos.x - ( rect.width / 2.0f ) - USE_OFFSET, pos.y );
 	case Right:	return sf::Vector2f( pos.x + ( rect.width / 2.0f ) + USE_OFFSET, pos.y );
@@ -41,12 +41,12 @@ void Player::setInventoryLevel( sf::Uint8 level )
 	m_invLevel = std::min( level, ( sf::Uint8 ) 5U );
 	switch ( m_invLevel )
 	{
-	case 0:	m_inv.setLimit( 3 );  break;
-	case 1: m_inv.setLimit( 6 );  break;
-	case 2: m_inv.setLimit( 9 );  break;
-	case 3: m_inv.setLimit( 12 ); break;
-	case 4: m_inv.setLimit( 16 ); break;
-	case 5: m_inv.setLimit( 20 ); break;
+	case 0: m_inv.setSize( 3 );  break;
+	case 1: m_inv.setSize( 6 );  break;
+	case 2: m_inv.setSize( 9 );  break;
+	case 3: m_inv.setSize( 12 ); break;
+	case 4: m_inv.setSize( 16 ); break;
+	case 5: m_inv.setSize( 20 ); break;
 	}
 }
 

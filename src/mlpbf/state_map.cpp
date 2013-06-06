@@ -45,10 +45,9 @@ state::Map::Map() :
 {
 	setKeyListener( *this );
 
-	m_viewer.addCharacter( Player::singleton() );
-	
 	rarity = new Character( "rarity" );
 	m_viewer.addCharacter( *rarity );
+	m_viewer.addCharacter( Player::singleton() );
 
 	rarity->reposition( sf::Vector2i( 14, 14 ), "path_a" )
 		  .repeatBegin( 2U )
@@ -85,10 +84,10 @@ state::Map::Map() :
 	
 	inventoryIndex = 0U;
 
-	item::Inventory& inventory = Player::singleton().getInventory();
-	inventory.addItem( "turnip" );
-	inventory.addItem( "cucumber" );
-	inventory.addItem( "potato" );
+	Inventory& inventory = Player::singleton().getInventory();
+	inventory.addItem( generateItem( "turnip" ) );
+	inventory.addItem( generateItem( "cucumber" ) );
+	inventory.addItem( generateItem( "potato" ) );
 	//inventory.addItem( "strawberry" );
 
 	Time::singleton().setState( true );

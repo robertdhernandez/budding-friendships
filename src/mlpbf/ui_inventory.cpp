@@ -3,13 +3,15 @@
 #include "mlpbf/direction.h"
 #include "mlpbf/exception.h"
 
-#include "mlpbf/item/inventory.h"
+#include "mlpbf/item.h"
 #include "mlpbf/resource.h"
 #include "mlpbf/ui/window.h"
 
 #include <SFML/Graphics/RenderTarget.hpp>
 
 namespace bf
+{
+namespace ui
 {
 
 static const std::string INV_SML = "data/ui/inventory/bag_s.png";
@@ -76,10 +78,10 @@ private:
 		// Draw the item
 		if ( m_item )
 		{
-			sf::Sprite item( m_item->getIcon() );
+			/*sf::Sprite item( m_item->getIcon() );
 			item.setTextureRect( sf::IntRect( 0, 0, (int) INV_TILE_WIDTH, (int) INV_TILE_HEIGHT ) );
 
-			target.draw( item, states );
+			target.draw( item, states );*/
 		}
 	}
 
@@ -95,12 +97,12 @@ class TileGrid : public ui::Base
 public:
 	TileGrid( const sf::Vector2u& dim )
 	{
-		const item::Inventory& inv = Player::singleton().getInventory();
+		const Inventory& inv = Player::singleton().getInventory();
 		for ( unsigned y = 0; y < dim.y; y++ )
 			for ( unsigned x = 0; x < dim.x; x++ )
 			{
 				unsigned index = y * dim.x + x;
-				Item* item = index < inv.getSize() ? inv.getSlot( index ).get() : nullptr;
+				const Item * item = index < inv.getSize() ? inv.getItem( index ) : nullptr;
 
 				std::unique_ptr< Tile > tile( new Tile( item ) );
 				tile->setPosition( x * INV_TILE_WIDTH + x * INV_TILE_GAP_H, y * INV_TILE_HEIGHT + y * INV_TILE_GAP_V );
@@ -209,13 +211,15 @@ private:
 	sf::Vector2u m_dim;
 };
 
+} // namespace ui
+
 /***************************************************************************/
 
 void showInventory()
 {
 	if ( ui::Window::getGlobal() )
 		throw Exception( "window in use" );
-	ui::Window::setGlobal( new Inventory() );
+	ui::Window::setGlobal( new ui::Inventory() );
 }
 
 /***************************************************************************/

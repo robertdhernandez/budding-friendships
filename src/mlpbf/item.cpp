@@ -1,154 +1,181 @@
-#include "mlpbf/item/generic.h"
-#include "mlpbf/item/inventory.h"
-
-#include "mlpbf/exception.h"
 #include "mlpbf/database.h"
-
-#include <algorithm>
+#include "mlpbf/exception.h"
+#include "mlpbf/item.h"
 
 namespace bf
 {
-namespace item
-{
 
 /***************************************************************************/
 
-class EmptyItemException : public Exception { public: EmptyItemException() { *this << "item cannot be null"; } };
-class NoFreeSlotException : public Exception { public: NoFreeSlotException() { *this << "no free slot available"; } };
-class IndexOutOfRangeException : public Exception { public: IndexOutOfRangeException( unsigned index, unsigned range ) { *this << "index " << index << " is out of range (" << range-1 << ")"; } };
-
-/***************************************************************************/
-
-Generic::Generic( const std::string& item, sf::Uint8 quality ) :
-	m_canRemove( false ),
-	m_quality( std::min( ( sf::Uint8 ) 100U, quality ) ),
-	m_data( db::getItem( item ) )
+class GenericItem : public Item
 {
-	loadTexture( m_data.image );
-}
+	const data::Item & m_data;
+	unsigned char m_quantity, m_quality;
 
-Generic::Generic( const data::Item& item, sf::Uint8 quality ) :
-	m_canRemove( false ),
-	m_quality( std::min( ( sf::Uint8 ) 100U, quality ) ),
-	m_data( item )
-{
-	loadTexture( m_data.image );
-}
-
-ItemPtr Generic::clone() const
-{
-	return ItemPtr( new Generic( m_data, m_quality ) );
-}
-
-const std::string& Generic::getName() const
-{
-	return m_data.name;
-}
-
-const std::string& Generic::getDesc() const
-{
-	return m_data.desc;
-}
-
-const std::string& Generic::getID() const
-{
-	return m_data.id;
-}
-
-const sf::Texture& Generic::getIcon() const
-{
-	return getTexture();
-}
-
-unsigned Generic::getBuy() const
-{
-	return m_data.buy;
-}
-
-unsigned Generic::getSell() const
-{
-	return static_cast< unsigned >( m_data.sell * ( m_quality / 100.0f ) );
-}
+public:
+	GenericItem( const data::Item & item, unsigned char quantity, unsigned char quality ) :
+		m_data( item ),
+		m_quantity( quantity ),
+		m_quality( quality )
+	{
+	}
+	
+	Item * clone() const
+	{
+		return new GenericItem( m_data, m_quantity, m_quality );
+	}
+	
+	void use()
+	{
+	}
+	
+	const std::string & getName() const
+	{
+		return m_data.name;
+	}
+	
+	const std::string & getDesc() const
+	{
+		return m_data.desc;
+	}
+	
+	const std::string & getID() const
+	{
+		return m_data.id;
+	}
+	
+	unsigned getBuy() const
+	{
+		return m_data.buy;
+	}
+	
+	unsigned getSell() const
+	{
+		return m_data.sell;
+	}
+	
+	bool canRemove() const
+	{
+		return m_quantity == 0;
+	}
+};
 
 /***************************************************************************/
 
 Inventory::Inventory( unsigned size ) :
-	m_limit( false )
+	m_hasLimit( size != 0U )
 {
-	setLimit( size );
+	if ( m_hasLimit )
+		m_items.resize( size, nullptr );
 }
 
-Item& Inventory::addItem( const std::string& id )
+Inventory::Inventory( const Inventory & copy ) :
+	m_hasLimit( copy.m_hasLimit )
 {
-	return addItem( ItemPtr( new Generic( id ) ) );
+	m_items.resize( copy.m_items.size(), nullptr );
+	for ( unsigned i = 0; i < copy.m_items.size(); i++ )
+		if ( copy.m_items[i] != nullptr )
+			m_items[i] = copy.m_items[i]->clone();
 }
 
-Item& Inventory::addItem( ItemPtr item )
+Inventory & Inventory::operator=( const Inventory & copy )
 {
-	if ( !item )
-		throw EmptyItemException();
+	for ( Item * item : m_items )
+		delete item;
+		
+	m_hasLimit = copy.m_hasLimit;
+	
+	m_items.resize( copy.m_items.size(), nullptr );
+	for ( unsigned i = 0; i < copy.m_items.size(); i++ )
+		if ( copy.m_items[i] != nullptr )
+			m_items[i] = copy.m_items[i]->clone();
+	
+	return *this;
+}
 
-	if ( m_limit )
+Inventory::~Inventory()
+{
+	for ( Item * item : m_items )
+		delete item;
+}
+
+void Inventory::addItem( Item * item )
+{
+	if ( m_hasLimit )
 	{
-		// Find the first available index
-		unsigned index;
-		for ( index = 0; index < m_items.size(); index++ )
-			if ( !m_items[ index ] )
-				break;
-
-		// Check it found a spot
-		if ( index == m_items.size() )
-			throw NoFreeSlotException();
-
-		// Add the item
-		m_items[ index ] = std::move( item );
-		return *m_items[ index ];
+		for ( unsigned i = 0; i < m_items.size(); i++ )
+			if ( m_items[i] == nullptr )
+			{
+				m_items[i] = item;
+				return;
+			}
+			
+		delete item;
+		throw Exception( "inventory does not contain a free slot" );
 	}
 	else
-	{
 		m_items.push_back( item );
-		return *m_items.back();
+}
+
+void Inventory::addItem( Item * item, unsigned index )
+{
+	try
+	{
+		if ( index >= m_items.size() )
+			throw Exception( "inventory index out of bounds" );
+			
+		if ( m_items[index] != nullptr )
+			throw Exception( "inventory index already occupied" );
+			
+		m_items[index] = item;
+	}
+	catch ( ... )
+	{
+		delete item;
+		throw;
 	}
 }
 
-Item& Inventory::addItem( const std::string& id, unsigned index )
+Item * Inventory::getItem( unsigned index )
 {
-	return addItem( ItemPtr( new Generic( id ) ), index );
+	return m_items.at( index );
 }
 
-Item& Inventory::addItem( ItemPtr item, unsigned index )
+const Item * Inventory::getItem( unsigned index ) const
 {
-	if ( !item )
-		throw EmptyItemException();
-
-	// Ensure index is in bounds
-	if ( index < 0 || m_items.size() <= index )
-		throw IndexOutOfRangeException( index, m_items.size() );
-
-	// Add the item
-	m_items[ index ] = std::move( item );
-	return *m_items[ index ];
+	return m_items.at( index );
 }
 
-ItemPtr Inventory::removeItem( unsigned index )
+Item * Inventory::removeItem( unsigned index )
 {
-	if ( index < 0 || m_items.size() <= index )
-		throw IndexOutOfRangeException( index, m_items.size() );
-
-	ItemPtr remove( nullptr );
-	std::swap( remove, m_items[ index ] );
-	return remove;
+	Item * item = m_items.at( index );
+	m_items[index] = nullptr;
+	return item;
 }
 
-void Inventory::setLimit( unsigned size )
+unsigned Inventory::getSize() const
 {
-	m_limit = ( size > 0U );
-	if ( m_limit )
-		m_items.resize( size, ItemPtr( nullptr ) );
+	return m_items.size();
+}
+
+void Inventory::setSize( unsigned size )
+{
+	if ( m_hasLimit = ( size != 0U ) )
+	{
+		if ( size < m_items.size() )
+			for ( unsigned i = size; i < m_items.size(); i++ )
+				delete m_items[i];
+		m_items.resize( size, nullptr );
+	}
 }
 
 /***************************************************************************/
 
-} // namespace item
+Item * generateItem( const std::string & id, unsigned char quantity, unsigned char quality )
+{
+	return new GenericItem( db::getItem( id ), quantity, quality );
+}
+
+/***************************************************************************/
 
 } // namespace bf

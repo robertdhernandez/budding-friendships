@@ -1,3 +1,4 @@
+#include "mlpbf/console.h"
 #include "mlpbf/global.h"
 #include "mlpbf/lua.h"
 
@@ -17,6 +18,25 @@ int lua_showText( lua_State * l )
 static const struct luaL_Reg testLib[] = 
 {
 	{ "showText", lua_showText },
+	{ NULL, NULL },
+};
+
+/***************************************************************************/
+
+// console.write( str [, col ] )
+// prints a line to the console
+int lua_consoleWrite( lua_State * l )
+{
+	if ( lua_gettop( l ) >= 2 && lua_isnumber( l, 2 ) )
+		Console::singleton().setBufferColor( lua_tonumber( l, 2 ) );
+
+	Console::singleton() << luaL_checkstring( l, 1 ) << con::endl;
+	return 0;
+}
+
+static const struct luaL_Reg consoleLib[] = 
+{
+	{ "write", lua_consoleWrite },
 	{ NULL, NULL },
 };
 
@@ -45,6 +65,7 @@ lua_State * newState()
 	
 	// register custom libraries
 	registerLib( l, "test", testLib );
+	registerLib( l, "console", consoleLib );
 	
 	return l;
 }

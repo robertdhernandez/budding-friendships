@@ -9,15 +9,15 @@ namespace lua
 
 /***************************************************************************/
 
-int lua_showText( lua_State * l )
+int game_showText( lua_State * l )
 {
 	bf::showText( luaL_checkstring( l, 1 ), luaL_optstring( l, 2, "" ) );
 	return 0;
 }
 
-static const struct luaL_Reg testLib[] = 
+static const struct luaL_Reg gameLib[] = 
 {
-	{ "showText", lua_showText },
+	{ "showText", game_showText },
 	{ NULL, NULL },
 };
 
@@ -34,6 +34,9 @@ int console_write( lua_State * l )
 	return 0;
 }
 
+// console.execute( str )
+// executes a console commmand
+// note: cannot execute lua console command
 int console_execute( lua_State * l )
 {
 	Console::singleton().execute( luaL_checkstring( l, 1 ) );
@@ -71,7 +74,7 @@ lua_State * newState()
 	luaL_openlibs( l );
 	
 	// register custom libraries
-	registerLib( l, "test", testLib );
+	registerLib( l, "game", gameLib );
 	registerLib( l, "console", consoleLib );
 	
 	return l;

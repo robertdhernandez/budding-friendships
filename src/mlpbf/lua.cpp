@@ -92,8 +92,7 @@ int console_hook( lua_State * l )
 		{
 		}
 		
-		// note: if the function name is after "lua", the lua_State is destroyed causing a segfault
-		//~LuaCommand() { luaL_unref( l, LUA_REGISTRYINDEX, ref ); }		
+		~LuaCommand() { luaL_unref( l, LUA_REGISTRYINDEX, ref ); }		
 	};
 	
 	luaL_checktype( l, 1, LUA_TSTRING );

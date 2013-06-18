@@ -41,6 +41,7 @@ namespace bf
 		};
 
 		void pushLine( const std::string& line, unsigned color = DEFAULT_COLOR );
+		void execute( const std::string& );
 
 		void clearHistory();
 		void clearCommands();
@@ -54,8 +55,6 @@ namespace bf
 
 	private:
 		Console();
-
-		void execute( const std::string& );
 
 		void onKeyPressed( const sf::Event::KeyEvent& );
 		void onKeyReleased( const sf::Event::KeyEvent& );

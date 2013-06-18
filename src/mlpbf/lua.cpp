@@ -25,7 +25,7 @@ static const struct luaL_Reg testLib[] =
 
 // console.write( str [, col ] )
 // prints a line to the console
-int lua_consoleWrite( lua_State * l )
+int console_write( lua_State * l )
 {
 	if ( lua_gettop( l ) >= 2 && lua_isnumber( l, 2 ) )
 		Console::singleton().setBufferColor( lua_tonumber( l, 2 ) );
@@ -34,9 +34,16 @@ int lua_consoleWrite( lua_State * l )
 	return 0;
 }
 
+int console_execute( lua_State * l )
+{
+	Console::singleton().execute( luaL_checkstring( l, 1 ) );
+	return 0;
+}
+
 static const struct luaL_Reg consoleLib[] = 
 {
-	{ "write", lua_consoleWrite },
+	{ "write", console_write },
+	{ "execute", console_execute },
 	{ NULL, NULL },
 };
 

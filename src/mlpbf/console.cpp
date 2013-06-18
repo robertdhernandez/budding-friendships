@@ -106,11 +106,12 @@ Console::~Console()
 
 void Console::addCommand( con::Command * cmd )
 {
-	/*if ( std::find( m_cmds.begin(), m_cmds.end(), cmd ) != m_cmds.end() )
-	{
-		delete cmd;
-		throw Exception( "Console command already exists" );
-	}*/
+	for ( con::Command * c : m_cmds )
+		if ( c->name() == cmd->name() )
+		{
+			delete cmd;
+			throw Exception( "Console command already exists" );
+		}
 
 	m_cmds.push_back( cmd );
 	std::sort( m_cmds.begin(), m_cmds.end(), []( const con::Command * a, const con::Command * b ) { return *a < *b; } );

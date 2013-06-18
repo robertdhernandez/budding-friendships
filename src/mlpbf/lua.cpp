@@ -22,6 +22,21 @@ static const struct luaL_Reg testLib[] =
 
 /***************************************************************************/
 
+void registerLib( lua_State * l, const char * name, const struct luaL_Reg lib[] )
+{
+	// push a new table to the stack
+	lua_newtable( l );
+	
+	for ( int i = 0; lib[i].name; i++ )
+	{
+		lua_pushcfunction( l, lib[i].func );
+		lua_setfield( l, -2, lib[i].name );
+	}
+	
+	// register the table in global index and pop the table
+	lua_setglobal( l, name );
+}
+
 lua_State * newState()
 {
 	// create lua state
@@ -29,8 +44,7 @@ lua_State * newState()
 	luaL_openlibs( l );
 	
 	// register custom libraries
-	lua_pushcfunction( l, lua_showText );
-	lua_setglobal( l, "showText" );
+	registerLib( l, "test", testLib );
 	
 	return l;
 }

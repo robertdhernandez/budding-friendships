@@ -176,6 +176,9 @@ void Console::pushLine( const std::string& str, unsigned color )
 
 void Console::execute( const std::string& line )
 {
+	std::clog << ">";
+	pushLine( line );
+
 	std::string::size_type pos = line.find( ' ' );
 	std::string cmd = std::string( line.begin(), pos != std::string::npos ? line.begin() + pos : line.end() );
 
@@ -220,8 +223,6 @@ void Console::onKeyPressed( const sf::Event::KeyEvent& ev )
 		case sf::Keyboard::Return:
 			if ( !m_input.empty() )
 			{
-				std::clog << ">";
-				pushLine( m_input );
 				execute( m_input );
 				m_index = 0;
 				m_input.clear();

@@ -1,6 +1,6 @@
 CXXFLAGS=-std=c++0x
 CPPFLAGS=-I../tmx-parser
-LDFLAGS=-L../tmx-parser/bin -ltinyxml -ltmx-parser -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio
+LDFLAGS=-L../tmx-parser/bin -ltinyxml -ltmx-parser -llua5.2 -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio
 SOURCES=$(wildcard *.cpp)
 OBJECTS=$(patsubst %.cpp,obj/%.o,$(SOURCES))
 EXECUTABLE=budding-friendships

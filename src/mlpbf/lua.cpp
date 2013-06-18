@@ -29,7 +29,8 @@ lua_State * newState()
 	luaL_openlibs( l );
 	
 	// register custom libraries
-	luaL_newlib( l, testLib );
+	lua_pushcfunction( l, lua_showText );
+	lua_setglobal( l, "showText" );
 	
 	return l;
 }

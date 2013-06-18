@@ -262,6 +262,7 @@ static class MESSAGE : public con::Command
 static class LUA : public con::Command
 {
 	mutable bool executing;
+	mutable lua_State * lua;
 
 	const std::string name() const
 	{
@@ -285,18 +286,16 @@ static class LUA : public con::Command
 			throw Exception( "Cannot execute lua console command recursively" );
 			
 		executing = true;
-	
-		lua_State * l = lua::newState();
 		
-		if ( luaL_loadfile( l, args[0].c_str() ) || lua_pcall( l, 0, 0, 0 ) )
-			c << setcerr << lua_tostring( l, -1 ) << con::endl;
+		if ( luaL_loadfile( lua, args[0].c_str() ) || lua_pcall( lua, 0, 0, 0 ) )
+			c << setcerr << lua_tostring( lua, -1 ) << con::endl;
 		
-		lua_close( l );
 		executing = false;
 	}
 
 public:
-	LUA() : executing( false ) {}
+	LUA() : executing( false ), lua( lua::newState() ) {}
+	~LUA() { lua_close( lua ); }
 } LUA;
 
 void defaultCommands( Console& console )

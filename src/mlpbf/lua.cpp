@@ -10,10 +10,7 @@ namespace lua
 
 int lua_showText( lua_State * l )
 {
-	const char * ctext = luaL_checkstring( l, 1 );
-	const char * cspeaker = luaL_optstring( l, 2, NULL );
-	
-	bf::showText( ctext, std::string( cspeaker != NULL ? cspeaker : "" ) );
+	bf::showText( luaL_checkstring( l, 1 ), luaL_optstring( l, 2, "" ) );
 	return 0;
 }
 

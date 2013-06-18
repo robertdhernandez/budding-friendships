@@ -3,6 +3,7 @@
 #include "mlpbf/console/function.h"
 
 #include "mlpbf/global.h"
+#include "mlpbf/lua.h"
 #include "mlpbf/player.h"
 #include "mlpbf/time.h"
 #include "mlpbf/exception.h"
@@ -258,6 +259,35 @@ static class MESSAGE : public con::Command
 	}
 } MESSAGE;
 
+static class LUA : public con::Command
+{
+	const std::string name() const
+	{
+		return "lua";
+	}
+	
+	unsigned minArgs() const
+	{
+		return 1;
+	}
+	
+	void help( Console & c ) const
+	{
+		c << setcinfo << "Executes a lua script from the working directory" << con::endl;
+		c << setcinfo << "lua \"filename\"" << con::endl;
+	}
+	
+	void execute( Console & c, const std::vector< std::string > & args ) const
+	{
+		lua_State * l = lua::newState();
+		
+		if ( luaL_loadfile( l, args[0].c_str() ) || lua_pcall( l, 0, 0, 0 ) )
+			c << setcerr << lua_tostring( l, -1 ) << con::endl;
+		
+		lua_close( l );
+	}
+} LUA;
+
 void defaultCommands( Console& console )
 {
 	console.addCommand( HELP );
@@ -269,6 +299,7 @@ void defaultCommands( Console& console )
 	console.addCommand( SHOW_FPS );
 	console.addCommand( TIMESCALE );
 	console.addCommand( MESSAGE );
+	console.addCommand( LUA );
 }
 
 /***************************************************************************/

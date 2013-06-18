@@ -18,7 +18,7 @@ namespace con
 
 /***************************************************************************/
 
-static class HELP : public con::Command
+class HELP : public con::Command
 {
 	const std::string name() const
 	{
@@ -53,9 +53,9 @@ static class HELP : public con::Command
 			(*find)->help( c );
 		}
 	}
-} HELP;
+};
 
-static class CLEAR : public con::Command
+class CLEAR : public con::Command
 {
 	const std::string name() const
 	{
@@ -76,9 +76,9 @@ static class CLEAR : public con::Command
 	{
 		c.clearHistory();
 	}
-} CLEAR;
+};
 
-static class REPOSITION : public con::Command
+class REPOSITION : public con::Command
 {
 	const std::string name() const
 	{
@@ -105,9 +105,9 @@ static class REPOSITION : public con::Command
 		else
 			Player::singleton().setPosition( pos );
 	}
-} REPOSITION;
+};
 
-static class ANIMATE : public con::Command
+class ANIMATE : public con::Command
 {
 	const std::string name() const
 	{
@@ -133,9 +133,9 @@ static class ANIMATE : public con::Command
 			std::istringstream( args[ 1 ] ) >> std::boolalpha >> loop;
 		Player::singleton().animate( args[ 0 ], loop );
 	}
-} ANIMATE;
+};
 
-static class DEBUG_COLLISION : public con::Command
+class DEBUG_COLLISION : public con::Command
 {
 	const std::string name() const
 	{
@@ -157,9 +157,9 @@ static class DEBUG_COLLISION : public con::Command
 	{
 		std::istringstream( args[ 0 ] ) >> std::boolalpha >> bf::DEBUG_COLLISION;
 	}
-} DEBUG_COLLISION;
+};
 
-static class TIME : public con::Command
+class TIME : public con::Command
 {
 	const std::string name() const
 	{
@@ -181,9 +181,9 @@ static class TIME : public con::Command
 		if ( args.size() == 0 )
 			c << t.getHour() << ", " << t.getDate() << con::endl;
 	}
-} TIME;
+};
 
-static class TIMESCALE : public con::Command
+class TIMESCALE : public con::Command
 {
 	const std::string name() const
 	{
@@ -204,9 +204,9 @@ static class TIMESCALE : public con::Command
 	{
 		Time::singleton().setTimescale( std::stof( args[ 0 ] ) );
 	}
-} TIMESCALE;
+};
 
-static class SHOW_FPS : public con::Command
+class SHOW_FPS : public con::Command
 {
 	const std::string name() const
 	{
@@ -228,9 +228,9 @@ static class SHOW_FPS : public con::Command
 	{
 		std::istringstream( args[ 0 ] ) >> std::boolalpha >> bf::SHOW_FPS;
 	}
-} SHOW_FPS;
+};
 
-static class MESSAGE : public con::Command
+class MESSAGE : public con::Command
 {
 	const std::string name() const
 	{
@@ -257,9 +257,9 @@ static class MESSAGE : public con::Command
 		else if ( args.size() == 1 )
 			showText( args[ 0 ] );
 	}
-} MESSAGE;
+};
 
-static class LUA : public con::Command
+class LUA : public con::Command
 {
 	mutable bool executing;
 	mutable lua_State * lua;
@@ -296,20 +296,20 @@ static class LUA : public con::Command
 public:
 	LUA() : executing( false ), lua( lua::newState() ) {}
 	~LUA() { lua_close( lua ); }
-} LUA;
+};
 
-void defaultCommands( Console& console )
+void defaultCommands( Console & console )
 {
-	console.addCommand( HELP );
-	console.addCommand( CLEAR );
-	console.addCommand( REPOSITION );
-	console.addCommand( ANIMATE );
-	console.addCommand( DEBUG_COLLISION );
-	console.addCommand( TIME );
-	console.addCommand( SHOW_FPS );
-	console.addCommand( TIMESCALE );
-	console.addCommand( MESSAGE );
-	console.addCommand( LUA );
+	console.addCommand( new HELP );
+	console.addCommand( new CLEAR );
+	console.addCommand( new REPOSITION );
+	console.addCommand( new ANIMATE );
+	console.addCommand( new DEBUG_COLLISION );
+	console.addCommand( new TIME );
+	console.addCommand( new SHOW_FPS );
+	console.addCommand( new TIMESCALE );
+	console.addCommand( new MESSAGE );
+	console.addCommand( new LUA );
 }
 
 /***************************************************************************/

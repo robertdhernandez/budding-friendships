@@ -97,16 +97,24 @@ Console::Console() :
 	clearCommands();
 }
 
+Console::~Console()
+{
+	clearHistory();
+	clearCommands();
+}
+
 /***************************************************************************/
 
-void Console::addCommand( con::Command& cmd )
+void Console::addCommand( con::Command * cmd )
 {
-	m_cmds.push_back( &cmd );
-	std::sort( m_cmds.begin(), m_cmds.end(), []( const con::Command* a, const con::Command* b ) { return *a < *b; } );
+	m_cmds.push_back( cmd );
+	std::sort( m_cmds.begin(), m_cmds.end(), []( const con::Command * a, const con::Command * b ) { return *a < *b; } );
 }
 
 void Console::clearCommands()
 {
+	for ( con::Command * cmd : m_cmds )
+		delete cmd;
 	m_cmds.clear();
 	con::defaultCommands( *this );
 }

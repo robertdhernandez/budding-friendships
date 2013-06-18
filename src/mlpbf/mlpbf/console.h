@@ -30,7 +30,7 @@ namespace bf
 
 		operator bool() const { return state(); }
 
-		void addCommand( con::Command& );
+		void addCommand( con::Command * );
 		const std::vector< con::Command* >& getCommands() const { return m_cmds; }
 
 		enum
@@ -55,6 +55,7 @@ namespace bf
 
 	private:
 		Console();
+		~Console();
 
 		void onKeyPressed( const sf::Event::KeyEvent& );
 		void onKeyReleased( const sf::Event::KeyEvent& );
@@ -74,7 +75,7 @@ namespace bf
 		int m_bufferOffset, m_bufferColor;
 		std::ostringstream m_buffer;
 
-		std::vector< con::Command* > m_cmds;
+		std::vector< con::Command * > m_cmds;
 	};
 	
 	template< typename T >

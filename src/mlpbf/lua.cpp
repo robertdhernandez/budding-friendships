@@ -1,4 +1,5 @@
 #include "mlpbf/console.h"
+#include "mlpbf/console/command.h"
 #include "mlpbf/global.h"
 #include "mlpbf/lua.h"
 
@@ -43,10 +44,71 @@ int console_execute( lua_State * l )
 	return 0;
 }
 
+int console_hook( lua_State * l )
+{
+	class LuaCommand : public con::Command
+	{
+		const std::string cmd;
+		int ref;
+		mutable lua_State * l;
+		
+		const std::string name() const 
+		{ 
+			return cmd; 
+		}
+		
+		unsigned minArgs() const 
+		{ 
+			return 0;
+		}
+		
+		void help( Console & ) const
+		{
+		}
+		
+		void execute( Console & c, const std::vector< std::string > & args ) const
+		{
+			lua_rawgeti( l, LUA_REGISTRYINDEX, ref );
+			
+			int numargs = 0;
+			for ( const std::string & str : args )
+			{
+				lua_pushstring( l, str.c_str() );
+				numargs++;
+			}
+			
+			if ( lua_pcall( l, numargs, 0, 0 ) )
+			{
+				c << con::setcerr << lua_tostring( l, -1 ) << con::endl;
+				lua_pop( l, 1 );
+			}
+		}
+	
+	public:
+		LuaCommand( lua_State * L ) :
+			cmd( lua_tostring( L, 1 ) ),
+			ref( luaL_ref( L, LUA_REGISTRYINDEX ) ),
+			l( L )
+		{
+		}
+		
+		// note: if the function name is after "lua", the lua_State is destroyed causing a segfault
+		//~LuaCommand() { luaL_unref( l, LUA_REGISTRYINDEX, ref ); }		
+	};
+	
+	luaL_checktype( l, 1, LUA_TSTRING );
+	luaL_checktype( l, 2, LUA_TFUNCTION );
+	
+	Console::singleton().addCommand( new LuaCommand( l ) );
+
+	return 0;
+}
+
 static const struct luaL_Reg consoleLib[] = 
 {
 	{ "write", console_write },
 	{ "execute", console_execute },
+	{ "hook", console_hook },
 	{ NULL, NULL },
 };
 

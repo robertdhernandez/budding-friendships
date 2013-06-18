@@ -288,7 +288,10 @@ class LUA : public con::Command
 		executing = true;
 		
 		if ( luaL_loadfile( lua, args[0].c_str() ) || lua_pcall( lua, 0, 0, 0 ) )
+		{
 			c << setcerr << lua_tostring( lua, -1 ) << con::endl;
+			lua_pop( lua, 1 );
+		}
 		
 		executing = false;
 	}

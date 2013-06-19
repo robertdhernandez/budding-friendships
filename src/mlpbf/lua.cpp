@@ -97,6 +97,20 @@ static int image_position( lua_State * l )
 	return 2;
 }
 
+static int image_repeat( lua_State * l )
+{
+	lua::Image * image = (lua::Image *) luaL_checkudata( l, 1, IMAGE_MT );
+	
+	if ( lua_gettop( l ) == 2 )
+	{
+		luaL_checktype( l, 2, LUA_TBOOLEAN );
+		image->texture->setRepeated( lua_toboolean( l, 2 ) );
+	}
+	
+	lua_pushboolean( l, image->texture->isRepeated() );
+	return 1;
+}
+
 static int image_rotate( lua_State * l )
 {
 	lua::Image * image = (lua::Image *) luaL_checkudata( l, 1, IMAGE_MT );
@@ -145,6 +159,20 @@ static int image_size( lua_State * l )
 	return 2;
 }
 
+static int image_smooth( lua_State * l )
+{
+	lua::Image * data = (lua::Image *) luaL_checkudata( l, 1, IMAGE_MT );
+	
+	if ( lua_gettop( l ) == 2 )
+	{
+		luaL_checktype( l, 2, LUA_TBOOLEAN );
+		data->texture->setSmooth( lua_toboolean( l, 2 ) );
+	}
+	
+	lua_pushboolean( l, data->texture->isSmooth() );
+	return 1;
+}
+
 static int image_subrect( lua_State * l )
 {
 	lua::Image * data = (lua::Image *) luaL_checkudata( l, 1, IMAGE_MT );
@@ -174,7 +202,6 @@ static int image_free( lua_State * l )
 	lua::Image * data = (lua::Image *) luaL_checkudata( l, 1, IMAGE_MT );
 	if ( data->display ) hideDrawable( &data->sprite );
 	data->~Image();
-	std::clog << "image_free called" << std::endl;
 	return 0;
 }
 
@@ -185,8 +212,10 @@ static const struct luaL_Reg libimage_mt [] =
 	{ "move",		image_move },
 	{ "origin",	image_origin },
 	{ "position",	image_position },
+	{ "repeat",	image_repeat },
 	{ "rotate",	image_rotate },
 	{ "scale", 	image_scale },
+	{ "smooth",	image_smooth },
 	{ "size", 	image_size },
 	{ "subrect",	image_subrect },
 	{ "__gc", 	image_free },

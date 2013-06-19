@@ -2,6 +2,9 @@
 #include "mlpbf/console/command.h"
 #include "mlpbf/global.h"
 #include "mlpbf/lua.h"
+#include "mlpbf/resource.h"
+
+#include <cstring>
 
 namespace bf
 {
@@ -9,6 +12,37 @@ namespace lua
 {
 
 /***************************************************************************/
+
+struct Texture
+{
+	res::TexturePtr texture;
+	sf::Vector2u offset;
+};
+
+static const char * TEXTURE_MT = "game.texture";
+
+/***************************************************************************/
+
+// game.loadTexture( str [, x, y ] )
+int game_loadTexture( lua_State * l )
+{
+	// get arguments
+	res::TexturePtr texture = res::loadTexture( luaL_checkstring( l, 1 ) );
+	unsigned x = luaL_optinteger( l, 2, 0 );
+	unsigned y = luaL_optinteger( l, 3, 0 );
+	
+	// create userdata and set metatable
+	lua::Texture * data = (lua::Texture *) lua_newuserdata( l, sizeof( lua::Texture ) );
+	luaL_getmetatable( l, TEXTURE_MT );
+	lua_setmetatable( l, -2 );
+	
+	// set userdata variables from arguments
+	memcpy( &data->texture, &texture, sizeof( res::TexturePtr ) );
+	data->offset.x = x;
+	data->offset.y = y;
+	
+	return 1;
+}
 
 int game_showText( lua_State * l )
 {
@@ -18,6 +52,7 @@ int game_showText( lua_State * l )
 
 static const struct luaL_Reg gameLib[] = 
 {
+	{ "loadTexture", game_loadTexture },
 	{ "showText", game_showText },
 	{ NULL, NULL },
 };
@@ -133,6 +168,10 @@ lua_State * newState()
 	// create lua state
 	lua_State * l = luaL_newstate();
 	luaL_openlibs( l );
+	
+	// texture metatable
+	luaL_newmetatable( l, TEXTURE_MT );
+	lua_pop( l, 1 );
 	
 	// register custom libraries
 	registerLib( l, "game", gameLib );

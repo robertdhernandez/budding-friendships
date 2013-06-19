@@ -5,6 +5,7 @@
 #include "mlpbf/resource.h"
 
 #include <cstring>
+#include <iostream>
 
 namespace bf
 {
@@ -21,6 +22,20 @@ struct Texture
 
 static const char * TEXTURE_MT = "game.texture";
 
+int texture_free( lua_State * l )
+{
+	lua::Texture * data = (lua::Texture *) luaL_checkudata( l, 1, TEXTURE_MT );
+	data->~Texture();
+	std::clog << "texture_free called" << std::endl;
+	return 0;
+}
+
+static const struct luaL_Reg libtexture_mt [] =
+{
+	{ "__gc", texture_free },
+	{ NULL, NULL },
+};
+
 /***************************************************************************/
 
 // game.loadTexture( str [, x, y ] )
@@ -33,11 +48,13 @@ int game_loadTexture( lua_State * l )
 	
 	// create userdata and set metatable
 	lua::Texture * data = (lua::Texture *) lua_newuserdata( l, sizeof( lua::Texture ) );
+	new (data) lua::Texture();
+	
 	luaL_getmetatable( l, TEXTURE_MT );
 	lua_setmetatable( l, -2 );
 	
 	// set userdata variables from arguments
-	memcpy( &data->texture, &texture, sizeof( res::TexturePtr ) );
+	data->texture  = texture;
 	data->offset.x = x;
 	data->offset.y = y;
 	
@@ -50,7 +67,7 @@ int game_showText( lua_State * l )
 	return 0;
 }
 
-static const struct luaL_Reg gameLib[] = 
+static const struct luaL_Reg libgame[] = 
 {
 	{ "loadTexture", game_loadTexture },
 	{ "showText", game_showText },
@@ -65,6 +82,8 @@ int console_write( lua_State * l )
 {
 	if ( lua_gettop( l ) >= 2 && lua_isnumber( l, 2 ) )
 		Console::singleton().setBufferColor( lua_tonumber( l, 2 ) );
+	else
+		Console::singleton().setBufferColor( Console::INFO_COLOR );
 
 	Console::singleton() << luaL_checkstring( l, 1 ) << con::endl;
 	return 0;
@@ -133,12 +152,14 @@ int console_hook( lua_State * l )
 	luaL_checktype( l, 1, LUA_TSTRING );
 	luaL_checktype( l, 2, LUA_TFUNCTION );
 	
-	Console::singleton().addCommand( new LuaCommand( l ) );
+	con::Command * cmd = new LuaCommand( l );
+	Console::singleton().addCommand( cmd );
+	Console::singleton() << con::setcinfo << "Lua: hooked console function " << cmd->name() << con::endl;
 
 	return 0;
 }
 
-static const struct luaL_Reg consoleLib[] = 
+static const struct luaL_Reg libconsole[] = 
 {
 	{ "write", console_write },
 	{ "execute", console_execute },
@@ -148,21 +169,6 @@ static const struct luaL_Reg consoleLib[] =
 
 /***************************************************************************/
 
-void registerLib( lua_State * l, const char * name, const struct luaL_Reg lib[] )
-{
-	// push a new table to the stack
-	lua_newtable( l );
-	
-	for ( int i = 0; lib[i].name; i++ )
-	{
-		lua_pushcfunction( l, lib[i].func );
-		lua_setfield( l, -2, lib[i].name );
-	}
-	
-	// register the table in global index and pop the table
-	lua_setglobal( l, name );
-}
-
 lua_State * newState()
 {
 	// create lua state
@@ -171,11 +177,19 @@ lua_State * newState()
 	
 	// texture metatable
 	luaL_newmetatable( l, TEXTURE_MT );
+
+	lua_pushvalue( l, -1 );
+	lua_setfield( l, -2, "__index" );
+	
+	luaL_setfuncs( l, libtexture_mt, 0 );
 	lua_pop( l, 1 );
 	
 	// register custom libraries
-	registerLib( l, "game", gameLib );
-	registerLib( l, "console", consoleLib );
+	luaL_newlib( l, libgame );
+	lua_setglobal( l, "game" );
+
+	luaL_newlib( l, libconsole );
+	lua_setglobal( l, "console" );
 	
 	return l;
 }

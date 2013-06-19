@@ -102,7 +102,7 @@ static int image_rotate( lua_State * l )
 	lua::Image * image = (lua::Image *) luaL_checkudata( l, 1, IMAGE_MT );
 	
 	if ( lua_gettop( l ) == 2 ) // rotate
-		image->sprite.rotate( luaL_checknumber( l, 2 ) );
+		image->sprite.setRotation( luaL_checknumber( l, 2 ) );
 	
 	lua_pushnumber( l, image->sprite.getRotation() );
 	return 1;
@@ -219,10 +219,18 @@ int game_showText( lua_State * l )
 	return 0;
 }
 
+int game_screen( lua_State * l )
+{
+	lua_pushinteger( l, SCREEN_WIDTH );
+	lua_pushinteger( l, SCREEN_HEIGHT );
+	return 2;
+}
+
 static const struct luaL_Reg libgame[] = 
 {
-	{ "newImage", game_newImage },
-	{ "showText", game_showText },
+	{ "newImage", 	game_newImage },
+	{ "screen",	game_screen },
+	{ "showText", 	game_showText },
 	{ NULL, NULL },
 };
 

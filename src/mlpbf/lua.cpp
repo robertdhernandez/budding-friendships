@@ -3,6 +3,7 @@
 #include "mlpbf/global.h"
 #include "mlpbf/lua.h"
 #include "mlpbf/resource.h"
+#include "mlpbf/time.h"
 
 #include <cstring>
 #include <iostream>
@@ -171,6 +172,7 @@ static int image_subrect( lua_State * l )
 static int image_free( lua_State * l )
 {
 	lua::Image * data = (lua::Image *) luaL_checkudata( l, 1, IMAGE_MT );
+	if ( data->display ) hideDrawable( &data->sprite );
 	data->~Image();
 	std::clog << "image_free called" << std::endl;
 	return 0;
@@ -319,6 +321,36 @@ static const struct luaL_Reg libconsole[] =
 
 /***************************************************************************/
 
+// time.date()
+// returns the day [1,30], season [0,3], and year in that order
+static int time_date( lua_State * l )
+{
+	const time::Date & date = Time::singleton().getDate();
+	lua_pushinteger( l, date.getDay() );
+	lua_pushinteger( l, (int) date.getSeason() );
+	lua_pushinteger( l, date.getYear() );
+	return 3;
+}
+
+// time.hour()
+// returns the hour [0,23] and minute [0,59]
+static int time_hour( lua_State * l )
+{
+	const time::Hour & hour = Time::singleton().getHour();
+	lua_pushinteger( l, hour.get24Hour() );
+	lua_pushinteger( l, hour.getMinute() );
+	return 2;
+}
+
+static const struct luaL_Reg libtime[] =
+{
+	{ "date", time_date },
+	{ "hour",	time_hour },
+	{ NULL, NULL },
+};
+
+/***************************************************************************/
+
 lua_State * newState()
 {
 	// create lua state
@@ -340,6 +372,9 @@ lua_State * newState()
 
 	luaL_newlib( l, libconsole );
 	lua_setglobal( l, "console" );
+	
+	luaL_newlib( l, libtime );
+	lua_setglobal( l, "time" );
 	
 	return l;
 }

@@ -285,15 +285,23 @@ class LUA : public con::Command
 		if ( executing )
 			throw Exception( "Cannot execute lua console command recursively" );
 			
-		executing = true;
-		
-		if ( luaL_loadfile( lua, args[0].c_str() ) || lua_pcall( lua, 0, 0, 0 ) )
+		try
 		{
-			c << setcerr << lua_tostring( lua, -1 ) << con::endl;
-			lua_pop( lua, 1 );
-		}
+			executing = true;
 		
-		executing = false;
+			if ( luaL_loadfile( lua, args[0].c_str() ) || lua_pcall( lua, 0, 0, 0 ) )
+			{
+				c << setcerr << lua_tostring( lua, -1 ) << con::endl;
+				lua_pop( lua, 1 );
+			}
+		
+			executing = false;
+		}
+		catch ( ... )
+		{
+			executing = false;
+			throw;
+		}
 	}
 
 public:

@@ -6,6 +6,7 @@
 
 #include <cstring>
 #include <iostream>
+#include <SFML/Graphics/Sprite.hpp>
 
 namespace bf
 {
@@ -14,17 +15,113 @@ namespace lua
 
 /***************************************************************************/
 
-struct Texture
+struct Image
 {
 	res::TexturePtr texture;
-	sf::Vector2u offset;
+	sf::Sprite sprite;
 };
 
-static const char * TEXTURE_MT = "game.texture";
+static const char * IMAGE_MT = "game.image";
 
-static int texture_size( lua_State * l )
+static int image_load( lua_State * l )
 {
-	lua::Texture * data = (lua::Texture *) luaL_checkudata( l, 1, TEXTURE_MT );
+	lua::Image * image = (lua::Image *) luaL_checkudata( l, 1, IMAGE_MT );
+	
+	image->texture = res::loadTexture( luaL_checkstring( l, 2 ) );
+	image->sprite.setTexture( *image->texture );
+	
+	return 0;
+}
+
+static int image_move( lua_State * l )
+{
+	lua::Image * image = (lua::Image *) luaL_checkudata( l, 1, IMAGE_MT );
+	float x = luaL_checknumber( l, 2 );
+	float y = luaL_checknumber( l, 3 );
+	
+	image->sprite.move( x, y );
+	
+	return 0;
+}
+
+static int image_origin( lua_State * l )
+{
+	lua::Image * image = (lua::Image *) luaL_checkudata( l, 1, IMAGE_MT );
+	
+	if ( lua_gettop( l ) == 3 )
+	{
+		float x = luaL_checknumber( l, 2 );
+		float y = luaL_checknumber( l, 3 );
+		
+		image->sprite.setOrigin( x, y );
+	}
+	
+	const sf::Vector2f & origin = image->sprite.getOrigin();
+	lua_pushnumber( l, origin.x );
+	lua_pushnumber( l, origin.y );
+	
+	return 2;
+}
+
+static int image_position( lua_State * l )
+{
+	lua::Image * image = (lua::Image *) luaL_checkudata( l, 1, IMAGE_MT );
+	
+	if ( lua_gettop( l ) == 3 )
+	{
+		float x = luaL_checknumber( l, 2 );
+		float y = luaL_checknumber( l, 3 );
+		
+		image->sprite.setPosition( x, y );
+	}
+
+	const sf::Vector2f & pos = image->sprite.getPosition();
+	lua_pushnumber( l, pos.x );
+	lua_pushnumber( l, pos.y );
+	
+	return 2;
+}
+
+static int image_rotate( lua_State * l )
+{
+	lua::Image * image = (lua::Image *) luaL_checkudata( l, 1, IMAGE_MT );
+	
+	if ( lua_gettop( l ) == 2 ) // rotate
+		image->sprite.rotate( luaL_checknumber( l, 2 ) );
+	
+	lua_pushnumber( l, image->sprite.getRotation() );
+	return 1;
+}
+
+// (1) image:scale()
+// (2) image:scale( x, y )
+// version (2) sets the scale of the image
+// both versions return the scale x, y
+static int image_scale( lua_State * l )
+{
+	lua::Image * image = (lua::Image *) luaL_checkudata( l, 1, IMAGE_MT );
+
+	if ( lua_gettop( l ) == 3 ) // setScale
+	{
+		float x = luaL_checknumber( l, 2 );
+		float y = luaL_checknumber( l, 3 );
+		
+		image->sprite.setScale( x, y );
+		
+		return 0;
+	}
+
+	const sf::Vector2f & scale = image->sprite.getScale();
+	
+	lua_pushnumber( l, scale.x );
+	lua_pushnumber( l, scale.y );
+	
+	return 2;
+}
+
+static int image_size( lua_State * l )
+{
+	lua::Image * data = (lua::Image *) luaL_checkudata( l, 1, IMAGE_MT );
 	sf::Vector2u size = data->texture->getSize();
 	
 	lua_pushinteger( l, size.x );
@@ -33,46 +130,45 @@ static int texture_size( lua_State * l )
 	return 2;
 }
 
-static int texture_free( lua_State * l )
+static int image_free( lua_State * l )
 {
-	lua::Texture * data = (lua::Texture *) luaL_checkudata( l, 1, TEXTURE_MT );
-	data->~Texture();
-	std::clog << "texture_free called" << std::endl;
+	lua::Image * data = (lua::Image *) luaL_checkudata( l, 1, IMAGE_MT );
+	data->~Image();
+	std::clog << "image_free called" << std::endl;
 	return 0;
 }
 
-static const struct luaL_Reg libtexture_mt [] =
+static const struct luaL_Reg libimage_mt [] =
 {
-	{ "size", texture_size },
-	{ "__gc", texture_free },
-	{ NULL, NULL },
+	{ "load", 	image_load },
+	{ "move",		image_move },
+	{ "origin",	image_origin },
+	{ "position",	image_position },
+	{ "rotate",	image_rotate },
+	{ "scale", 	image_scale },
+	{ "size", 	image_size },
+	{ "__gc", 	image_free },
+	{ NULL, 		NULL },
 };
 
 /***************************************************************************/
 
-// game.loadTexture( str [, x, y ] )
-int game_loadTexture( lua_State * l )
+// game.newImage()
+// creates a new image userdata
+int game_newImage( lua_State * l )
 {
-	// get arguments
-	res::TexturePtr texture = res::loadTexture( luaL_checkstring( l, 1 ) );
-	unsigned x = luaL_optinteger( l, 2, 0 );
-	unsigned y = luaL_optinteger( l, 3, 0 );
-	
 	// create userdata and set metatable
-	lua::Texture * data = (lua::Texture *) lua_newuserdata( l, sizeof( lua::Texture ) );
-	new (data) lua::Texture();
+	lua::Image * data = (lua::Image *) lua_newuserdata( l, sizeof( lua::Image ) );
+	new (data) lua::Image();
 	
-	luaL_getmetatable( l, TEXTURE_MT );
+	luaL_getmetatable( l, IMAGE_MT );
 	lua_setmetatable( l, -2 );
-	
-	// set userdata variables from arguments
-	data->texture  = texture;
-	data->offset.x = x;
-	data->offset.y = y;
 	
 	return 1;
 }
 
+// game.showText( text [, speaker ] )
+// displays a dialogue box
 int game_showText( lua_State * l )
 {
 	bf::showText( luaL_checkstring( l, 1 ), luaL_optstring( l, 2, "" ) );
@@ -81,7 +177,7 @@ int game_showText( lua_State * l )
 
 static const struct luaL_Reg libgame[] = 
 {
-	{ "loadTexture", game_loadTexture },
+	{ "newImage", game_newImage },
 	{ "showText", game_showText },
 	{ NULL, NULL },
 };
@@ -188,12 +284,12 @@ lua_State * newState()
 	luaL_openlibs( l );
 	
 	// texture metatable
-	luaL_newmetatable( l, TEXTURE_MT );
+	luaL_newmetatable( l, IMAGE_MT );
 
 	lua_pushvalue( l, -1 );
 	lua_setfield( l, -2, "__index" );
 	
-	luaL_setfuncs( l, libtexture_mt, 0 );
+	luaL_setfuncs( l, libimage_mt, 0 );
 	lua_pop( l, 1 );
 	
 	// register custom libraries

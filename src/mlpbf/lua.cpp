@@ -22,7 +22,18 @@ struct Texture
 
 static const char * TEXTURE_MT = "game.texture";
 
-int texture_free( lua_State * l )
+static int texture_size( lua_State * l )
+{
+	lua::Texture * data = (lua::Texture *) luaL_checkudata( l, 1, TEXTURE_MT );
+	sf::Vector2u size = data->texture->getSize();
+	
+	lua_pushinteger( l, size.x );
+	lua_pushinteger( l, size.y );
+	
+	return 2;
+}
+
+static int texture_free( lua_State * l )
 {
 	lua::Texture * data = (lua::Texture *) luaL_checkudata( l, 1, TEXTURE_MT );
 	data->~Texture();
@@ -32,6 +43,7 @@ int texture_free( lua_State * l )
 
 static const struct luaL_Reg libtexture_mt [] =
 {
+	{ "size", texture_size },
 	{ "__gc", texture_free },
 	{ NULL, NULL },
 };

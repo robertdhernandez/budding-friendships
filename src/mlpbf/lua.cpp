@@ -19,9 +19,23 @@ struct Image
 {
 	res::TexturePtr texture;
 	sf::Sprite sprite;
+	bool display;
 };
 
 static const char * IMAGE_MT = "game.image";
+
+static int image_display( lua_State * l )
+{
+	lua::Image * image = (lua::Image *) luaL_checkudata( l, 1, IMAGE_MT );
+	luaL_checktype( l, 2, LUA_TBOOLEAN );
+	
+	if ( image->display = lua_toboolean( l, 2 ) )
+		showDrawable( &image->sprite );
+	else
+		hideDrawable( &image->sprite );
+	
+	return 0;
+}
 
 static int image_load( lua_State * l )
 {
@@ -130,6 +144,30 @@ static int image_size( lua_State * l )
 	return 2;
 }
 
+static int image_subrect( lua_State * l )
+{
+	lua::Image * data = (lua::Image *) luaL_checkudata( l, 1, IMAGE_MT );
+	
+	if ( lua_gettop( l ) == 5 )
+	{
+		int x = luaL_checkinteger( l, 2 );
+		int y = luaL_checkinteger( l, 3 );
+		int w = luaL_checkinteger( l, 4 );
+		int h = luaL_checkinteger( l, 5 );
+		
+		data->sprite.setTextureRect( sf::IntRect( x, y, w, h ) );
+	}
+	
+	const sf::IntRect & rect = data->sprite.getTextureRect();
+	
+	lua_pushinteger( l, rect.left );
+	lua_pushinteger( l, rect.top );
+	lua_pushinteger( l, rect.width );
+	lua_pushinteger( l, rect.height );
+	
+	return 4;
+}
+
 static int image_free( lua_State * l )
 {
 	lua::Image * data = (lua::Image *) luaL_checkudata( l, 1, IMAGE_MT );
@@ -140,6 +178,7 @@ static int image_free( lua_State * l )
 
 static const struct luaL_Reg libimage_mt [] =
 {
+	{ "display",	image_display },
 	{ "load", 	image_load },
 	{ "move",		image_move },
 	{ "origin",	image_origin },
@@ -147,6 +186,7 @@ static const struct luaL_Reg libimage_mt [] =
 	{ "rotate",	image_rotate },
 	{ "scale", 	image_scale },
 	{ "size", 	image_size },
+	{ "subrect",	image_subrect },
 	{ "__gc", 	image_free },
 	{ NULL, 		NULL },
 };
@@ -163,6 +203,8 @@ int game_newImage( lua_State * l )
 	
 	luaL_getmetatable( l, IMAGE_MT );
 	lua_setmetatable( l, -2 );
+	
+	data->display = false;
 	
 	return 1;
 }

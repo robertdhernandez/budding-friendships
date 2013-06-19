@@ -19,6 +19,7 @@
 
 #include <SFML/System/Clock.hpp>
 #include <SFML/Graphics.hpp>
+#include <deque>
 
 // NOTE:
 // Microsoft Visual Studio C++ 2010 Redistributable required
@@ -90,6 +91,20 @@ void cleanup()
 	bf::res::cleanup(); // resource managers
 }
 
+static std::deque< const sf::Drawable * > g_Drawables;
+
+void bf::showDrawable( const sf::Drawable * d )
+{
+	g_Drawables.push_back( d );
+}
+
+void bf::hideDrawable( const sf::Drawable * d )
+{
+	auto find = std::find( g_Drawables.begin(), g_Drawables.end(), d );
+	if ( find != g_Drawables.end() )
+		g_Drawables.erase( find );
+}
+
 int main( int argc, char* argv[] )
 {
 	using namespace bf;
@@ -130,6 +145,8 @@ int main( int argc, char* argv[] )
 			window.clear();
 
 				window.draw( state );
+				for ( const sf::Drawable * d : g_Drawables )
+					window.draw( *d );
 				window.draw( console );
 				window.draw( FPS );
 

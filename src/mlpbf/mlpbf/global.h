@@ -2,6 +2,11 @@
 
 #include <string>
 
+namespace sf
+{
+	class Drawable;
+}
+
 namespace bf
 {
 	enum
@@ -21,4 +26,7 @@ namespace bf
 
 	void showText( const std::string& message, const std::string& speaker = "" );
 	void showInventory();
+	
+	void showDrawable( const sf::Drawable * );
+	void hideDrawable( const sf::Drawable * );
 }

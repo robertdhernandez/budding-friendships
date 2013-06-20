@@ -63,7 +63,7 @@ static int game_unhook( lua_State * l )
 
 // game.newImage()
 // creates a new image userdata
-int game_newImage( lua_State * l )
+static int game_newImage( lua_State * l )
 {
 	// create userdata and set metatable
 	lua::Image * data = (lua::Image *) lua_newuserdata( l, sizeof( lua::Image ) );
@@ -77,7 +77,7 @@ int game_newImage( lua_State * l )
 	return 1;
 }
 
-int game_newText( lua_State * l )
+static int game_newText( lua_State * l )
 {
 	lua::Text * data = (lua::Text *) lua_newuserdata( l, sizeof( lua::Text ) );
 	new (data) lua::Text();
@@ -92,13 +92,13 @@ int game_newText( lua_State * l )
 
 // game.showText( text [, speaker ] )
 // displays a dialogue box
-int game_showText( lua_State * l )
+static int game_showText( lua_State * l )
 {
 	bf::showText( luaL_checkstring( l, 1 ), luaL_optstring( l, 2, "" ) );
 	return 0;
 }
 
-int game_screen( lua_State * l )
+static int game_screen( lua_State * l )
 {
 	lua_pushinteger( l, SCREEN_WIDTH );
 	lua_pushinteger( l, SCREEN_HEIGHT );
@@ -120,7 +120,7 @@ static const struct luaL_Reg libgame[] =
 
 // console.write( str [, col ] )
 // prints a line to the console
-int console_write( lua_State * l )
+static int console_write( lua_State * l )
 {
 	if ( lua_gettop( l ) >= 2 && lua_isnumber( l, 2 ) )
 		Console::singleton().setBufferColor( lua_tonumber( l, 2 ) );
@@ -134,13 +134,13 @@ int console_write( lua_State * l )
 // console.execute( str )
 // executes a console commmand
 // note: cannot execute lua console command
-int console_execute( lua_State * l )
+static int console_execute( lua_State * l )
 {
 	Console::singleton().execute( luaL_checkstring( l, 1 ) );
 	return 0;
 }
 
-int console_hook( lua_State * l )
+static int console_hook( lua_State * l )
 {
 	class LuaCommand : public con::Command
 	{
@@ -638,8 +638,8 @@ static const struct luaL_Reg libtext_mt [] =
 	{ "scale",	text_scale },
 	{ "size",		text_size },
 	{ "string",	text_string },
-	{ "__gc", text_free },
-	{ NULL, NULL },
+	{ "__gc", 	text_free },
+	{ NULL, 		NULL },
 };
 
 /***************************************************************************/

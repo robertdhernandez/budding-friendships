@@ -888,48 +888,35 @@ void removeLuaRef( const std::string & str )
 
 static lua_State * LUA = nullptr;
 
+inline void register_metatable( lua_State * l, const char * name, const struct luaL_Reg lib[] )
+{
+	luaL_newmetatable( l, name );
+	
+	lua_pushvalue( l, -1 );
+	lua_setfield( l, -2, "__index" );
+	
+	luaL_setfuncs( l, lib, 0 );
+	lua_pop( l, 1 );
+}
+
+// Macro because inline function throws a warning
+#define register_library(L,n,l) (luaL_newlib(L,l),lua_setglobal(L,n))
+
 void init()
 {
 	// create lua state
 	lua_State * l = LUA = luaL_newstate();
 	luaL_openlibs( l );
 	
-	// container metatable
-	luaL_newmetatable( l, CONTAINER_MT );
-	
-	lua_pushvalue( l, -1 );
-	lua_setfield( l, -2, "__index" );
-	
-	luaL_setfuncs( l, libcontainer_mt, 0 );
-	lua_pop( l, 1 );
-	
-	// image metatable
-	luaL_newmetatable( l, IMAGE_MT );
-
-	lua_pushvalue( l, -1 );
-	lua_setfield( l, -2, "__index" );
-	
-	luaL_setfuncs( l, libimage_mt, 0 );
-	lua_pop( l, 1 );
-	
-	// text metatable
-	luaL_newmetatable( l, TEXT_MT );
-	
-	lua_pushvalue( l, -1 );
-	lua_setfield( l, -2, "__index" );
-	
-	luaL_setfuncs( l, libtext_mt, 0 );
-	lua_pop( l, 1 );
+	// register metatables
+	register_metatable( l, CONTAINER_MT, libcontainer_mt );
+	register_metatable( l, IMAGE_MT, libimage_mt );
+	register_metatable( l, TEXT_MT, libtext_mt );
 	
 	// register custom libraries
-	luaL_newlib( l, libgame );
-	lua_setglobal( l, "game" );
-
-	luaL_newlib( l, libconsole );
-	lua_setglobal( l, "console" );
-	
-	luaL_newlib( l, libtime );
-	lua_setglobal( l, "time" );
+	register_library( l, "game", libgame );
+	register_library( l, "console", libconsole );
+	register_library( l, "time", libtime );
 }
 
 void cleanup()

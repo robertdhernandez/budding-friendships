@@ -8,6 +8,8 @@ namespace bf
 	{
 		void init();
 		void cleanup();
+		
+		void update( unsigned ms );
 	
 		lua_State * state();
 	}

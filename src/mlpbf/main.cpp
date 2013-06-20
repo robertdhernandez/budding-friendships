@@ -156,7 +156,9 @@ int main( int argc, char* argv[] )
 				state.handleEvents( ev );
 			}
 
-			state.update( clock.restart() );
+			sf::Time time = clock.restart();
+			state.update( time );
+			lua::update( time.asMilliseconds() );
 			FPS.update();
 
 			window.clear();

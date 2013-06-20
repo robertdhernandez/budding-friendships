@@ -1,5 +1,6 @@
 #include "mlpbf/console.h"
 #include "mlpbf/console/command.h"
+#include "mlpbf/exception.h"
 #include "mlpbf/global.h"
 #include "mlpbf/lua.h"
 #include "mlpbf/resource.h"
@@ -8,11 +9,15 @@
 #include <cstring>
 #include <iostream>
 #include <SFML/Graphics/Sprite.hpp>
+#include <unordered_map>
 
 namespace bf
 {
 namespace lua
 {
+
+void addLuaRef( const std::string & str, int ref );
+void removeLuaRef( const std::string & str );
 
 /***************************************************************************/
 
@@ -224,6 +229,25 @@ static const struct luaL_Reg libimage_mt [] =
 
 /***************************************************************************/
 
+// game.hook( id, fn )
+static int game_hook( lua_State * l )
+{
+	luaL_checktype( l, 1, LUA_TSTRING );
+	luaL_checktype( l, 2, LUA_TFUNCTION );
+	
+	lua_pushvalue( l, 2 );
+	addLuaRef( lua_tostring( l, 1 ), luaL_ref( l, LUA_REGISTRYINDEX ) );
+	
+	return 0;
+}
+
+// game.unhook( id )
+static int game_unhook( lua_State * l )
+{
+	removeLuaRef( luaL_checkstring( l, 1 ) );
+	return 0;
+}
+
 // game.newImage()
 // creates a new image userdata
 int game_newImage( lua_State * l )
@@ -257,6 +281,8 @@ int game_screen( lua_State * l )
 
 static const struct luaL_Reg libgame[] = 
 {
+	{ "hook",		game_hook },
+	{ "unhook",	game_unhook },
 	{ "newImage", 	game_newImage },
 	{ "screen",	game_screen },
 	{ "showText", 	game_showText },
@@ -341,6 +367,8 @@ int console_hook( lua_State * l )
 	luaL_checktype( l, 1, LUA_TSTRING );
 	luaL_checktype( l, 2, LUA_TFUNCTION );
 	
+	lua_pushvalue( l, 2 );
+	
 	con::Command * cmd = new LuaCommand( l );
 	Console::singleton().addCommand( cmd );
 	Console::singleton() << con::setcinfo << "Lua: hooked console function " << cmd->name() << con::endl;
@@ -388,6 +416,22 @@ static const struct luaL_Reg libtime[] =
 
 /***************************************************************************/
 
+static std::unordered_map< std::string, int > LuaRef;
+
+void addLuaRef( const std::string & str, int ref )
+{
+	if ( LuaRef.find( str ) != LuaRef.end() )
+		throw Exception( "reference ID already exists" );
+	LuaRef.insert( std::make_pair( str, ref ) );
+}
+
+void removeLuaRef( const std::string & str )
+{
+	LuaRef.erase( str );
+}
+
+/***************************************************************************/
+
 static lua_State * LUA = nullptr;
 
 void init()
@@ -418,12 +462,39 @@ void init()
 
 void cleanup()
 {
+	for ( auto i : LuaRef )
+		luaL_unref( LUA, LUA_REGISTRYINDEX, i.second );
+	LuaRef.clear();
+	
 	lua_close( LUA );
 }
 
 lua_State * state()
 {
 	return LUA;
+}
+
+void update( unsigned ms )
+{
+	for ( auto ref : LuaRef )
+	{
+		try
+		{
+			lua_rawgeti( LUA, LUA_REGISTRYINDEX, ref.second );
+			lua_pushinteger( LUA, ms );
+			
+			if ( lua_pcall( LUA, 1, 0, 0 ) )
+			{
+				std::string err = lua_tostring( LUA, -1 );
+				lua_pop( LUA, 1 );
+				throw Exception( err );
+			}
+		}
+		catch ( Exception & err )
+		{
+			Console::singleton() << con::setcerr << err.what() << con::endl;
+		}
+	}
 }
 
 /***************************************************************************/

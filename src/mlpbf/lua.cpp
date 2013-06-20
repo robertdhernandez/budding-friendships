@@ -965,6 +965,8 @@ void update( unsigned ms )
 		catch ( Exception & err )
 		{
 			Console::singleton() << con::setcerr << err.what() << con::endl;
+			Console::singleton() << con::setcerr << "Unhooking lua function " << ref.first << con::endl;
+			removeLuaRef( ref.first );
 		}
 	}
 }

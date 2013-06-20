@@ -588,6 +588,17 @@ static int text_scale( lua_State * l )
 static int text_size( lua_State * l )
 {
 	lua::Text * text = (lua::Text *) luaL_checkudata( l, 1, TEXT_MT );
+	sf::FloatRect bounds = text->text.getGlobalBounds();
+	
+	lua_pushnumber( l, bounds.width );
+	lua_pushnumber( l, bounds.height );
+	
+	return 2;
+}
+
+static int text_charsize( lua_State * l )
+{
+	lua::Text * text = (lua::Text *) luaL_checkudata( l, 1, TEXT_MT );
 	
 	if ( lua_gettop( l ) == 2 )
 		text->text.setCharacterSize( luaL_checkinteger( l, 2 ) );
@@ -617,6 +628,7 @@ static int text_free( lua_State * l )
 
 static const struct luaL_Reg libtext_mt [] =
 {
+	{ "charsize",	text_charsize },
 	{ "color",	text_color },
 	{ "display",	text_display },
 	{ "load",		text_load },

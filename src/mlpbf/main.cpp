@@ -16,6 +16,8 @@
 #include "mlpbf/time/season.h"
 
 #include "mlpbf/console.h"
+#include "mlpbf/console/function.h"
+#include "mlpbf/lua.h"
 
 #include <SFML/System/Clock.hpp>
 #include <SFML/Graphics.hpp>
@@ -34,6 +36,8 @@ bool bf::SHOW_FPS = true;
 #		include <iostream>
 #	endif
 #endif
+
+/***************************************************************************/
 
 class FPS : public sf::Drawable, bf::res::FontLoader<>
 {
@@ -74,22 +78,33 @@ private:
 	sf::Clock m_clock;
 } FPS;
 
+/***************************************************************************/
+
 void init()
 {
-	bf::res::init(); // resource managers
-	bf::db::init(); // databases
-	
-	bf::farm::init(); // farm 
+	bf::res::init(); 	// resource managers
+	bf::db::init(); 	// databases
+	bf::farm::init(); 	// farm 
+	bf::lua::init(); 	// lua
 	
 	FPS.init();
+	
+	// load console commands AFTER lua
+	bf::con::defaultCommands( bf::Console::singleton() );
 }
 
 void cleanup()
 {
-	bf::farm::cleanup(); // farm
-	bf::db::cleanup(); // databases
-	bf::res::cleanup(); // resource managers
+	// clear console commands as some may require lua
+	bf::Console::singleton().clearCommands();
+	
+	bf::lua::cleanup(); 	// lua
+	bf::farm::cleanup(); 	// farm
+	bf::db::cleanup(); 		// databases
+	bf::res::cleanup(); 	// resource managers
 }
+
+/***************************************************************************/
 
 static std::deque< const sf::Drawable * > g_Drawables;
 
@@ -104,6 +119,8 @@ void bf::hideDrawable( const sf::Drawable * d )
 	if ( find != g_Drawables.end() )
 		g_Drawables.erase( find );
 }
+
+/***************************************************************************/
 
 int main( int argc, char* argv[] )
 {

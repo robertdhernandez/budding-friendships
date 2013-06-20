@@ -93,13 +93,6 @@ Console::Console() :
 	m_bufferOffset( 0 ),
 	m_bufferColor( DEFAULT_COLOR )
 {
-	con::defaultCommands( *this );
-}
-
-Console::~Console()
-{
-	clearHistory();
-	clearCommands();
 }
 
 /***************************************************************************/
@@ -119,17 +112,8 @@ void Console::addCommand( con::Command * cmd )
 
 void Console::clearCommands()
 {
-	// shitty workaround: delete the lua console command function last
-	con::Command * lua = nullptr;
 	for ( con::Command * cmd : m_cmds )
-	{
-		if ( cmd->name() == "lua" )
-			lua = cmd;
-		else
-			delete cmd;
-	}
-	
-	delete lua;
+		delete cmd;
 	m_cmds.clear();
 }
 

@@ -388,10 +388,12 @@ static const struct luaL_Reg libtime[] =
 
 /***************************************************************************/
 
-lua_State * newState()
+static lua_State * LUA = nullptr;
+
+void init()
 {
 	// create lua state
-	lua_State * l = luaL_newstate();
+	lua_State * l = LUA = luaL_newstate();
 	luaL_openlibs( l );
 	
 	// texture metatable
@@ -412,8 +414,16 @@ lua_State * newState()
 	
 	luaL_newlib( l, libtime );
 	lua_setglobal( l, "time" );
-	
-	return l;
+}
+
+void cleanup()
+{
+	lua_close( LUA );
+}
+
+lua_State * state()
+{
+	return LUA;
 }
 
 /***************************************************************************/

@@ -6,6 +6,9 @@ namespace bf
 {
 	namespace lua
 	{
-		lua_State * newState();
+		void init();
+		void cleanup();
+	
+		lua_State * state();
 	}
 }

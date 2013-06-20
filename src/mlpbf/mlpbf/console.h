@@ -55,7 +55,6 @@ namespace bf
 
 	private:
 		Console();
-		~Console();
 
 		void onKeyPressed( const sf::Event::KeyEvent& );
 		void onKeyReleased( const sf::Event::KeyEvent& );

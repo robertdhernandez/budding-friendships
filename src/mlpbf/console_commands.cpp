@@ -305,8 +305,7 @@ class LUA : public con::Command
 	}
 
 public:
-	LUA() : executing( false ), lua( lua::newState() ) {}
-	~LUA() { lua_close( lua ); }
+	LUA() : executing( false ), lua( lua::state() ) {}
 };
 
 void defaultCommands( Console & console )

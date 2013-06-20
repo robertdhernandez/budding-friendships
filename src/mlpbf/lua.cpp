@@ -6,11 +6,15 @@
 #include "mlpbf/resource.h"
 #include "mlpbf/time.h"
 
+#include <algorithm>
 #include <cstring>
+#include <deque>
 #include <iostream>
+#include <unordered_map>
+
+#include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Text.hpp>
-#include <unordered_map>
 
 namespace bf
 {
@@ -22,20 +26,82 @@ void removeLuaRef( const std::string & str );
 
 /***************************************************************************/
 
-struct Image
+struct Drawable;
+
+class Container : public sf::Drawable, public sf::Transformable
+{
+	std::deque< lua::Drawable * > m_draw;
+	bool m_display;
+	
+public:
+	Container();
+	~Container();
+
+	void addChild( lua::Drawable * d );
+	void removeChild( const lua::Drawable * d );
+	
+	void display( bool state );
+	
+	void draw( sf::RenderTarget & target, sf::RenderStates states ) const;
+};
+
+class Drawable
+{
+	bool m_display;
+	Container * m_parent;
+
+public:
+	friend class Container;
+
+	Drawable() : 
+		m_display( false ), 
+		m_parent( nullptr ) 
+	{
+	}
+	
+	virtual ~Drawable()
+	{
+		display( false );
+	}
+	
+	void display( bool state )
+	{
+		if ( m_display != state )
+		{
+			if ( state )
+				showDrawable( &getDrawable() );
+			else
+			{
+				if ( m_parent )
+					m_parent->removeChild( this );
+				else
+					hideDrawable( &getDrawable() );
+			}
+			m_display = state;
+		}
+	}
+	
+	virtual const sf::Drawable & getDrawable() const = 0;
+};
+
+static const char * CONTAINER_MT = "game.container";
+
+struct Image : public lua::Drawable
 {
 	res::TexturePtr texture;
 	sf::Sprite sprite;
-	bool display;
+	
+	const sf::Sprite & getDrawable() const { return sprite; }
 };
 
 static const char * IMAGE_MT = "game.image";
 
-struct Text
+struct Text : public lua::Drawable
 {
 	res::FontPtr font;
 	sf::Text text;
-	bool display;
+	
+	const sf::Text & getDrawable() const { return text; }
 };
 
 static const char * TEXT_MT = "game.text";
@@ -61,6 +127,19 @@ static int game_unhook( lua_State * l )
 	return 0;
 }
 
+// game.newContainer()
+// creates a new drawing container
+static int game_newContainer( lua_State * l )
+{
+	lua::Container * cnt = (lua::Container *) lua_newuserdata( l, sizeof( lua::Container ) );
+	new (cnt) lua::Container();
+	
+	luaL_getmetatable( l, CONTAINER_MT );
+	lua_setmetatable( l, -2 );
+	
+	return 1;
+}
+
 // game.newImage()
 // creates a new image userdata
 static int game_newImage( lua_State * l )
@@ -72,8 +151,6 @@ static int game_newImage( lua_State * l )
 	luaL_getmetatable( l, IMAGE_MT );
 	lua_setmetatable( l, -2 );
 	
-	data->display = false;
-	
 	return 1;
 }
 
@@ -84,8 +161,6 @@ static int game_newText( lua_State * l )
 	
 	luaL_getmetatable( l, TEXT_MT );
 	lua_setmetatable( l, -2 );
-	
-	data->display = false;
 	
 	return 1;
 }
@@ -107,13 +182,14 @@ static int game_screen( lua_State * l )
 
 static const struct luaL_Reg libgame[] = 
 {
-	{ "hook",		game_hook },
-	{ "unhook",	game_unhook },
-	{ "newImage", 	game_newImage },
-	{ "newText",	game_newText },
-	{ "screen",	game_screen },
-	{ "showText", 	game_showText },
-	{ NULL, NULL },
+	{ "hook",			game_hook },
+	{ "unhook",		game_unhook },
+	{ "newContainer",	game_newContainer },
+	{ "newImage", 		game_newImage },
+	{ "newText",		game_newText },
+	{ "screen",		game_screen },
+	{ "showText", 		game_showText },
+	{ NULL, 			NULL },
 };
 
 /***************************************************************************/
@@ -243,6 +319,164 @@ static const struct luaL_Reg libtime[] =
 
 /***************************************************************************/
 
+lua::Container::Container() : 
+	m_display( false )
+{
+}
+
+lua::Container::~Container()
+{
+	display( false );
+}
+
+void lua::Container::addChild( lua::Drawable * d )
+{
+	m_draw.push_back( d );
+	d->m_parent = this;
+}
+
+void lua::Container::removeChild( const lua::Drawable * d )
+{
+	auto find = std::find( m_draw.begin(), m_draw.end(), d );
+	if ( find != m_draw.end() )
+	{
+		(*find)->m_parent = nullptr;
+		(*find)->m_display = false;
+		m_draw.erase( find );
+	}
+}
+
+void lua::Container::display( bool state )
+{
+	if ( m_display != state )
+	{
+		if ( m_display = state )
+			showDrawable( this );
+		else
+			hideDrawable( this );
+			
+		for ( lua::Drawable * d : m_draw )
+			d->m_display = m_display;
+	}
+}
+
+void lua::Container::draw( sf::RenderTarget & target, sf::RenderStates states ) const
+{
+	states.transform *= getTransform();
+	for ( const lua::Drawable * d : m_draw )
+		target.draw( d->getDrawable(), states );
+}
+
+static int container_addImage( lua_State * l )
+{
+	lua::Container * container = (lua::Container *) luaL_checkudata( l, 1, CONTAINER_MT );
+	lua::Image * image = (lua::Image *) luaL_checkudata( l, 2, IMAGE_MT );
+	
+	container->addChild( image );
+
+	return 0;
+}
+
+static int container_addText( lua_State * l )
+{
+	lua::Container * container = (lua::Container *) luaL_checkudata( l, 1, CONTAINER_MT );
+	lua::Text * text = (lua::Text *) luaL_checkudata( l, 2, TEXT_MT );
+	
+	container->addChild( text );
+	
+	return 0;
+}
+
+static int container_display( lua_State * l )
+{
+	lua::Container * container = (lua::Container *) luaL_checkudata( l, 1, CONTAINER_MT );
+	luaL_checktype( l, 2, LUA_TBOOLEAN );
+	
+	container->display( lua_toboolean( l, 2 ) );
+	
+	return 0;
+}
+
+static int container_origin( lua_State * l )
+{
+	lua::Container * container = (lua::Container *) luaL_checkudata( l, 1, CONTAINER_MT );
+	
+	if ( lua_gettop( l ) == 3 )
+	{
+		float x = luaL_checknumber( l, 2 );
+		float y = luaL_checknumber( l, 3 );
+		
+		container->setOrigin( x, y );
+	}
+	
+	const sf::Vector2f & origin = container->getOrigin();
+	lua_pushnumber( l, origin.x );
+	lua_pushnumber( l, origin.y );
+	
+	return 2;
+}
+
+static int container_position( lua_State * l )
+{
+	lua::Container * container = (lua::Container *) luaL_checkudata( l, 1, CONTAINER_MT );
+	
+	if ( lua_gettop( l ) == 3 )
+	{
+		float x = luaL_checknumber( l, 2 );
+		float y = luaL_checknumber( l, 3 );
+		
+		container->setPosition( x, y );
+	}
+
+	const sf::Vector2f & pos = container->getPosition();
+	lua_pushnumber( l, pos.x );
+	lua_pushnumber( l, pos.y );
+	
+	return 2;
+}
+
+static int container_removeImage( lua_State * l )
+{
+	lua::Container * container = (lua::Container *) luaL_checkudata( l, 1, CONTAINER_MT );
+	lua::Image * image = (lua::Image *) luaL_checkudata( l, 2, IMAGE_MT );
+	
+	container->removeChild( image );
+
+	return 0;
+}
+
+static int container_removeText( lua_State * l )
+{
+	lua::Container * container = (lua::Container *) luaL_checkudata( l, 1, CONTAINER_MT );
+	lua::Text * text = (lua::Text *) luaL_checkudata( l, 2, TEXT_MT );
+	
+	container->removeChild( text );
+
+	return 0;
+}
+
+static int container_free( lua_State * l )
+{
+	lua::Container * container = (lua::Container *) luaL_checkudata( l, 1, CONTAINER_MT );
+	container->~Container();
+	return 0;
+}
+
+static const struct luaL_Reg libcontainer_mt[] =
+{
+	{ "addImage",		container_addImage },
+	{ "addText",		container_addText },
+	{ "display",		container_display },
+	{ "origin",		container_origin },
+	{ "position",		container_position },
+	{ "removeImage", 	container_removeImage },
+	{ "removeText",	container_removeText },
+	{ "__gc",			container_free },
+	{ NULL, 			NULL },
+};
+
+/***************************************************************************/
+
 static int image_color( lua_State * l )
 {
 	lua::Image * image = (lua::Image *) luaL_checkudata( l, 1, IMAGE_MT );
@@ -272,10 +506,7 @@ static int image_display( lua_State * l )
 	lua::Image * image = (lua::Image *) luaL_checkudata( l, 1, IMAGE_MT );
 	luaL_checktype( l, 2, LUA_TBOOLEAN );
 	
-	if ( image->display = lua_toboolean( l, 2 ) )
-		showDrawable( &image->sprite );
-	else
-		hideDrawable( &image->sprite );
+	image->display( lua_toboolean( l, 2 ) );
 	
 	return 0;
 }
@@ -442,7 +673,6 @@ static int image_subrect( lua_State * l )
 static int image_free( lua_State * l )
 {
 	lua::Image * data = (lua::Image *) luaL_checkudata( l, 1, IMAGE_MT );
-	if ( data->display ) hideDrawable( &data->sprite );
 	data->~Image();
 	return 0;
 }
@@ -496,10 +726,7 @@ static int text_display( lua_State * l )
 	lua::Text * text = (lua::Text *) luaL_checkudata( l, 1, TEXT_MT );
 	luaL_checktype( l, 2, LUA_TBOOLEAN );
 	
-	if ( text->display = lua_toboolean( l, 2 ) )
-		showDrawable( &text->text );
-	else
-		hideDrawable( &text->text );
+	text->display( lua_toboolean( l, 2 ) );
 	
 	return 0;
 }
@@ -621,7 +848,6 @@ static int text_string( lua_State * l )
 static int text_free( lua_State * l )
 {
 	lua::Text * data = (lua::Text *) luaL_checkudata( l, 1, TEXT_MT );
-	if ( data->display ) hideDrawable( &data->text );
 	data->~Text();
 	return 0;
 }
@@ -667,6 +893,15 @@ void init()
 	// create lua state
 	lua_State * l = LUA = luaL_newstate();
 	luaL_openlibs( l );
+	
+	// container metatable
+	luaL_newmetatable( l, CONTAINER_MT );
+	
+	lua_pushvalue( l, -1 );
+	lua_setfield( l, -2, "__index" );
+	
+	luaL_setfuncs( l, libcontainer_mt, 0 );
+	lua_pop( l, 1 );
 	
 	// image metatable
 	luaL_newmetatable( l, IMAGE_MT );

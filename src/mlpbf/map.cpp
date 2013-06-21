@@ -638,7 +638,32 @@ class Script : public Map::Object, public lua::Container
 	
 	bool hasCollision( const sf::Vector2f & pos ) const
 	{
-		return false;
+		lua_State * l = m_lua;
+		lua_rawgeti( l, LUA_REGISTRYINDEX, ref );
+		lua_getfield( l, -1, "hasCollision" );
+		
+		if ( !lua_isfunction( l, -1 ) )
+		{
+			lua_pop( l, lua_gettop( l ) );
+			return false;
+		}
+		
+		lua_pushvalue( l, -2 );
+		lua_pushnumber( l, pos.x );
+		lua_pushnumber( l, pos.y );
+		
+		if ( lua_pcall( l, 3, 1, 0 ) )
+		{
+			Console::singleton() << con::setcerr << lua_tostring( l, -1 ) << con::endl;
+			lua_pop( l, lua_gettop( l ) );
+			return false;
+		}
+		else
+		{
+			bool ret = lua_toboolean( l, -1 );
+			lua_pop( l, lua_gettop( l ) );
+			return ret;
+		}
 	}
 	
 	void load( const Tmx::Object & object )
@@ -678,7 +703,6 @@ class Script : public Map::Object, public lua::Container
 		if ( !lua_isfunction( l, -1 ) )
 		{
 			lua_pop( l, 2 ); // pop load and table
-			luaL_unref( l, LUA_REGISTRYINDEX, ref );
 			throw Exception( "load must be a function" );
 		}
 		
@@ -687,7 +711,7 @@ class Script : public Map::Object, public lua::Container
 		if ( lua_pcall( l, 1, 0, 0 ) )
 		{
 			std::string err = lua_tostring( l, -1 );
-			lua_pop( l, 1 );
+			lua_pop( l, 2 );
 			throw Exception( err );
 		}
 		

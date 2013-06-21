@@ -26,65 +26,37 @@ void removeLuaRef( const std::string & str );
 
 /***************************************************************************/
 
-struct Drawable;
+const char * CONTAINER_MT = "game.container";
+const char * IMAGE_MT = "game.image";
+const char * TEXT_MT = "game.text";
 
-class Container : public sf::Drawable, public sf::Transformable
+Drawable::Drawable() : 
+	m_display( false ), 
+	m_parent( nullptr ) 
 {
-	std::deque< lua::Drawable * > m_draw;
-	bool m_display;
-	
-public:
-	Container();
-	~Container();
+}
 
-	void addChild( lua::Drawable * d );
-	void removeChild( const lua::Drawable * d );
-	
-	void display( bool state );
-	
-	void draw( sf::RenderTarget & target, sf::RenderStates states ) const;
-};
-
-class Drawable
+Drawable::~Drawable()
 {
-	bool m_display;
-	Container * m_parent;
+	display( false );
+}
 
-public:
-	friend class Container;
-
-	Drawable() : 
-		m_display( false ), 
-		m_parent( nullptr ) 
+void Drawable::display( bool state )
+{
+	if ( m_display != state )
 	{
-	}
-	
-	virtual ~Drawable()
-	{
-		display( false );
-	}
-	
-	void display( bool state )
-	{
-		if ( m_display != state )
+		if ( state )
+			showDrawable( &getDrawable() );
+		else
 		{
-			if ( state )
-				showDrawable( &getDrawable() );
+			if ( m_parent )
+				m_parent->removeChild( this );
 			else
-			{
-				if ( m_parent )
-					m_parent->removeChild( this );
-				else
-					hideDrawable( &getDrawable() );
-			}
-			m_display = state;
+				hideDrawable( &getDrawable() );
 		}
+		m_display = state;
 	}
-	
-	virtual const sf::Drawable & getDrawable() const = 0;
-};
-
-static const char * CONTAINER_MT = "game.container";
+}
 
 struct Image : public lua::Drawable
 {
@@ -94,8 +66,6 @@ struct Image : public lua::Drawable
 	const sf::Sprite & getDrawable() const { return sprite; }
 };
 
-static const char * IMAGE_MT = "game.image";
-
 struct Text : public lua::Drawable
 {
 	res::FontPtr font;
@@ -103,8 +73,6 @@ struct Text : public lua::Drawable
 	
 	const sf::Text & getDrawable() const { return text; }
 };
-
-static const char * TEXT_MT = "game.text";
 
 /***************************************************************************/
 

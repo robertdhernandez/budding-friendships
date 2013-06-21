@@ -71,7 +71,7 @@ inline void setNeighbor( const std::map< std::string, std::string >& map, const 
 
 /***************************************************************************/
 
-class Map::Object : public sf::Drawable, private sf::Transformable
+class Map::Object : public virtual sf::Drawable, private virtual sf::Transformable
 {
 public:
 	friend Map::Object * generateObject( const Tmx::Object & );
@@ -612,15 +612,29 @@ class Field : public Map::Object, res::TextureLoader<>
 
 /***************************************************************************/
 
-class Script : public Map::Object
+static int lua_addImage( lua_State * l );
+static int lua_addText( lua_State * l );
+static int lua_removeImage( lua_State * l );
+static int lua_removeText( lua_State * l );
+
+static const char * SCRIPT_MT = "map.script";
+static const char * SCRIPT_OBJ = "__object";
+
+static const struct luaL_Reg SCRIPT_LIB [] =
+{
+	{ "addImage",		lua_addImage },
+	{ "addText",		lua_addText },
+	{ "removeImage",	lua_removeImage },
+	{ "removeText",	lua_removeText },
+	{ NULL, NULL },
+};
+
+class Script : public Map::Object, public lua::Container
 {
 	lua_State * m_lua;
 	int ref;
-	
-	class LuaException : public Exception { public: LuaException( lua_State * l ) { *this << lua_tostring( l, -1 ); lua_pop( l, 1 ); } };
 
-	static constexpr char * METATABLE = "map.script";
-	static constexpr char * OBJECT = "__object";
+	class LuaException : public Exception { public: LuaException( lua_State * l ) { *this << lua_tostring( l, -1 ); lua_pop( l, 1 ); } };
 	
 	bool hasCollision( const sf::Vector2f & pos ) const
 	{
@@ -632,7 +646,7 @@ class Script : public Map::Object
 		const auto & list = object.GetProperties().GetList();
 		
 		lua_State * l = m_lua = lua::state();
-		Console::singleton() << con::setcinfo << lua_gettop( l ) << con::endl;
+		//Console::singleton() << con::setcinfo << lua_gettop( l ) << con::endl;
 		
 		// execute the lua script, and retrieve a table
 		if ( luaL_loadfile( l, list.at( "file" ).c_str() ) || lua_pcall( l, 0, 1, 0 ) )
@@ -645,20 +659,19 @@ class Script : public Map::Object
 			throw Exception( "script must return a table" ); 
 		}
 		
-		// copy the table and register it to the registry
-		lua_pushvalue( l, -1 );
-		ref = luaL_ref( l, LUA_REGISTRYINDEX );
+		// register map object functions to the table
+		luaL_setfuncs( l, SCRIPT_LIB, 0 );
 		
 		// create a script ** userdata to reference this object
 		Script ** script = (Script **) lua_newuserdata( l, sizeof( Script * ) );
 		*script = this;
 		
 		// set the metatable of the script ** userdata
-		luaL_newmetatable( l, METATABLE );
+		luaL_newmetatable( l, SCRIPT_MT );
 		lua_setmetatable( l, -2 );
 		
 		// set the script ** userdata to the OBJECT field of the table
-		lua_setfield( l, -2, OBJECT );
+		lua_setfield( l, -2, SCRIPT_OBJ );
 		
 		// get table:load and ensure it is a function
 		lua_getfield( l, -1, "load" );
@@ -675,12 +688,11 @@ class Script : public Map::Object
 		{
 			std::string err = lua_tostring( l, -1 );
 			lua_pop( l, 1 );
-			luaL_unref( l, LUA_REGISTRYINDEX, ref );
 			throw Exception( err );
 		}
 		
-		// pop the table from the stack
-		lua_pop( l, 1 );
+		// register the table
+		ref = luaL_ref( l, LUA_REGISTRYINDEX );
 	}
 	
 	void onInteract( const sf::Vector2f & pos )
@@ -710,12 +722,60 @@ class Script : public Map::Object
 		lua_pop( l, 1 ); // pop table
 	}
 	
-	void draw( sf::RenderTarget & target, sf::RenderStates states ) const
-	{
-		states.transform *= getTransform();
-		//target.draw( m_container, states );
-	}
+	using lua::Container::draw;
 };
+
+static int lua_addImage( lua_State * l )
+{
+	luaL_checktype( l, 1, LUA_TTABLE );
+	lua::Drawable * d = (lua::Drawable *) luaL_checkudata( l, 2, lua::IMAGE_MT ); 
+	
+	lua_getfield( l, 1, SCRIPT_OBJ );
+	Script ** obj = (Script **) luaL_checkudata( l, -1, SCRIPT_MT );
+	
+	(*obj)->addChild( d );
+	
+	return 0;
+}
+
+static int lua_addText( lua_State * l )
+{
+	luaL_checktype( l, 1, LUA_TTABLE );
+	lua::Drawable * d = (lua::Drawable *) luaL_checkudata( l, 2, lua::TEXT_MT );
+	
+	lua_getfield( l, 1, SCRIPT_OBJ );
+	Script ** obj = (Script **) luaL_checkudata( l, -1, SCRIPT_MT );
+	
+	(*obj)->addChild( d );
+	
+	return 0;
+}
+
+static int lua_removeImage( lua_State * l )
+{
+	luaL_checktype( l, 1, LUA_TTABLE );
+	lua::Drawable * d = (lua::Drawable *) luaL_checkudata( l, 2, lua::IMAGE_MT );
+	
+	lua_getfield( l, 1, SCRIPT_OBJ );
+	Script ** obj = (Script **) luaL_checkudata( l, -1, SCRIPT_MT );
+	
+	(*obj)->removeChild( d );
+
+	return 0;
+}
+
+static int lua_removeText( lua_State * l )
+{
+	luaL_checktype( l, 1, LUA_TTABLE );
+	lua::Drawable * d = (lua::Drawable *) luaL_checkudata( l, 2, lua::TEXT_MT );
+	
+	lua_getfield( l, 1, SCRIPT_OBJ );
+	Script ** obj = (Script **) luaL_checkudata( l, -1, SCRIPT_MT );
+	
+	(*obj)->removeChild( d );
+
+	return 0;
+}
 
 /***************************************************************************/
 

@@ -689,7 +689,7 @@ class Script : public Map::Object
 	
 		lua_rawgeti( l, LUA_REGISTRYINDEX, ref );
 		
-		lua_getfield( l, -1, "onInteract" );
+		lua_getfield( l, -1, "interact" );
 		if ( !lua_isfunction( l, -1 ) )
 		{
 			lua_pop( l, 2 ); // pop table, table.onInteract

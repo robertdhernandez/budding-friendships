@@ -5,6 +5,7 @@
 #include "mlpbf/exception.h"
 #include "mlpbf/farm.h"
 #include "mlpbf/global.h"
+#include "mlpbf/lua.h"
 #include "mlpbf/map.h"
 #include "mlpbf/resource.h"
 #include "mlpbf/time/season.h"
@@ -611,6 +612,113 @@ class Field : public Map::Object, res::TextureLoader<>
 
 /***************************************************************************/
 
+class Script : public Map::Object
+{
+	lua_State * m_lua;
+	int ref;
+	
+	class LuaException : public Exception { public: LuaException( lua_State * l ) { *this << lua_tostring( l, -1 ); lua_pop( l, 1 ); } };
+
+	static constexpr char * METATABLE = "map.script";
+	static constexpr char * OBJECT = "__object";
+	
+	bool hasCollision( const sf::Vector2f & pos ) const
+	{
+		return false;
+	}
+	
+	void load( const Tmx::Object & object )
+	{
+		const auto & list = object.GetProperties().GetList();
+		
+		lua_State * l = m_lua = lua::state();
+		Console::singleton() << con::setcinfo << lua_gettop( l ) << con::endl;
+		
+		// execute the lua script, and retrieve a table
+		if ( luaL_loadfile( l, list.at( "file" ).c_str() ) || lua_pcall( l, 0, 1, 0 ) )
+			throw LuaException( l );
+			
+		// ensure the returned value is a table
+		if ( !lua_istable( l, -1 ) )
+		{
+			lua_pop( l, 1 ); // pop table
+			throw Exception( "script must return a table" ); 
+		}
+		
+		// copy the table and register it to the registry
+		lua_pushvalue( l, -1 );
+		ref = luaL_ref( l, LUA_REGISTRYINDEX );
+		
+		// create a script ** userdata to reference this object
+		Script ** script = (Script **) lua_newuserdata( l, sizeof( Script * ) );
+		*script = this;
+		
+		// set the metatable of the script ** userdata
+		luaL_newmetatable( l, METATABLE );
+		lua_setmetatable( l, -2 );
+		
+		// set the script ** userdata to the OBJECT field of the table
+		lua_setfield( l, -2, OBJECT );
+		
+		// get table:load and ensure it is a function
+		lua_getfield( l, -1, "load" );
+		if ( !lua_isfunction( l, -1 ) )
+		{
+			lua_pop( l, 2 ); // pop load and table
+			luaL_unref( l, LUA_REGISTRYINDEX, ref );
+			throw Exception( "load must be a function" );
+		}
+		
+		// call table:load
+		lua_pushvalue( l, -2 );
+		if ( lua_pcall( l, 1, 0, 0 ) )
+		{
+			std::string err = lua_tostring( l, -1 );
+			lua_pop( l, 1 );
+			luaL_unref( l, LUA_REGISTRYINDEX, ref );
+			throw Exception( err );
+		}
+		
+		// pop the table from the stack
+		lua_pop( l, 1 );
+	}
+	
+	void onInteract( const sf::Vector2f & pos )
+	{
+		lua_State * l = m_lua;
+	
+		lua_rawgeti( l, LUA_REGISTRYINDEX, ref );
+		
+		lua_getfield( l, -1, "onInteract" );
+		if ( !lua_isfunction( l, -1 ) )
+		{
+			lua_pop( l, 2 ); // pop table, table.onInteract
+			return;
+		}
+		
+		lua_pushvalue( l, -2 );
+		lua_pushnumber( l, pos.x );
+		lua_pushnumber( l, pos.y );
+		
+		if ( lua_pcall( l, 3, 0, 0 ) )
+		{
+			std::string err = lua_tostring( l, -1 );
+			lua_pop( l, 2 );
+			throw Exception( err );
+		}
+		
+		lua_pop( l, 1 ); // pop table
+	}
+	
+	void draw( sf::RenderTarget & target, sf::RenderStates states ) const
+	{
+		states.transform *= getTransform();
+		//target.draw( m_container, states );
+	}
+};
+
+/***************************************************************************/
+
 class Sign : public Map::Object, private res::TextureLoader<>
 {
 	std::string m_text;
@@ -668,6 +776,8 @@ Map::Object * generateObject( const Tmx::Object & tmxObject )
 			object = new Sign();
 		else if ( type == "field" )
 			object = new Field();
+		else if ( type == "script" )
+			object = new Script();
 		else
 			throw UnknownObjectException( tmxObject );
 	

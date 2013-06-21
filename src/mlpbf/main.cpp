@@ -82,10 +82,10 @@ private:
 
 void init()
 {
+	bf::lua::init(); 	// lua
 	bf::res::init(); 	// resource managers
 	bf::db::init(); 	// databases
 	bf::farm::init(); 	// farm 
-	bf::lua::init(); 	// lua
 	
 	FPS.init();
 	
@@ -98,10 +98,10 @@ void cleanup()
 	// clear console commands as some may require lua
 	bf::Console::singleton().clearCommands();
 	
-	bf::lua::cleanup(); 	// lua
 	bf::farm::cleanup(); 	// farm
 	bf::db::cleanup(); 		// databases
 	bf::res::cleanup(); 	// resource managers
+	bf::lua::cleanup(); 	// lua
 }
 
 /***************************************************************************/

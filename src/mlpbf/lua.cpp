@@ -296,6 +296,7 @@ static int time_date( lua_State * l )
 // (3) time.hour( str )
 // (4) time.hour( h, m )
 // returns the hour [0,23] and minute [0,59]
+// BUG: incrementing past midnight doesn't change the day
 static int time_hour( lua_State * l )
 {
 	time::Hour & hour = Time::singleton().getHour();

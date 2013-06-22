@@ -28,6 +28,8 @@ namespace bf
 	
 		void load( unsigned id, const std::string& );
 		void loadNeighbors();
+		
+		void reloadObject( const std::string & obj );
 
 		void update( sf::Uint32 frameTime, const sf::Vector2f& pos );
 		bool interact( const sf::Vector2f& pos );

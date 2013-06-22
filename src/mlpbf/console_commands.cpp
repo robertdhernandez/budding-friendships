@@ -1,9 +1,10 @@
 #include "mlpbf/console.h"
 #include "mlpbf/console/command.h"
 #include "mlpbf/console/function.h"
-
+#include "mlpbf/database.h"
 #include "mlpbf/global.h"
 #include "mlpbf/lua.h"
+#include "mlpbf/map.h"
 #include "mlpbf/player.h"
 #include "mlpbf/time.h"
 #include "mlpbf/exception.h"
@@ -18,7 +19,7 @@ namespace con
 
 /***************************************************************************/
 
-class HELP : public con::Command
+class Help : public con::Command
 {
 	const std::string name() const
 	{
@@ -55,7 +56,7 @@ class HELP : public con::Command
 	}
 };
 
-class CLEAR : public con::Command
+class Clear : public con::Command
 {
 	const std::string name() const
 	{
@@ -78,7 +79,7 @@ class CLEAR : public con::Command
 	}
 };
 
-class REPOSITION : public con::Command
+class Reposition : public con::Command
 {
 	const std::string name() const
 	{
@@ -107,7 +108,7 @@ class REPOSITION : public con::Command
 	}
 };
 
-class ANIMATE : public con::Command
+class Animate : public con::Command
 {
 	const std::string name() const
 	{
@@ -135,7 +136,7 @@ class ANIMATE : public con::Command
 	}
 };
 
-class DEBUG_COLLISION : public con::Command
+class DebugCollision : public con::Command
 {
 	const std::string name() const
 	{
@@ -159,7 +160,7 @@ class DEBUG_COLLISION : public con::Command
 	}
 };
 
-class TIME : public con::Command
+class GetTime : public con::Command
 {
 	const std::string name() const
 	{
@@ -177,13 +178,13 @@ class TIME : public con::Command
 
 	void execute( Console& c, const std::vector< std::string >& args ) const
 	{
-		const Time& t = Time::singleton();
+		const bf::Time & t = bf::Time::singleton();
 		if ( args.size() == 0 )
 			c << t.getHour() << ", " << t.getDate() << con::endl;
 	}
 };
 
-class TIMESCALE : public con::Command
+class Timescale : public con::Command
 {
 	const std::string name() const
 	{
@@ -206,7 +207,7 @@ class TIMESCALE : public con::Command
 	}
 };
 
-class SHOW_FPS : public con::Command
+class ShowFPS : public con::Command
 {
 	const std::string name() const
 	{
@@ -230,7 +231,7 @@ class SHOW_FPS : public con::Command
 	}
 };
 
-class MESSAGE : public con::Command
+class Message : public con::Command
 {
 	const std::string name() const
 	{
@@ -259,7 +260,7 @@ class MESSAGE : public con::Command
 	}
 };
 
-class LUA : public con::Command
+class Lua : public con::Command
 {
 	mutable bool executing;
 	mutable lua_State * lua;
@@ -305,21 +306,47 @@ class LUA : public con::Command
 	}
 
 public:
-	LUA() : executing( false ), lua( lua::state() ) {}
+	Lua() : executing( false ), lua( lua::state() ) {}
+};
+
+class ReloadMapObject : public con::Command
+{
+	const std::string name() const
+	{
+		return "reload_map_object";
+	}
+	
+	unsigned minArgs() const
+	{
+		return 2;
+	}
+	
+	void help( Console & c ) const
+	{
+		c << setcinfo << "Reloads an already loaded map object" << con::endl;
+		c << setcinfo << "Useful for reloading a map object loaded from a Lua script" << con::endl;
+		c << setcinfo << "reload_map_object map obj" << con::endl;
+	}
+	
+	void execute( Console & c, const std::vector< std::string > & args ) const
+	{
+		db::getMap( args[0] ).reloadObject( args[1] );
+	}
 };
 
 void defaultCommands( Console & console )
 {
-	console.addCommand( new HELP );
-	console.addCommand( new CLEAR );
-	console.addCommand( new REPOSITION );
-	console.addCommand( new ANIMATE );
-	console.addCommand( new DEBUG_COLLISION );
-	console.addCommand( new TIME );
-	console.addCommand( new SHOW_FPS );
-	console.addCommand( new TIMESCALE );
-	console.addCommand( new MESSAGE );
-	console.addCommand( new LUA );
+	console.addCommand( new Help );
+	console.addCommand( new Clear );
+	console.addCommand( new Reposition );
+	console.addCommand( new Animate );
+	console.addCommand( new DebugCollision );
+	console.addCommand( new GetTime );
+	console.addCommand( new ShowFPS );
+	console.addCommand( new Timescale );
+	console.addCommand( new Message );
+	console.addCommand( new Lua );
+	console.addCommand( new ReloadMapObject );
 }
 
 /***************************************************************************/

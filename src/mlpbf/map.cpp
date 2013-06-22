@@ -77,8 +77,9 @@ public:
 	friend Map::Object * generateObject( const Tmx::Object & );
 	virtual ~Object() {}
 
-	const std::string & getName() const { return m_name; }
-	const sf::FloatRect & getBounds() const { return m_bounds; }
+	inline const std::string & getName() const { return m_name; }
+	inline const sf::FloatRect & getBounds() const { return m_bounds; }
+	inline const Tmx::Object & getObject() const { return *m_object; }
 
 	using sf::Transformable::getPosition;
 	using sf::Transformable::setPosition;
@@ -101,6 +102,7 @@ protected:
 private:
 	std::string m_name;
 	sf::FloatRect m_bounds;
+	const Tmx::Object * m_object;
 };
 
 Map::Object * generateObject( const Tmx::Object & tmxObject );
@@ -267,6 +269,52 @@ void Map::loadNeighbors()
 	setNeighbor( properties, "south", m_neighbors[ Down ] );
 	setNeighbor( properties, "west", m_neighbors[ Left ] );
 	setNeighbor( properties, "east", m_neighbors[ Right ] );
+}
+
+void Map::reloadObject( const std::string & objStr )
+{
+	std::vector< Map::Object * >::iterator objItr;
+	for ( objItr = m_objects.begin(); objItr != m_objects.end(); objItr++ )
+		if ( (*objItr)->getName() == objStr )
+			break;
+		
+	Map::Object * obj = nullptr;
+	const Tmx::Object * objTmx = nullptr;
+	
+	if ( objItr != m_objects.end() )
+	{
+		// retrieve the object and delete it (note: the address is still exists)
+		obj = *objItr;
+		objTmx = &obj->getObject();
+		delete obj;
+	
+		// erase from objects vector
+		m_objects.erase( objItr );
+	
+		// if in active objects, find and remove it
+		auto find = std::find( m_activeObjects.begin(), m_activeObjects.end(), obj );
+		if ( find != m_activeObjects.end() ) m_activeObjects.erase( find );
+	}
+	else
+	{
+		const auto & objects = m_map.GetObjectGroups();
+		for ( auto it = objects.begin(); it != objects.end() && objTmx == nullptr; ++it )
+		{
+			const auto& objectGroup = (*it)->GetObjects();
+			for ( auto ij = objectGroup.begin(); ij != objectGroup.end() && objTmx == nullptr; ++ij )
+			{
+				const Tmx::Object & object = *(*ij);
+				if ( object.GetName() == objStr )
+					objTmx = &object;
+			}
+		}
+	}
+	
+	// generate the object
+	obj = generateObject( *objTmx );
+	
+	// add the object to the object vector
+	m_objects.push_back( obj );
 }
 
 void Map::update( sf::Uint32 frameTime, const sf::Vector2f& pos )
@@ -906,6 +954,7 @@ Map::Object * generateObject( const Tmx::Object & tmxObject )
 
 		object->m_name = tmxObject.GetName();
 		object->m_bounds = sf::FloatRect( (float) tmxObject.GetX(), (float) tmxObject.GetY(), (float) tmxObject.GetWidth(), (float) tmxObject.GetHeight() );
+		object->m_object = &tmxObject;
 
 		object->load( tmxObject );
 		return object;

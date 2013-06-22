@@ -258,7 +258,7 @@ static const struct luaL_Reg libconsole[] =
 /***************************************************************************/
 
 // (1) time.date()
-// (2) time.date( tday )
+// (2) time.date( inc )
 // (3) time.date( str )
 // (4) time.date( season, day [, year ] )
 // returns the day [1,30], season [0,3], and year in that order
@@ -270,7 +270,7 @@ static int time_date( lua_State * l )
 	if ( n == 1 )
 	{
 		if ( lua_isnumber( l, 1 ) )
-			date.set( lua_tointeger( l, 1 ) );
+			date.increment( lua_tointeger( l, 1 ) );
 		else
 			date.set( lua_tostring( l, 1 ) );
 	}
@@ -292,8 +292,9 @@ static int time_date( lua_State * l )
 }
 
 // (1) time.hour()
-// (2) time.hour( str )
-// (3) time.hour( h, m )
+// (2) time.hour( inc )
+// (3) time.hour( str )
+// (4) time.hour( h, m )
 // returns the hour [0,23] and minute [0,59]
 static int time_hour( lua_State * l )
 {
@@ -301,7 +302,12 @@ static int time_hour( lua_State * l )
 	
 	int n = lua_gettop( l );
 	if ( n == 1 )
-		hour.set( luaL_checkstring( l, 1 ) );
+	{
+		if ( lua_isnumber( l, 1 ) )
+			hour.increment( lua_tointeger( l, 1 ) );
+		else
+			hour.set( lua_tostring( l, 1 ) );
+	}
 	else if ( n == 2 )
 		hour.set( luaL_checkinteger( l, 1 ), luaL_checkinteger( l, 2 ) );
 	
@@ -327,12 +333,19 @@ static int time_state( lua_State * l )
 	return 1;
 }
 
+static int time_timescale( lua_State * l )
+{
+	Time::singleton().setTimescale( luaL_checknumber( l, 1 ) );
+	return 0;
+}
+
 static const struct luaL_Reg libtime[] =
 {
-	{ "date", time_date },
-	{ "hour",	time_hour },
-	{ "state", time_state },
-	{ NULL, NULL },
+	{ "date", 	time_date },
+	{ "hour",		time_hour },
+	{ "state", 	time_state },
+	{ "timescale", time_timescale },
+	{ NULL, 		NULL },
 };
 
 /***************************************************************************/

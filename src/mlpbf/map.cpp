@@ -361,7 +361,8 @@ bool Map::interact( const sf::Vector2f& pos )
 	for ( Map::Object * obj : m_objects )
 		if ( obj->getBounds().contains( pos ) )
 		{
-			obj->onInteract( pos - obj->getPosition() );
+			try { obj->onInteract( pos - obj->getPosition() ); }
+			catch ( std::exception & err ) { Console::singleton() << con::setcerr << err.what() << con::endl; }
 			ret = true;
 		}
 	return ret;
@@ -743,30 +744,29 @@ class Script : public Map::Object, public lua::Container
 		
 		// get table:load and ensure it is a function
 		lua_getfield( l, -1, "load" );
-		if ( !lua_isfunction( l, -1 ) )
+		if ( lua_isfunction( l, -1 ) )
 		{
-			lua_pop( l, 2 ); // pop load and table
-			throw Exception( "load must be a function" );
-		}
+			// push the table as an argument
+			lua_pushvalue( l, -2 );
 		
-		// push the table as an argument
-		lua_pushvalue( l, -2 );
+			// push Tmx::Object properties as a table
+			lua_newtable( l );
+			for ( auto & arg : list )
+			{
+				lua_pushstring( l, arg.second.c_str() );
+				lua_setfield( l, -2, arg.first.c_str() );
+			}
 		
-		// push Tmx::Object properties as a table
-		lua_newtable( l );
-		for ( auto & arg : list )
-		{
-			lua_pushstring( l, arg.second.c_str() );
-			lua_setfield( l, -2, arg.first.c_str() );
+			// call table:load
+			if ( lua_pcall( l, 2, 0, 0 ) )
+			{
+				std::string err = lua_tostring( l, -1 );
+				lua_pop( l, 2 );
+				throw Exception( err );
+			}
 		}
-		
-		// call table:load
-		if ( lua_pcall( l, 2, 0, 0 ) )
-		{
-			std::string err = lua_tostring( l, -1 );
-			lua_pop( l, 2 );
-			throw Exception( err );
-		}
+		else
+			lua_pop( l, 1 ); // pop table.load leaving table at the top
 		
 		// register the table
 		ref = luaL_ref( l, LUA_REGISTRYINDEX );

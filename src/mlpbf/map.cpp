@@ -281,17 +281,24 @@ void Map::update( sf::Uint32 frameTime, const sf::Vector2f& pos )
 	// Remove the objects that the player has left and call their onExit
 	for ( auto it = remove.begin(); it != remove.end(); ++it )
 	{
-		(*it)->onExit( frameTime, pos - (*it)->getPosition() );
+		try { (*it)->onExit( frameTime, pos - (*it)->getPosition() ); }
+		catch ( std::exception & err ) { Console::singleton() << con::setcerr << err.what() << con::endl; }
 		std::remove( m_activeObjects.begin(), m_activeObjects.end(), *it );
 	}
 
 	// Update all objects on the map
 	for ( auto it = m_objects.begin(); it != m_objects.end(); ++it )
-		(*it)->update( frameTime, pos - (*it)->getPosition() );
+	{
+		try { (*it)->update( frameTime, pos - (*it)->getPosition() ); }
+		catch ( std::exception & err ) { Console::singleton() << con::setcerr << err.what() << con::endl; }
+	}
 
 	// Update all active objects
 	for ( auto it = m_activeObjects.begin(); it != m_activeObjects.end(); ++it )
-		(*it)->whileInside( frameTime, pos - (*it)->getPosition() );
+	{
+		try { (*it)->whileInside( frameTime, pos - (*it)->getPosition() ); }
+		catch ( std::exception & err ) { Console::singleton() << con::setcerr << err.what() << con::endl; }
+	}
 
 	// Check if the player has entered any new objects
 	for ( auto it = m_objects.begin(); it != m_objects.end(); ++it )
@@ -299,7 +306,8 @@ void Map::update( sf::Uint32 frameTime, const sf::Vector2f& pos )
 		const sf::FloatRect& rect = (*it)->getBounds();
 		if ( rect.contains( pos ) && std::find( m_activeObjects.begin(), m_activeObjects.end(), *it ) != m_activeObjects.end() )
 		{
-			(*it)->onEnter( frameTime, pos - (*it)->getPosition() );
+			try { (*it)->onEnter( frameTime, pos - (*it)->getPosition() ); }
+			catch ( std::exception & err ) { Console::singleton() << con::setcerr << err.what() << con::endl; }
 			m_activeObjects.push_back( *it );
 		}
 	}
@@ -636,34 +644,23 @@ class Script : public Map::Object, public lua::Container
 
 	class LuaException : public Exception { public: LuaException( lua_State * l ) { *this << lua_tostring( l, -1 ); lua_pop( l, 1 ); } };
 	
-	bool hasCollision( const sf::Vector2f & pos ) const
+	static bool pushTableFunction( lua_State * l, int ref, const char * fn )
 	{
-		lua_State * l = m_lua;
 		lua_rawgeti( l, LUA_REGISTRYINDEX, ref );
-		lua_getfield( l, -1, "hasCollision" );
-		
+		lua_getfield( l, -1, fn );
 		if ( !lua_isfunction( l, -1 ) )
 		{
-			lua_pop( l, lua_gettop( l ) );
+			lua_pop( l, 2 );
 			return false;
 		}
-		
 		lua_pushvalue( l, -2 );
-		lua_pushnumber( l, pos.x );
-		lua_pushnumber( l, pos.y );
-		
-		if ( lua_pcall( l, 3, 1, 0 ) )
-		{
-			Console::singleton() << con::setcerr << lua_tostring( l, -1 ) << con::endl;
-			lua_pop( l, lua_gettop( l ) );
-			return false;
-		}
-		else
-		{
-			bool ret = lua_toboolean( l, -1 );
-			lua_pop( l, lua_gettop( l ) );
-			return ret;
-		}
+		lua_remove( l, -3 );
+		return true;
+	}
+	
+	~Script()
+	{
+		luaL_unref( m_lua, LUA_REGISTRYINDEX, ref );
 	}
 	
 	void load( const Tmx::Object & object )
@@ -719,31 +716,95 @@ class Script : public Map::Object, public lua::Container
 		ref = luaL_ref( l, LUA_REGISTRYINDEX );
 	}
 	
+	void update( sf::Uint32 ms, const sf::Vector2f & pos )
+	{
+		lua_State * l = m_lua;
+		if ( !pushTableFunction( l, ref, "update" ) )
+			return;
+			
+		lua_pushunsigned( l, ms );
+		lua_pushnumber( l, pos.x );
+		lua_pushnumber( l, pos.y );
+		
+		if ( lua_pcall( l, 4, 0, 0 ) )
+			throw LuaException( l );
+	}
+	
+	void onEnter( sf::Uint32 ms, const sf::Vector2f & pos )
+	{
+		lua_State * l = m_lua;
+		if ( !pushTableFunction( l, ref, "onEnter" ) )
+			return;
+			
+		lua_pushinteger( l, ms );
+		lua_pushnumber( l, pos.x );
+		lua_pushnumber( l, pos.y );
+		
+		if ( lua_pcall( l, 4, 0, 0 ) )
+			throw LuaException( l );
+	}
+	
+	void whileInside( sf::Uint32 ms, const sf::Vector2f & pos )
+	{
+		lua_State * l = m_lua;
+		if ( !pushTableFunction( l, ref, "whileInside" ) )
+			return;
+			
+		lua_pushinteger( l, ms );
+		lua_pushnumber( l, pos.x );
+		lua_pushnumber( l, pos.y );
+		
+		if ( lua_pcall( l, 4, 0, 0 ) )
+			throw LuaException( l );
+	}
+	
+	void onExit( sf::Uint32 ms, const sf::Vector2f & pos )
+	{
+		lua_State * l = m_lua;
+		if ( !pushTableFunction( l, ref, "onExit" ) )
+			return;
+			
+		lua_pushinteger( l, ms );
+		lua_pushnumber( l, pos.x );
+		lua_pushnumber( l, pos.y );
+		
+		if ( lua_pcall( l, 4, 0, 0 ) )
+			throw LuaException( l );
+	}
+	
 	void onInteract( const sf::Vector2f & pos )
 	{
 		lua_State * l = m_lua;
-	
-		lua_rawgeti( l, LUA_REGISTRYINDEX, ref );
-		
-		lua_getfield( l, -1, "interact" );
-		if ( !lua_isfunction( l, -1 ) )
-		{
-			lua_pop( l, 2 ); // pop table, table.onInteract
+		if ( !pushTableFunction( l, ref, "interact" ) )
 			return;
-		}
 		
-		lua_pushvalue( l, -2 );
 		lua_pushnumber( l, pos.x );
 		lua_pushnumber( l, pos.y );
 		
 		if ( lua_pcall( l, 3, 0, 0 ) )
+			throw LuaException( l );
+	}
+	
+	bool hasCollision( const sf::Vector2f & pos ) const
+	{
+		lua_State * l = m_lua;
+		
+		if ( !pushTableFunction( l, ref, "hasCollision" ) )
+			return false;
+		
+		lua_pushnumber( l, pos.x );
+		lua_pushnumber( l, pos.y );
+		
+		if ( lua_pcall( l, 3, 1, 0 ) )
 		{
-			std::string err = lua_tostring( l, -1 );
-			lua_pop( l, 2 );
-			throw Exception( err );
+			Console::singleton() << con::setcerr << lua_tostring( l, -1 ) << con::endl;
+			lua_pop( l, 1 );
+			return false;
 		}
 		
-		lua_pop( l, 1 ); // pop table
+		bool ret = lua_toboolean( l, -1 );
+		lua_pop( l, 1 );
+		return ret;
 	}
 	
 	using lua::Container::draw;

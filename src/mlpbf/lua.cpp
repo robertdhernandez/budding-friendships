@@ -78,6 +78,18 @@ struct Text : public lua::Drawable
 
 /***************************************************************************/
 
+static int game_fadeIn( lua_State * l )
+{
+	bf::fadeIn( sf::milliseconds( luaL_checkinteger( l, 1 ) ) );
+	return 0;
+}
+
+static int game_fadeOut( lua_State * l )
+{
+	bf::fadeOut( sf::milliseconds( luaL_checkinteger( l, 1 ) ) );
+	return 0;
+}
+
 // game.hook( id, fn )
 static int game_hook( lua_State * l )
 {
@@ -102,10 +114,11 @@ static int game_unhook( lua_State * l )
 static int game_newContainer( lua_State * l )
 {
 	lua::Container * cnt = (lua::Container *) lua_newuserdata( l, sizeof( lua::Container ) );
-	new (cnt) lua::Container();
 	
 	luaL_getmetatable( l, CONTAINER_MT );
 	lua_setmetatable( l, -2 );
+	
+	new (cnt) lua::Container();
 	
 	return 1;
 }
@@ -116,10 +129,11 @@ static int game_newImage( lua_State * l )
 {
 	// create userdata and set metatable
 	lua::Image * data = (lua::Image *) lua_newuserdata( l, sizeof( lua::Image ) );
-	new (data) lua::Image();
 	
 	luaL_getmetatable( l, IMAGE_MT );
 	lua_setmetatable( l, -2 );
+	
+	new (data) lua::Image();
 	
 	return 1;
 }
@@ -127,10 +141,11 @@ static int game_newImage( lua_State * l )
 static int game_newText( lua_State * l )
 {
 	lua::Text * data = (lua::Text *) lua_newuserdata( l, sizeof( lua::Text ) );
-	new (data) lua::Text();
-	
+		
 	luaL_getmetatable( l, TEXT_MT );
 	lua_setmetatable( l, -2 );
+	
+	new (data) lua::Text();
 	
 	return 1;
 }
@@ -152,6 +167,8 @@ static int game_screen( lua_State * l )
 
 static const struct luaL_Reg libgame[] = 
 {
+	{ "fadeIn",		game_fadeIn },
+	{ "fadeOut",		game_fadeOut },
 	{ "hook",			game_hook },
 	{ "unhook",		game_unhook },
 	{ "newContainer",	game_newContainer },
@@ -395,10 +412,11 @@ static const char * TIMER_MT = "game.timer";
 static int timer_new( lua_State * l )
 {
 	sf::Clock * timer = (sf::Clock *) lua_newuserdata( l, sizeof( sf::Clock ) );
-	new (timer) sf::Clock();
 	
 	luaL_getmetatable( l, TIMER_MT );
 	lua_setmetatable( l, -2 );
+	
+	new (timer) sf::Clock();
 	
 	return 1;
 }

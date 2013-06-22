@@ -80,6 +80,70 @@ private:
 
 /***************************************************************************/
 
+class Fade : public sf::Drawable
+{
+	sf::Clock m_timer;
+	sf::Time m_target;
+	
+	sf::Color m_color;
+	
+	int m_state;
+	
+	enum
+	{
+		NONE = 0,
+		FADE_IN = 1,
+		FADE_OUT = 2,
+	};
+	
+public:
+	Fade() : m_color( sf::Color( 0, 0, 0, 0 ) ) {}
+
+	void fadeIn( sf::Time time )
+	{
+		m_target = time;
+		m_state = FADE_IN;
+		m_color = sf::Color( 0, 0, 0, 0 );
+		m_timer.restart();
+	}
+	
+	void fadeOut( sf::Time time )
+	{
+		m_target = time;
+		m_state = FADE_OUT;
+		m_color = sf::Color( 0, 0, 0, 255 );
+		m_timer.restart();
+	}
+	
+	void update()
+	{
+		if ( m_state != NONE )
+		{
+			unsigned ms1 = m_timer.getElapsedTime().asMilliseconds();
+			unsigned ms2 = m_target.asMilliseconds();
+			
+			float p = std::min( (float) ms1 / ms2, 1.0f );
+			if ( m_state == FADE_IN ) p = 1 - p;
+			
+			m_color.a = 255 * p;
+			
+			if ( ms1 >= ms2 )
+				m_state = NONE;
+		}
+	}
+
+	void draw( sf::RenderTarget & target, sf::RenderStates states ) const
+	{
+		sf::RectangleShape rect;
+		rect.setSize( sf::Vector2f( bf::SCREEN_WIDTH, bf::SCREEN_HEIGHT ) );
+		rect.setFillColor( m_color );
+		
+		target.draw( rect, states );
+	}
+};
+
+/***************************************************************************/
+
 void init()
 {
 	bf::lua::init(); 	// lua
@@ -122,6 +186,20 @@ void bf::hideDrawable( const sf::Drawable * d )
 
 /***************************************************************************/
 
+static Fade ScreenTint;
+
+void bf::fadeIn( sf::Time t )
+{
+	ScreenTint.fadeIn( t );
+}
+
+void bf::fadeOut( sf::Time t )
+{
+	ScreenTint.fadeOut( t );
+}
+
+/***************************************************************************/
+
 int main( int argc, char* argv[] )
 {
 	using namespace bf;
@@ -160,12 +238,14 @@ int main( int argc, char* argv[] )
 			state.update( time );
 			lua::update( time.asMilliseconds() );
 			FPS.update();
+			ScreenTint.update();
 
 			window.clear();
 
 				window.draw( state );
 				for ( const sf::Drawable * d : g_Drawables )
 					window.draw( *d );
+				window.draw( ScreenTint );
 				window.draw( console );
 				window.draw( FPS );
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <SFML/System/Time.hpp>
 #include <string>
 
 namespace sf
@@ -29,4 +30,7 @@ namespace bf
 	
 	void showDrawable( const sf::Drawable * );
 	void hideDrawable( const sf::Drawable * );
+	
+	void fadeIn( sf::Time );
+	void fadeOut( sf::Time );
 }

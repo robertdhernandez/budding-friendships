@@ -3,6 +3,7 @@
 #include "mlpbf/exception.h"
 #include "mlpbf/global.h"
 #include "mlpbf/lua.h"
+#include "mlpbf/player.h"
 #include "mlpbf/resource.h"
 #include "mlpbf/time.h"
 
@@ -252,6 +253,43 @@ static const struct luaL_Reg libconsole[] =
 	{ "write", console_write },
 	{ "execute", console_execute },
 	{ "hook", console_hook },
+	{ NULL, NULL },
+};
+
+/***************************************************************************/
+
+// (1) player.animate( str )
+static int player_animate( lua_State * l )
+{
+	Player::singleton().animate( luaL_checkstring( l, 1 ) );
+	return 0;
+}
+
+// (1) player.position()
+// (2) player.position( x, y )
+// (3) player.position( map, x, y )
+static int player_position( lua_State * l )
+{
+	Player & player = Player::singleton();
+	
+	int n = lua_gettop( l );
+	if ( n == 2 )
+		player.setPosition( sf::Vector2f( luaL_checknumber( l, 1 ), luaL_checknumber( l, 2 ) ) );
+	else if ( n == 3 )
+		player.setMap( luaL_checkstring( l, 1 ), sf::Vector2f( luaL_checknumber( l, 2 ), luaL_checknumber( l, 3 ) ) );
+	
+	const sf::Vector2f & pos = player.getPosition();
+	
+	lua_pushnumber( l, pos.x );
+	lua_pushnumber( l, pos.y );
+	
+	return 2;
+}
+
+static const struct luaL_Reg libplayer[] =
+{
+	{ "animate", player_animate },
+	{ "position", player_position },
 	{ NULL, NULL },
 };
 
@@ -949,6 +987,7 @@ void init()
 	register_library( l, "game", libgame );
 	register_library( l, "console", libconsole );
 	register_library( l, "time", libtime );
+	register_library( l, "player", libplayer );
 }
 
 void cleanup()

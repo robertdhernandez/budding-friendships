@@ -616,6 +616,7 @@ class Field : public Map::Object, res::TextureLoader<>
 
 static int lua_addImage( lua_State * l );
 static int lua_addText( lua_State * l );
+static int lua_bounds( lua_State * l );
 static int lua_removeImage( lua_State * l );
 static int lua_removeText( lua_State * l );
 
@@ -626,6 +627,7 @@ static const struct luaL_Reg SCRIPT_LIB [] =
 {
 	{ "addImage",		lua_addImage },
 	{ "addText",		lua_addText },
+	{ "bounds",		lua_bounds },
 	{ "removeImage",	lua_removeImage },
 	{ "removeText",	lua_removeText },
 	{ NULL, NULL },
@@ -838,6 +840,22 @@ static int lua_addText( lua_State * l )
 	(*obj)->addChild( d );
 	
 	return 0;
+}
+
+static int lua_bounds( lua_State * l )
+{
+	luaL_checktype( l, 1, LUA_TTABLE );
+	
+	lua_getfield( l, 1, SCRIPT_OBJ );
+	Script ** obj = (Script **) luaL_checkudata( l, -1, SCRIPT_MT );
+	
+	const sf::FloatRect rect = (*obj)->getBounds();
+	lua_pushnumber( l, rect.left );
+	lua_pushnumber( l, rect.top );
+	lua_pushnumber( l, rect.width );
+	lua_pushnumber( l, rect.height );
+	
+	return 4;
 }
 
 static int lua_removeImage( lua_State * l )

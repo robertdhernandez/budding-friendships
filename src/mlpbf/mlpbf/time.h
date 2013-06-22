@@ -19,8 +19,11 @@ namespace bf
 
 		void setTimescale( float amt ) { m_clock.setTimescale( amt ); }
 
-		const time::Date& getDate() const { return m_date; }
-		const time::Hour& getHour() const { return m_hour; }
+		inline time::Date & getDate() { return m_date; }
+		inline time::Hour & getHour() { return m_hour; }
+		
+		inline const time::Date & getDate() const { return m_date; }
+		inline const time::Hour & getHour() const { return m_hour; }
 
 	private:
 		Time();

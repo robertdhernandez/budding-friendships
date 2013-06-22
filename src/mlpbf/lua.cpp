@@ -257,31 +257,81 @@ static const struct luaL_Reg libconsole[] =
 
 /***************************************************************************/
 
-// time.date()
+// (1) time.date()
+// (2) time.date( tday )
+// (3) time.date( str )
+// (4) time.date( season, day [, year ] )
 // returns the day [1,30], season [0,3], and year in that order
 static int time_date( lua_State * l )
 {
-	const time::Date & date = Time::singleton().getDate();
+	time::Date & date = Time::singleton().getDate();
+	
+	int n = lua_gettop( l );
+	if ( n == 1 )
+	{
+		if ( lua_isnumber( l, 1 ) )
+			date.set( lua_tointeger( l, 1 ) );
+		else
+			date.set( lua_tostring( l, 1 ) );
+	}
+	else if ( n == 2 )
+	{
+		int s = luaL_checkinteger( l, 1 );
+		int d = luaL_checkinteger( l, 2 );
+		int y = luaL_optint( l, 3, 0 );
+		
+		luaL_argcheck( l, 0 <= s && s <= 3, 1, "season must be between 0 and 3" );
+		
+		date.set( (time::Season) s, d, y );
+	}
+	
 	lua_pushinteger( l, date.getDay() );
 	lua_pushinteger( l, (int) date.getSeason() );
 	lua_pushinteger( l, date.getYear() );
 	return 3;
 }
 
-// time.hour()
+// (1) time.hour()
+// (2) time.hour( str )
+// (3) time.hour( h, m )
 // returns the hour [0,23] and minute [0,59]
 static int time_hour( lua_State * l )
 {
-	const time::Hour & hour = Time::singleton().getHour();
+	time::Hour & hour = Time::singleton().getHour();
+	
+	int n = lua_gettop( l );
+	if ( n == 1 )
+		hour.set( luaL_checkstring( l, 1 ) );
+	else if ( n == 2 )
+		hour.set( luaL_checkinteger( l, 1 ), luaL_checkinteger( l, 2 ) );
+	
 	lua_pushinteger( l, hour.get24Hour() );
 	lua_pushinteger( l, hour.getMinute() );
 	return 2;
+}
+
+// (1) time.state()
+// (2) time.state( bool )
+static int time_state( lua_State * l )
+{
+	Time & time = Time::singleton();
+	
+	if ( lua_gettop( l ) == 1 )
+	{
+		luaL_checktype( l, 1, LUA_TBOOLEAN );
+		time.setState( lua_toboolean( l, 1 ) );
+	}
+		
+	lua_pushboolean( l, time.getState() );
+
+	return 1;
 }
 
 static const struct luaL_Reg libtime[] =
 {
 	{ "date", time_date },
 	{ "hour",	time_hour },
+	{ "state", time_state },
 	{ NULL, NULL },
 };
 

@@ -663,11 +663,13 @@ class Script : public Map::Object, public lua::Container
 	{
 		const auto & list = object.GetProperties().GetList();
 		
+		auto find = list.find( "script" );
+		std::string file = find == list.end() ? "data/scripts/" + object.GetType() + ".lua" : find->second;
+		
 		lua_State * l = m_lua = lua::state();
-		//Console::singleton() << con::setcinfo << lua_gettop( l ) << con::endl;
 		
 		// execute the lua script, and retrieve a table
-		if ( luaL_loadfile( l, list.at( "file" ).c_str() ) || lua_pcall( l, 0, 1, 0 ) )
+		if ( luaL_loadfile( l, file.c_str() ) || lua_pcall( l, 0, 1, 0 ) )
 			throw LuaException( l );
 			
 		// ensure the returned value is a table
@@ -886,50 +888,6 @@ static int lua_removeText( lua_State * l )
 
 /***************************************************************************/
 
-class Sign : public Map::Object, private res::TextureLoader<>
-{
-	std::string m_text;
-
-	void onInteract( const sf::Vector2f& pos )
-	{
-		showText( m_text );
-	}
-	
-	bool hasCollision( const sf::Vector2f& pos ) const 
-	{ 
-		return true; 
-	}
-
-	void load( const Tmx::Object& object )
-	{
-		const auto& list = object.GetProperties().GetList();
-
-		//auto findTexture = list.find( "texture" );
-		//auto findText = list.find( "text" );
-
-		//TODO: error checking
-
-		loadTexture( list.at( "texture" ) );
-		m_text = list.at( "text" );
-	}
-	
-	void draw( sf::RenderTarget& target, sf::RenderStates states ) const
-	{
-		states.transform *= getTransform();
-		const sf::FloatRect& rect = getBounds();
-
-		sf::Sprite sprite;
-		sprite.setTexture( getTexture() );
-		sprite.setTextureRect( sf::IntRect( 0, 0, (int) rect.width, (int) rect.height ) );
-
-		target.draw( sprite, states );
-	}
-};
-
-/***************************************************************************/
-
-class UnknownObjectException : public Exception { public: UnknownObjectException( const Tmx::Object& object ) { *this << "unknown object type \"" << object.GetType() << "\""; } };
-
 Map::Object * generateObject( const Tmx::Object & tmxObject )
 {
 	Map::Object * object = nullptr;
@@ -939,14 +897,10 @@ Map::Object * generateObject( const Tmx::Object & tmxObject )
 		std::string type = tmxObject.GetType();
 		std::transform( type.begin(), type.end(), type.begin(), ::tolower );
 		
-		if ( type == "sign" )
-			object = new Sign();
-		else if ( type == "field" )
+		if ( type == "field" )
 			object = new Field();
-		else if ( type == "script" )
-			object = new Script();
 		else
-			throw UnknownObjectException( tmxObject );
+			object = new Script();
 	
 		object->setPosition( (float) tmxObject.GetX(), (float) tmxObject.GetY());
 

@@ -271,44 +271,38 @@ void Map::loadNeighbors()
 
 void Map::update( sf::Uint32 frameTime, const sf::Vector2f& pos )
 {
-	std::vector< Map::Object* > remove;
-
-	// Check if the player has left any of the active objects
-	for ( auto it = m_activeObjects.begin(); it != m_activeObjects.end(); ++it )
-		if ( !(*it)->getBounds().contains( pos ) )
-			remove.push_back( *it );
-
-	// Remove the objects that the player has left and call their onExit
-	for ( auto it = remove.begin(); it != remove.end(); ++it )
-	{
-		try { (*it)->onExit( frameTime, pos - (*it)->getPosition() ); }
-		catch ( std::exception & err ) { Console::singleton() << con::setcerr << err.what() << con::endl; }
-		std::remove( m_activeObjects.begin(), m_activeObjects.end(), *it );
-	}
+	// Check if the player has left any of the active objects and call their onExit
+	for ( Map::Object * object : m_activeObjects )
+		if ( !object->getBounds().contains( pos ) )
+		{
+			try { object->onExit( frameTime, pos - object->getPosition() ); }
+			catch ( std::exception & err ) { Console::singleton() << con::setcerr << err.what() << con::endl; }
+			m_activeObjects.erase( std::find( m_activeObjects.begin(), m_activeObjects.end(), object ) );
+		}
 
 	// Update all objects on the map
-	for ( auto it = m_objects.begin(); it != m_objects.end(); ++it )
+	for ( Map::Object * object : m_objects )
 	{
-		try { (*it)->update( frameTime, pos - (*it)->getPosition() ); }
+		try { object->update( frameTime, pos - object->getPosition() ); }
 		catch ( std::exception & err ) { Console::singleton() << con::setcerr << err.what() << con::endl; }
 	}
 
 	// Update all active objects
-	for ( auto it = m_activeObjects.begin(); it != m_activeObjects.end(); ++it )
+	for ( Map::Object * object : m_activeObjects )
 	{
-		try { (*it)->whileInside( frameTime, pos - (*it)->getPosition() ); }
+		try { object->whileInside( frameTime, pos - object->getPosition() ); }
 		catch ( std::exception & err ) { Console::singleton() << con::setcerr << err.what() << con::endl; }
 	}
 
 	// Check if the player has entered any new objects
-	for ( auto it = m_objects.begin(); it != m_objects.end(); ++it )
+	for ( Map::Object * object : m_objects )
 	{
-		const sf::FloatRect& rect = (*it)->getBounds();
-		if ( rect.contains( pos ) && std::find( m_activeObjects.begin(), m_activeObjects.end(), *it ) != m_activeObjects.end() )
+		const sf::FloatRect& rect = object->getBounds();
+		if ( rect.contains( pos ) && std::find( m_activeObjects.begin(), m_activeObjects.end(), object ) == m_activeObjects.end() )
 		{
-			try { (*it)->onEnter( frameTime, pos - (*it)->getPosition() ); }
+			try { object->onEnter( frameTime, pos - object->getPosition() ); }
 			catch ( std::exception & err ) { Console::singleton() << con::setcerr << err.what() << con::endl; }
-			m_activeObjects.push_back( *it );
+			m_activeObjects.push_back( object );
 		}
 	}
 }
@@ -506,7 +500,7 @@ void MultiMapViewer::draw( sf::RenderTarget& target, sf::RenderStates states ) c
 //
 //	IMPLEMENTABLE METHODS
 //
-//		void load( const Tmx::Object&, Instance&, Map& ) [pure virtual]
+//		void load( const Tmx::Object& ) [pure virtual]
 //			Called once when the object is being created
 //			Retrieve references to external classes here and load from data from the TMX object
 //
@@ -730,13 +724,13 @@ class Script : public Map::Object, public lua::Container
 			throw LuaException( l );
 	}
 	
-	void onEnter( sf::Uint32 ms, const sf::Vector2f & pos )
+	void onEnter( sf::Uint32 frameTime, const sf::Vector2f & pos )
 	{
 		lua_State * l = m_lua;
 		if ( !pushTableFunction( l, ref, "onEnter" ) )
 			return;
 			
-		lua_pushinteger( l, ms );
+		lua_pushinteger( l, frameTime );
 		lua_pushnumber( l, pos.x );
 		lua_pushnumber( l, pos.y );
 		

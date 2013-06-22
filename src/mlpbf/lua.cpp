@@ -16,6 +16,7 @@
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Text.hpp>
+#include <SFML/System/Clock.hpp>
 
 namespace bf
 {
@@ -385,6 +386,56 @@ static const struct luaL_Reg libtime[] =
 	{ "state", 	time_state },
 	{ "timescale", time_timescale },
 	{ NULL, 		NULL },
+};
+
+/***************************************************************************/
+
+static const char * TIMER_MT = "game.timer";
+
+static int timer_new( lua_State * l )
+{
+	sf::Clock * timer = (sf::Clock *) lua_newuserdata( l, sizeof( sf::Clock ) );
+	new (timer) sf::Clock();
+	
+	luaL_getmetatable( l, TIMER_MT );
+	lua_setmetatable( l, -1 );
+	
+	return 1;
+}
+
+static int timer_free( lua_State * l )
+{
+	sf::Clock * timer = (sf::Clock *) luaL_checkudata( l, 1, TIMER_MT );
+	timer->~Clock();
+	return 0;
+}
+
+static int timer_getElapsedTime( lua_State * l )
+{
+	sf::Clock * timer = (sf::Clock *) luaL_checkudata( l, 1, TIMER_MT );
+	lua_pushinteger( l, timer->getElapsedTime().asMilliseconds() );
+	return 1;
+}
+
+static int timer_restart( lua_State * l )
+{
+	sf::Clock * timer = (sf::Clock *) luaL_checkudata( l, 1, TIMER_MT );
+	lua_pushinteger( l, timer->restart().asMilliseconds() );
+	return 1;
+}
+
+static const struct luaL_Reg libtimer [] =
+{
+	{ "new",	timer_new },
+	{ NULL, 	NULL },
+};
+
+static const struct luaL_Reg libtimer_mt [] =
+{
+	{ "getElapsedTime",		timer_getElapsedTime },
+	{ "restart",			timer_restart },
+	{ "__gc",				timer_free },
+	{ NULL, 				NULL },
 };
 
 /***************************************************************************/
@@ -982,12 +1033,14 @@ void init()
 	register_metatable( l, CONTAINER_MT, libcontainer_mt );
 	register_metatable( l, IMAGE_MT, libimage_mt );
 	register_metatable( l, TEXT_MT, libtext_mt );
+	register_metatable( l, TIMER_MT, libtimer_mt );
 	
 	// register custom libraries
 	register_library( l, "game", libgame );
 	register_library( l, "console", libconsole );
 	register_library( l, "time", libtime );
 	register_library( l, "player", libplayer );
+	register_library( l, "timer", libtimer );
 }
 
 void cleanup()

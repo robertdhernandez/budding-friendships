@@ -697,9 +697,19 @@ class Script : public Map::Object, public lua::Container
 			throw Exception( "load must be a function" );
 		}
 		
-		// call table:load
+		// push the table as an argument
 		lua_pushvalue( l, -2 );
-		if ( lua_pcall( l, 1, 0, 0 ) )
+		
+		// push Tmx::Object properties as a table
+		lua_newtable( l );
+		for ( auto & arg : list )
+		{
+			lua_pushstring( l, arg.second.c_str() );
+			lua_setfield( l, -2, arg.first.c_str() );
+		}
+		
+		// call table:load
+		if ( lua_pcall( l, 2, 0, 0 ) )
 		{
 			std::string err = lua_tostring( l, -1 );
 			lua_pop( l, 2 );

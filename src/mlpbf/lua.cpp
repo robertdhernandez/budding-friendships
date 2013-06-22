@@ -398,7 +398,7 @@ static int timer_new( lua_State * l )
 	new (timer) sf::Clock();
 	
 	luaL_getmetatable( l, TIMER_MT );
-	lua_setmetatable( l, -1 );
+	lua_setmetatable( l, -2 );
 	
 	return 1;
 }

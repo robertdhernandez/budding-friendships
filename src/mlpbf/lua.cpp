@@ -292,12 +292,12 @@ static int player_collision( lua_State * l )
 	return 0;
 }
 
-/*static int player_movement( lua_State * l )
+static int player_control( lua_State * l )
 {
 	luaL_checktype( l, 1, LUA_TBOOLEAN );
-	Player::singleton().enableMovement( lua_toboolean( l, 1 ) );
+	Player::singleton().enableControl( lua_toboolean( l, 1 ) );
 	return 0;
-}*/
+}
 
 // (1) player.position()
 // (2) player.position( x, y )
@@ -322,11 +322,11 @@ static int player_position( lua_State * l )
 
 static const struct luaL_Reg libplayer[] =
 {
-	{ "animate", player_animate },
-	{ "enableCollision", player_collision },
-	//{ "enableMovement", player_movement },
-	{ "position", player_position },
-	{ NULL, NULL },
+	{ "animate", 			player_animate },
+	{ "enableCollision", 	player_collision },
+	{ "enableControl", 		player_control },
+	{ "position", 			player_position },
+	{ NULL, 				NULL },
 };
 
 /***************************************************************************/

@@ -17,7 +17,8 @@ Player& Player::singleton()
 Player::Player() :
 	Character( "player_a" ),
 	m_invLevel( 0U ),
-	m_inv( 0 )
+	m_inv( 0 ),
+	m_canControl( true )
 {
 	setInventoryLevel( 0U );
 }

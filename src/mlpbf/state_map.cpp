@@ -95,10 +95,12 @@ state::Map::Map() :
 
 void state::Map::onKeyPressed( const sf::Event::KeyEvent& ev )
 {
+	Player & player = Player::singleton();
+
 	switch ( ev.code )
 	{
 	case KEY_MOVE_UP:
-		if ( m_dir != Up || !m_moving )
+		if ( player.canControl() && m_dir != Up || !m_moving )
 		{
 			m_dir = Up;
 			m_moving = m_updateSprite = true;
@@ -106,7 +108,7 @@ void state::Map::onKeyPressed( const sf::Event::KeyEvent& ev )
 	break;
 
 	case KEY_MOVE_DOWN:
-		if ( m_dir != Down || !m_moving )
+		if ( player.canControl() && m_dir != Down || !m_moving )
 		{
 			m_dir = Down;
 			m_moving = m_updateSprite = true;
@@ -114,7 +116,7 @@ void state::Map::onKeyPressed( const sf::Event::KeyEvent& ev )
 	break;
 
 	case KEY_MOVE_LEFT:
-		if ( m_dir != Left || !m_moving )
+		if ( player.canControl() && m_dir != Left || !m_moving )
 		{
 			m_dir = Left;
 			m_moving = m_updateSprite = true;
@@ -122,7 +124,7 @@ void state::Map::onKeyPressed( const sf::Event::KeyEvent& ev )
 	break;
 
 	case KEY_MOVE_RIGHT:
-		if ( m_dir != Right || !m_moving )
+		if ( player.canControl() && m_dir != Right || !m_moving )
 		{
 			m_dir = Right;
 			m_moving = m_updateSprite = true;
@@ -146,18 +148,8 @@ void state::Map::onKeyPressed( const sf::Event::KeyEvent& ev )
 	break;
 
 	case KEY_PRIMARY:
-		bf::Map::global().interact( bf::Player::singleton().getUsePosition() );
-	break;
-
-	case sf::Keyboard::Q:
-		if ( ui::Window::getGlobal() )
-			ui::Window::getGlobal()->close();
-		else
-		{
-			showText( "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut." );
-			showText( "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut." );
-			showText( "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut." );
-		}
+		if ( player.canControl() )
+			bf::Map::global().interact( player.getUsePosition() );
 	break;
 
 	//case sf::Keyboard::Comma:
@@ -189,10 +181,12 @@ void state::Map::onKeyPressed( const sf::Event::KeyEvent& ev )
 
 void state::Map::onKeyReleased( const sf::Event::KeyEvent& ev )
 {
+	Player & player = Player::singleton();
+
 	switch ( ev.code )
 	{
 	case KEY_MOVE_UP:
-		if ( m_dir == Up )
+		if ( player.canControl() && m_dir == Up )
 		{
 			m_moving = false;
 			m_updateSprite = true;
@@ -200,7 +194,7 @@ void state::Map::onKeyReleased( const sf::Event::KeyEvent& ev )
 	break;
 
 	case KEY_MOVE_DOWN:
-		if ( m_dir == Down )
+		if ( player.canControl() && m_dir == Down )
 		{
 			m_moving = false;
 			m_updateSprite = true;
@@ -208,7 +202,7 @@ void state::Map::onKeyReleased( const sf::Event::KeyEvent& ev )
 	break;
 
 	case KEY_MOVE_LEFT:
-		if ( m_dir == Left )
+		if ( player.canControl() && m_dir == Left )
 		{
 			m_moving = false;
 			m_updateSprite = true;
@@ -216,7 +210,7 @@ void state::Map::onKeyReleased( const sf::Event::KeyEvent& ev )
 	break;
 
 	case KEY_MOVE_RIGHT:
-		if ( m_dir == Right )
+		if ( player.canControl() && m_dir == Right )
 		{
 			m_moving = false;
 			m_updateSprite = true;
@@ -240,7 +234,8 @@ void state::Map::onKeyReleased( const sf::Event::KeyEvent& ev )
 	break;
 
 	case sf::Keyboard::A:
-		showInventory();
+		if ( player.canControl() )
+			showInventory();
 	break;
 	}
 }

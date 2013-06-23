@@ -17,11 +17,16 @@ namespace bf
 
 		sf::Uint8 getInventoryLevel() const { return m_invLevel; }	
 		void setInventoryLevel( sf::Uint8 level );
+		
+		inline void enableControl( bool b ) { m_canControl = b; }
+		inline bool canControl() const { return m_canControl; }
 
 	private:
 		Player();
 
 		sf::Uint8 m_invLevel;
 		Inventory m_inv;
+		
+		bool m_canControl;
 	};
 }

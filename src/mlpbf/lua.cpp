@@ -480,6 +480,11 @@ lua::Container::Container() :
 lua::Container::~Container()
 {
 	display( false );
+	for ( lua::Drawable * d : m_draw )
+	{
+		luaL_unref( lua::state(), LUA_REGISTRYINDEX, d->ref );
+		d->ref = LUA_NOREF;
+	}
 }
 
 void lua::Container::addChild( lua::Drawable * d )
@@ -1020,7 +1025,6 @@ static int text_string( lua_State * l )
 static int text_free( lua_State * l )
 {
 	lua::Text * data = (lua::Text *) luaL_checkudata( l, 1, TEXT_MT );
-	Console::singleton() << con::setcinfo << "text_free called" << con::endl;
 	data->display( false );
 	data->~Text();
 	return 0;

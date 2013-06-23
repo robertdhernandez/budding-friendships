@@ -68,7 +68,8 @@ sf::Vector2u convert( const sf::Vector2f& pos )
 /***************************************************************************/
 
 Character::Character( const std::string& spritesheet ) :
-	m_mapID( 0U )
+	m_mapID( 0U ),
+	m_checkCollision( true )
 {
 	m_sheet.load( spritesheet );
 	setMovement( Idle, Down );
@@ -100,96 +101,101 @@ void Character::update( const sf::Time& time )
 	sf::FloatRect bound = getBounds();
 
 	// Check for collision depending on direction
-	sf::Vector2f checkA, checkB;
-	bool collision = false;
-	
-	//TODO: factor out code
-	switch ( std::get< 0 >( m_move ) )
+	if ( m_checkCollision )
 	{
-	case Up: // Top-left and top-right
-		checkA = sf::Vector2f( bound.left, bound.top + move.y );
-		checkB = sf::Vector2f( bound.left + bound.width, checkA.y );
-
-		while ( m.checkTileCollision( convert( checkA ) ) || m.checkObjectCollision( checkA ) ||
-				m.checkTileCollision( convert( checkB ) ) || m.checkObjectCollision( checkB ) )
+		sf::Vector2f checkA, checkB;
+		bool collision = false;
+	
+		//TODO: factor out code
+		switch ( std::get< 0 >( m_move ) )
 		{
-			if ( !collision )
+		case Up: // Top-left and top-right
+			checkA = sf::Vector2f( bound.left, bound.top + move.y );
+			checkB = sf::Vector2f( bound.left + bound.width, checkA.y );
+
+			while ( m.checkTileCollision( convert( checkA ) ) || m.checkObjectCollision( checkA ) ||
+					m.checkTileCollision( convert( checkB ) ) || m.checkObjectCollision( checkB ) )
 			{
-				checkA.y = checkB.y = std::floor( checkB.y / TILE_HEIGHT ) * TILE_HEIGHT + 1.0f;
-				collision = true;
+				if ( !collision )
+				{
+					checkA.y = checkB.y = std::floor( checkB.y / TILE_HEIGHT ) * TILE_HEIGHT + 1.0f;
+					collision = true;
+				}
+				else
+					checkA.y = checkB.y += TILE_HEIGHT;
 			}
-			else
-				checkA.y = checkB.y += TILE_HEIGHT;
+
+			bound.top = checkA.y;
+		break;
+
+		case Down: // Bottom-left and bottom-right
+			checkA = sf::Vector2f( bound.left, bound.top + bound.height + move.y );
+			checkB = sf::Vector2f( bound.left + bound.width, checkA.y );
+
+			while ( m.checkTileCollision( convert( checkA ) ) || m.checkObjectCollision( checkA ) ||
+					m.checkTileCollision( convert( checkB ) ) || m.checkObjectCollision( checkB ) )
+			{
+				if ( !collision )
+				{
+					checkA.y = checkB.y = std::ceil( checkB.y / TILE_HEIGHT ) * TILE_HEIGHT - 1.0f;
+					collision = true;
+				}
+				else
+					checkA.y = checkB.y += -TILE_HEIGHT;
+			}
+
+			bound.top = checkA.y - bound.height;
+		break;
+
+		case Left: // Top-left and bottom-left
+			checkA = sf::Vector2f( bound.left + move.x, bound.top ); 
+			checkB = sf::Vector2f( checkA.x, bound.top + bound.height );
+
+			while ( m.checkTileCollision( convert( checkA ) ) || m.checkObjectCollision( checkA ) ||
+					m.checkTileCollision( convert( checkB ) ) || m.checkObjectCollision( checkB ) )
+			{
+				if ( !collision )
+				{
+					checkA.x = checkB.x = std::floor( checkB.x / TILE_WIDTH ) * TILE_WIDTH + 1.0f;
+					collision = true;
+				}
+				else
+					checkA.x = checkB.x += TILE_WIDTH;
+			}
+
+			bound.left = checkA.x;
+		break;
+
+		case Right:	// Top-right and bottom-right
+			checkA = sf::Vector2f( bound.left + bound.width + move.x, bound.top );
+			checkB = sf::Vector2f( checkA.x, bound.top + bound.height );
+
+			while ( m.checkTileCollision( convert( checkA ) ) || m.checkObjectCollision( checkA ) ||
+					m.checkTileCollision( convert( checkB ) ) || m.checkObjectCollision( checkB ) )
+			{
+				if ( !collision )
+				{
+					checkA.x = checkB.x = std::ceil( checkB.x / TILE_WIDTH ) * TILE_WIDTH - 1.0f;
+					collision = true;
+				}
+				else
+					checkA.x = checkB.x += -TILE_WIDTH;
+			}
+
+			bound.left = checkA.x - bound.width;
+		break;
 		}
 
-		bound.top = checkA.y;
-	break;
+		if ( collision )
+			setMovement( Idle, std::get< 0 >( m_move ) );
 
-	case Down: // Bottom-left and bottom-right
-		checkA = sf::Vector2f( bound.left, bound.top + bound.height + move.y );
-		checkB = sf::Vector2f( bound.left + bound.width, checkA.y );
-
-		while ( m.checkTileCollision( convert( checkA ) ) || m.checkObjectCollision( checkA ) ||
-				m.checkTileCollision( convert( checkB ) ) || m.checkObjectCollision( checkB ) )
-		{
-			if ( !collision )
-			{
-				checkA.y = checkB.y = std::ceil( checkB.y / TILE_HEIGHT ) * TILE_HEIGHT - 1.0f;
-				collision = true;
-			}
-			else
-				checkA.y = checkB.y += -TILE_HEIGHT;
-		}
-
-		bound.top = checkA.y - bound.height;
-	break;
-
-	case Left: // Top-left and bottom-left
-		checkA = sf::Vector2f( bound.left + move.x, bound.top ); 
-		checkB = sf::Vector2f( checkA.x, bound.top + bound.height );
-
-		while ( m.checkTileCollision( convert( checkA ) ) || m.checkObjectCollision( checkA ) ||
-				m.checkTileCollision( convert( checkB ) ) || m.checkObjectCollision( checkB ) )
-		{
-			if ( !collision )
-			{
-				checkA.x = checkB.x = std::floor( checkB.x / TILE_WIDTH ) * TILE_WIDTH + 1.0f;
-				collision = true;
-			}
-			else
-				checkA.x = checkB.x += TILE_WIDTH;
-		}
-
-		bound.left = checkA.x;
-	break;
-
-	case Right:	// Top-right and bottom-right
-		checkA = sf::Vector2f( bound.left + bound.width + move.x, bound.top );
-		checkB = sf::Vector2f( checkA.x, bound.top + bound.height );
-
-		while ( m.checkTileCollision( convert( checkA ) ) || m.checkObjectCollision( checkA ) ||
-				m.checkTileCollision( convert( checkB ) ) || m.checkObjectCollision( checkB ) )
-		{
-			if ( !collision )
-			{
-				checkA.x = checkB.x = std::ceil( checkB.x / TILE_WIDTH ) * TILE_WIDTH - 1.0f;
-				collision = true;
-			}
-			else
-				checkA.x = checkB.x += -TILE_WIDTH;
-		}
-
-		bound.left = checkA.x - bound.width;
-	break;
+		std::get< 2 >( m_move ) = collision;
+		
+		m_pos.x = bound.left + ( bound.width / 2.0f );
+		m_pos.y = bound.top + ( bound.height / 2.0f );
 	}
-
-	if ( collision )
-		setMovement( Idle, std::get< 0 >( m_move ) );
-
-	std::get< 2 >( m_move ) = collision;
-
-	m_pos.x = bound.left + ( bound.width / 2.0f );
-	m_pos.y = bound.top + ( bound.height / 2.0f );
+	else
+		m_pos += move;
 
 	// Change the character's current map if they left the map bounds
 	const Map& curMap = db::getMap( m_mapID ), *nextMap = nullptr;

@@ -283,6 +283,22 @@ static int player_animate( lua_State * l )
 	return 0;
 }
 
+// (1) player.collision( bool )
+// switches on/off collision detection for the player
+static int player_collision( lua_State * l )
+{
+	luaL_checktype( l, 1, LUA_TBOOLEAN );
+	Player::singleton().enableCollision( lua_toboolean( l, 1 ) );
+	return 0;
+}
+
+/*static int player_movement( lua_State * l )
+{
+	luaL_checktype( l, 1, LUA_TBOOLEAN );
+	Player::singleton().enableMovement( lua_toboolean( l, 1 ) );
+	return 0;
+}*/
+
 // (1) player.position()
 // (2) player.position( x, y )
 // (3) player.position( map, x, y )
@@ -307,6 +323,8 @@ static int player_position( lua_State * l )
 static const struct luaL_Reg libplayer[] =
 {
 	{ "animate", player_animate },
+	{ "enableCollision", player_collision },
+	//{ "enableMovement", player_movement },
 	{ "position", player_position },
 	{ NULL, NULL },
 };

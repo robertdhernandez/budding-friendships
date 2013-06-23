@@ -32,6 +32,8 @@ namespace bf
 
 		const sf::Vector2f& getPosition() const { return m_pos; }
 		void setPosition( const sf::Vector2f& pos ) { m_pos = pos; }
+		
+		inline void enableCollision( bool b) { m_checkCollision = b; }
 
 		void setMap( const std::string& map );
 		void setMap( const std::string& map, const sf::Vector2f& pos );
@@ -47,5 +49,7 @@ namespace bf
 		unsigned m_mapID;
 		sf::Vector2f m_pos;
 		std::tuple< Direction, sf::Vector2f, bool > m_move;
+		
+		bool m_checkCollision;
 	};
 }

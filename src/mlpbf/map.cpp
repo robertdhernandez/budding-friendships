@@ -881,6 +881,12 @@ static int lua_addImage( lua_State * l )
 	
 	(*obj)->addChild( d );
 	
+	if ( d->ref == LUA_NOREF )
+	{
+		lua_pushvalue( l, 2 );
+		d->ref = luaL_ref( l, LUA_REGISTRYINDEX );
+	}
+	
 	return 0;
 }
 
@@ -893,6 +899,12 @@ static int lua_addText( lua_State * l )
 	Script ** obj = (Script **) luaL_checkudata( l, -1, SCRIPT_MT );
 	
 	(*obj)->addChild( d );
+	
+	if ( d->ref == LUA_NOREF )
+	{
+		lua_pushvalue( l, 2 );
+		d->ref = luaL_ref( l, LUA_REGISTRYINDEX );
+	}
 	
 	return 0;
 }
@@ -922,6 +934,8 @@ static int lua_removeImage( lua_State * l )
 	Script ** obj = (Script **) luaL_checkudata( l, -1, SCRIPT_MT );
 	
 	(*obj)->removeChild( d );
+	
+	luaL_unref( l, LUA_REGISTRYINDEX, d->ref );
 
 	return 0;
 }
@@ -935,6 +949,8 @@ static int lua_removeText( lua_State * l )
 	Script ** obj = (Script **) luaL_checkudata( l, -1, SCRIPT_MT );
 	
 	(*obj)->removeChild( d );
+	
+	luaL_unref( l, LUA_REGISTRYINDEX, d->ref );
 
 	return 0;
 }

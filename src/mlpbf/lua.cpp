@@ -34,13 +34,9 @@ const char * TEXT_MT = "game.text";
 
 Drawable::Drawable() : 
 	m_display( false ), 
-	m_parent( nullptr ) 
+	m_parent( nullptr ),
+	ref( LUA_NOREF )
 {
-}
-
-Drawable::~Drawable()
-{
-	display( false );
 }
 
 void Drawable::display( bool state )
@@ -530,6 +526,12 @@ static int container_addImage( lua_State * l )
 	lua::Image * image = (lua::Image *) luaL_checkudata( l, 2, IMAGE_MT );
 	
 	container->addChild( image );
+	
+	if ( image->ref == LUA_NOREF )
+	{
+		lua_pushvalue( l, 2 );
+		image->ref = luaL_ref( l, LUA_REGISTRYINDEX );
+	}
 
 	return 0;
 }
@@ -540,6 +542,12 @@ static int container_addText( lua_State * l )
 	lua::Text * text = (lua::Text *) luaL_checkudata( l, 2, TEXT_MT );
 	
 	container->addChild( text );
+	
+	if ( text->ref == LUA_NOREF )
+	{
+		lua_pushvalue( l, 2 );
+		text->ref = luaL_ref( l, LUA_REGISTRYINDEX );
+	}
 	
 	return 0;
 }
@@ -598,6 +606,9 @@ static int container_removeImage( lua_State * l )
 	lua::Image * image = (lua::Image *) luaL_checkudata( l, 2, IMAGE_MT );
 	
 	container->removeChild( image );
+	
+	luaL_unref( l, LUA_REGISTRYINDEX, image->ref );
+	image->ref = LUA_NOREF;
 
 	return 0;
 }
@@ -608,6 +619,9 @@ static int container_removeText( lua_State * l )
 	lua::Text * text = (lua::Text *) luaL_checkudata( l, 2, TEXT_MT );
 	
 	container->removeChild( text );
+	
+	luaL_unref( l, LUA_REGISTRYINDEX, text->ref );
+	text->ref = LUA_NOREF;
 
 	return 0;
 }
@@ -830,6 +844,7 @@ static int image_subrect( lua_State * l )
 static int image_free( lua_State * l )
 {
 	lua::Image * data = (lua::Image *) luaL_checkudata( l, 1, IMAGE_MT );
+	data->display( false );
 	data->~Image();
 	return 0;
 }
@@ -1005,6 +1020,8 @@ static int text_string( lua_State * l )
 static int text_free( lua_State * l )
 {
 	lua::Text * data = (lua::Text *) luaL_checkudata( l, 1, TEXT_MT );
+	Console::singleton() << con::setcinfo << "text_free called" << con::endl;
+	data->display( false );
 	data->~Text();
 	return 0;
 }

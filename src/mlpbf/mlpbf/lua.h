@@ -44,11 +44,13 @@ namespace bf
 			friend class Container;
 
 			Drawable();
-			virtual ~Drawable();
+			virtual ~Drawable() {}
 	
 			void display( bool state );
 	
 			virtual const sf::Drawable & getDrawable() const = 0;
+			
+			int ref;
 		};
 		
 		extern const char * CONTAINER_MT;

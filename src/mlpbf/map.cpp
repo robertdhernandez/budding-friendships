@@ -256,6 +256,11 @@ void Map::load( unsigned id, const std::string& map )
 			}
 		}
 	}
+	
+	const auto & properties = m_map.GetProperties().GetList();
+	auto find = properties.find( "type" );
+	if ( find != properties.end() )
+		m_isExterior = find->second != "interior";
 
 	if ( !m_collision )
 		Console::singleton() << con::setcerr << "Warning: Map \"" << map << "\" does not have a collision layer!" << con::endl;

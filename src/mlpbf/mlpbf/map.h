@@ -39,6 +39,8 @@ namespace bf
 
 		void season( time::Season s ) { m_season = s; }
 		time::Season season() const { return m_season; }
+		
+		bool isExterior() const { return m_isExterior; }
 
 	public: // Functions to help with rendering
 		unsigned getWidth() const { return m_map.GetWidth(); }
@@ -81,6 +83,8 @@ namespace bf
 		// Map Objects
 		std::vector< Map::Object * > m_objects;
 		std::vector< Map::Object * > m_activeObjects;
+		
+		bool m_isExterior;
 	};
 	
 	class MapViewer : public sf::Drawable, public sf::Transformable

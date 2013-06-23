@@ -330,7 +330,7 @@ void state::Map::draw( sf::RenderTarget& target, sf::RenderStates states ) const
 	target.draw( m_viewer, states );
 	
 	//TODO: check if exterior
-	if ( bf::Map::global().isExterior() )
+	if ( m_viewer.map().isExterior() )
 		time::drawHourTint( target, Time::singleton().getHour() );
 
 	//DEBUG

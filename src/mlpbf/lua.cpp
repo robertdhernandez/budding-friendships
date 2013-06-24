@@ -1,6 +1,7 @@
 #include "mlpbf/console.h"
 #include "mlpbf/console/command.h"
 #include "mlpbf/exception.h"
+#include "mlpbf/farm.h"
 #include "mlpbf/global.h"
 #include "mlpbf/lua.h"
 #include "mlpbf/player.h"
@@ -1048,6 +1049,81 @@ static const struct luaL_Reg libtext_mt [] =
 
 /***************************************************************************/
 
+static const char * FIELDTILE_MT = "field.tile";
+
+static int lua_field_getTile( lua_State * l )
+{
+	using namespace farm;
+
+	int x = luaL_checkinteger( l, 1 );
+	int y = luaL_checkinteger( l, 2 );
+	
+	luaL_argcheck( l, 0 < x && x <= field::WIDTH, 1, "tile out of bounds" );
+	luaL_argcheck( l, 0 < y && y <= field::HEIGHT, 2, "tile out of bounds" );
+	
+	field::Tile & ftile = field::getTile( x - 1, y - 1 );
+
+	field::Tile ** tile = (field::Tile **) lua_newuserdata( l, sizeof( field::Tile * ) );
+	*tile = &ftile;
+	
+	luaL_setmetatable( l, FIELDTILE_MT );
+	
+	return 1;
+}
+
+static int lua_field_size( lua_State * l )
+{
+	lua_pushinteger( l, farm::field::WIDTH );
+	lua_pushinteger( l, farm::field::HEIGHT );
+	return 2;
+}
+
+static const struct luaL_Reg libfield [] =
+{
+	{ "getTile", 	lua_field_getTile },
+	{ "size", 	lua_field_size },
+	{ NULL, 		NULL },
+};
+
+static int lua_field_tile_till( lua_State * l )
+{
+	using namespace farm;
+
+	field::Tile ** ltile = (field::Tile **) luaL_checkudata( l, 1, FIELDTILE_MT );
+	field::Tile & tile = **ltile;
+
+	if ( lua_gettop( l ) == 2 )
+		tile.till = luaL_checkinteger( l, 2 );
+	
+	lua_pushinteger( l, tile.till );
+	
+	return 1;
+}
+
+static int lua_field_tile_water( lua_State * l )
+{
+	using namespace farm;
+
+	field::Tile ** ltile = (field::Tile **) luaL_checkudata( l, 1, FIELDTILE_MT );
+	field::Tile & tile = **ltile;
+	
+	if ( lua_gettop( l ) == 2 )
+		tile.water = lua_toboolean( l, 2 );
+		
+	lua_pushinteger( l, tile.water );
+
+	return 1;
+}
+
+static const struct luaL_Reg libfieldtile_mt [] =
+{
+	{ "till",		lua_field_tile_till },
+	{ "water",	lua_field_tile_water },
+	{ NULL, NULL },
+};
+
+/***************************************************************************/
+
 static std::unordered_map< std::string, int > LuaRef;
 
 void addLuaRef( const std::string & str, int ref )
@@ -1091,6 +1167,7 @@ void init()
 	register_metatable( l, IMAGE_MT, libimage_mt );
 	register_metatable( l, TEXT_MT, libtext_mt );
 	register_metatable( l, TIMER_MT, libtimer_mt );
+	register_metatable( l, FIELDTILE_MT, libfieldtile_mt );
 	
 	// register custom libraries
 	register_library( l, "game", libgame );
@@ -1098,6 +1175,7 @@ void init()
 	register_library( l, "time", libtime );
 	register_library( l, "player", libplayer );
 	register_library( l, "timer", libtimer );
+	register_library( l, "field", libfield );
 }
 
 void cleanup()

@@ -147,6 +147,8 @@ void Window::onUpdate()
 		if ( closed() )	
 			m_state = Closed;
 	break;
+	
+	case Closed: break;
 	}
 }
 

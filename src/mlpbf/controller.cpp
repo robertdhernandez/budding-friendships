@@ -47,6 +47,7 @@ void GeneralController::updateGeneralListener( const Event& ev )
 		case Event::GainedFocus:	m_generalListener->onGainedFocus(); break;
 		case Event::LostFocus:		m_generalListener->onLostFocus(); break;
 		case Event::Resized:		m_generalListener->onResize( ev.size ); break;
+		default: break;
 		}
 }
 
@@ -81,6 +82,7 @@ void KeyController::updateKeyListener( const Event& ev )
 		{
 		case Event::KeyPressed:	 m_keyListener->onKeyPressed( ev.key ); break;
 		case Event::KeyReleased: m_keyListener->onKeyReleased( ev.key ); break;
+		default: break;
 		}
 }
 
@@ -119,6 +121,7 @@ void MouseController::updateMouseListener( const Event& ev )
 		case Event::MouseLeft:				m_mouseListener->onMouseLeft(); break;
 		case Event::MouseMoved:				m_mouseListener->onMouseMoved( ev.mouseMove ); break;
 		case Event::MouseWheelMoved:		m_mouseListener->onMouseWheelMoved( ev.mouseWheel ); break;
+		default: break;
 		}
 }
 

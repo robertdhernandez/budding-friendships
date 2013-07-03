@@ -509,7 +509,7 @@ void lua::Container::display( bool state )
 {
 	if ( m_display != state )
 	{
-		if ( m_display = state )
+		if ( ( m_display = state ) )
 			showDrawable( this );
 		else
 			hideDrawable( this );

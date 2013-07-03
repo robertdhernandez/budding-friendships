@@ -242,9 +242,7 @@ void Map::load( unsigned id, const std::string& map )
 		for ( auto ij = objectGroup.begin(); ij != objectGroup.end(); ++ij )
 		{
 			const Tmx::Object& object = *(*ij);
-
 			const std::string& name = object.GetName();
-			const std::string& type = object.GetType();
 
 			try
 			{
@@ -480,7 +478,7 @@ void MultiMapViewer::draw( sf::RenderTarget& target, sf::RenderStates states ) c
 {
 	const Map& m = map();
 	const sf::FloatRect& area = getViewArea();
-	sf::Vector2f center = this->center(), offset;
+	sf::Vector2f offset;
 
 	MapViewer child( *this );
 

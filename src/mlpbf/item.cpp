@@ -160,7 +160,7 @@ unsigned Inventory::getSize() const
 
 void Inventory::setSize( unsigned size )
 {
-	if ( m_hasLimit = ( size != 0U ) )
+	if ( ( m_hasLimit = ( size != 0U ) ) )
 	{
 		if ( size < m_items.size() )
 			for ( unsigned i = size; i < m_items.size(); i++ )

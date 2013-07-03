@@ -222,7 +222,7 @@ void Console::onKeyPressed( const sf::Event::KeyEvent& ev )
 		break;
 
 		case sf::Keyboard::Delete:
-			if ( !m_input.empty() && m_index != m_input.size() )
+			if ( !m_input.empty() && (unsigned) m_index != m_input.size() )
 				m_input.erase( m_input.begin() + m_index );
 		break;
 	
@@ -262,6 +262,8 @@ void Console::onKeyPressed( const sf::Event::KeyEvent& ev )
 		case Console::KEY:
 			m_active = false;
 		break;
+		
+		default: break;
 		}
 	}
 }

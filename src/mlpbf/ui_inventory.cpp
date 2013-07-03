@@ -205,6 +205,7 @@ private:
 		case sf::Keyboard::A:
 			close();
 		break;
+		default: break;
 		}
 	}
 

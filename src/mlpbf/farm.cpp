@@ -154,8 +154,8 @@ void addObject( unsigned x, unsigned y, field::Object * obj )
 			throw Exception( "area not free" );
 			
 		// set the tiles
-		for ( int j = 0; j < obj->getHeight(); j++ )
-			for ( int i = 0; i < obj->getWidth(); i++ )
+		for ( unsigned j = 0; j < obj->getHeight(); j++ )
+			for ( unsigned i = 0; i < obj->getWidth(); i++ )
 				g_Field.tiles[ convert( x + i, y + j ) ].object = obj;
 
 		obj->setPosition( x * TILE_WIDTH, y * TILE_HEIGHT );

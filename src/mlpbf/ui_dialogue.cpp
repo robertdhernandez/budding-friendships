@@ -347,6 +347,8 @@ private:
 		case Console::KEY:
 			Console::singleton().state( true );
 		break;
+		
+		default: break;
 		}
 	}
 
@@ -365,6 +367,8 @@ private:
 			else if ( message.isFinished() )
 				close();
 		break;
+		
+		default: break;
 		}
 	}
 

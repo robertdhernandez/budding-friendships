@@ -56,13 +56,13 @@ bool modifyText( const std::string& cmd, RichText& text )
 	bool success = false;
 
 	// Execute a command
-	if ( success = ( command == "b" ) )
+	if ( ( success = ( command == "b" ) ) )
 		textBold( text, args );
-	else if ( success = ( command == "c" ) )
+	else if ( ( success = ( command == "c" ) ) )
 		textColor( text, args );
-	else if ( success = ( command == "i" ) )
+	else if ( ( success = ( command == "i" ) ) )
 		textItalic( text, args );
-	else if ( success = ( command == "u" ) )
+	else if ( ( success = ( command == "u" ) ) )
 		textUnderline( text, args );
 
 	return success;

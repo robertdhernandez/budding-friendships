@@ -100,7 +100,7 @@ void state::Map::onKeyPressed( const sf::Event::KeyEvent& ev )
 	switch ( ev.code )
 	{
 	case KEY_MOVE_UP:
-		if ( player.canControl() && m_dir != Up || !m_moving )
+		if ( player.canControl() && ( m_dir != Up || !m_moving ) )
 		{
 			m_dir = Up;
 			m_moving = m_updateSprite = true;
@@ -108,7 +108,7 @@ void state::Map::onKeyPressed( const sf::Event::KeyEvent& ev )
 	break;
 
 	case KEY_MOVE_DOWN:
-		if ( player.canControl() && m_dir != Down || !m_moving )
+		if ( player.canControl() && ( m_dir != Down || !m_moving ) )
 		{
 			m_dir = Down;
 			m_moving = m_updateSprite = true;
@@ -116,7 +116,7 @@ void state::Map::onKeyPressed( const sf::Event::KeyEvent& ev )
 	break;
 
 	case KEY_MOVE_LEFT:
-		if ( player.canControl() && m_dir != Left || !m_moving )
+		if ( player.canControl() && ( m_dir != Left || !m_moving ) )
 		{
 			m_dir = Left;
 			m_moving = m_updateSprite = true;
@@ -124,7 +124,7 @@ void state::Map::onKeyPressed( const sf::Event::KeyEvent& ev )
 	break;
 
 	case KEY_MOVE_RIGHT:
-		if ( player.canControl() && m_dir != Right || !m_moving )
+		if ( player.canControl() && ( m_dir != Right || !m_moving ) )
 		{
 			m_dir = Right;
 			m_moving = m_updateSprite = true;
@@ -176,6 +176,8 @@ void state::Map::onKeyPressed( const sf::Event::KeyEvent& ev )
 		m_updateSprite = true;
 		Console::singleton().state( true );
 	break;
+	
+	default: break;
 	}
 }
 
@@ -237,6 +239,8 @@ void state::Map::onKeyReleased( const sf::Event::KeyEvent& ev )
 		if ( player.canControl() )
 			showInventory();
 	break;
+	
+	default: break;
 	}
 }
 
@@ -293,7 +297,7 @@ void state::Map::update( const sf::Time& time )
 		if ( m_moving )
 			switch ( m_speedModifier )
 			{
-			case Default:	m = Trot;	break;
+			case Default:		m = Trot;	break;
 			case Fast:		m = Run;	break;
 			case Slow:		m = Walk;	break;
 			}

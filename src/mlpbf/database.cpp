@@ -33,7 +33,7 @@ public:
 		const std::string element = getElementType();
 
 		const TiXmlNode * it = nullptr;
-		while ( it = root.IterateChildren( element.c_str(), it ) )
+		while ( ( it = root.IterateChildren( element.c_str(), it ) ) )
 		{
 			const TiXmlElement& elem = static_cast< const TiXmlElement & >( *it );
 			std::string id = xml::attribute( elem, "id" );
@@ -101,7 +101,7 @@ class CropDatabase : public Database< data::Crop >
 		data.regrowth	= std::stoi( xml::attribute( elem, "regrowth" ) );
 		
 		const TiXmlNode * it = nullptr;
-		while ( it = elem.IterateChildren( "stage", it ) )
+		while ( ( it = elem.IterateChildren( "stage", it ) ) )
 			data.growth.push_back( std::stoi( xml::attribute( static_cast< const TiXmlElement & >( *it ), "length" ) ) );
 			
 		if ( data.regrowth != 0 && data.regrowth > data.growth.size() )
@@ -139,7 +139,7 @@ class ItemDatabase : public Database< data::Item >
 		data.sell		= std::stoi( xml::attribute( elem, "sell" ) );
 
 		const TiXmlNode* it = nullptr;
-		while ( it = elem.IterateChildren( "attribute", it ) )
+		while ( ( it = elem.IterateChildren( "attribute", it ) ) )
 		{
 			const TiXmlElement& child = static_cast< const TiXmlElement& >( *it );
 			data.attributes.insert( xml::attribute( child, "type" ) );
@@ -221,7 +221,7 @@ public:
 		const TiXmlElement& root = *xml.RootElement();
 
 		const TiXmlNode * it = nullptr;
-		while ( it = root.IterateChildren( "animation", it ) )
+		while ( ( it = root.IterateChildren( "animation", it ) ) )
 		{
 			std::unique_ptr< gfx::Animation > anim( new gfx::Animation( static_cast< const TiXmlElement& >( *it ) ) );
 			std::string id = anim->getID();

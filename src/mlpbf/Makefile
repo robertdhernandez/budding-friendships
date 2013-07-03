@@ -15,7 +15,7 @@ release: CXXFLAGS += -O3
 release: all
 
 clean:
-	$(RM) $(OBJECTS) $(EXECDIR)$(EXECUTABLE)
+	@$(RM) $(OBJECTS) $(EXECDIR)$(EXECUTABLE)
 	
 $(EXECUTABLE): $(OBJECTS) 
 	$(CXX) $(OBJECTS) -o $(EXECDIR)$(EXECUTABLE) $(LDFLAGS)

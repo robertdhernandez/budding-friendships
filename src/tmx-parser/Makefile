@@ -1,19 +1,26 @@
 SOURCES=$(wildcard *.cpp) 
 OBJECTS=$(patsubst %.cpp,obj/%.o,$(SOURCES))
-EXECUTABLE=tmx-parser.a
+EXECUTABLE=tmx-parser.so
 EXECDIR=bin/
+INSTALL_PATH?=/usr/lib/
 
 all: $(SOURCES) $(EXECUTABLE)
+
+install: all
+	@cp $(EXECDIR)lib$(EXECUTABLE) $(INSTALL_PATH)
+	
+uninstall:
+	@$(RM) $(INSTALL_PATH)lib$(EXECUTABLE)
 
 release: CXXFLAGS += -O3
 release: all
 
 clean:
-	$(RM) $(OBJECTS) $(EXECDIR)lib$(EXECUTABLE)
+	@$(RM) $(OBJECTS) $(EXECDIR)lib$(EXECUTABLE)
 	
 $(EXECUTABLE): $(OBJECTS) 
-	$(AR) rcs $(EXECDIR)lib$(EXECUTABLE) $(OBJECTS)
+	$(CXX) -shared -o $(EXECDIR)lib$(EXECUTABLE) $(OBJECTS)
 
 $(OBJECTS): obj/%.o: %.cpp
-	$(CXX) -c $< -o $@
+	$(CXX) -fpic -c $< -o $@
 

@@ -2,7 +2,7 @@ SOURCES=$(wildcard *.cpp)
 OBJECTS=$(patsubst %.cpp,obj/%.o,$(SOURCES))
 EXECUTABLE=tmx-parser.so
 EXECDIR=bin/
-INSTALL_PATH?=/usr/local/lib/
+INSTALL_PATH?=/usr/lib/
 
 all: $(SOURCES) $(EXECUTABLE)
 

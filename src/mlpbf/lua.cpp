@@ -29,7 +29,7 @@ void addLuaRef( const std::string & str, int ref );
 void removeLuaRef( const std::string & str );
 
 sf::Keyboard::Key getKeyFromString( const char * str );
-const char * getStringFromKey( sf::Keyboard::Key key )
+const char * getStringFromKey( sf::Keyboard::Key key );
 
 /***************************************************************************/
 
@@ -1349,7 +1349,7 @@ sf::Keyboard::Key getKeyFromString( const char * str )
 
 const char * getStringFromKey( sf::Keyboard::Key key )
 {
-	for ( int i = 0; i < keyList[i].str != NULL; i++ )
+	for ( int i = 0; keyList[i].str != NULL; i++ )
 		if ( key == keyList[i].key )
 			return keyList[i].str;
 	return NULL;

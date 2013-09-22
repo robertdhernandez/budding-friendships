@@ -18,7 +18,7 @@ namespace bf
 		sf::Uint8 getInventoryLevel() const { return m_invLevel; }	
 		void setInventoryLevel( sf::Uint8 level );
 		
-		inline void enableControl( bool b ) { m_canControl = b; }
+		inline void enableControl( bool b ) { m_canControl = b; if ( !b ) setMovement( Idle, getDirection() ); }
 		inline bool canControl() const { return m_canControl; }
 
 	private:

@@ -236,7 +236,8 @@ int main( int argc, char* argv[] )
 
 			sf::Time time = clock.restart();
 			state.update( time );
-			lua::update( time.asMilliseconds() );
+			if ( !Console::singleton().state() ) 
+				lua::update( time.asMilliseconds() );
 			FPS.update();
 			ScreenTint.update();
 

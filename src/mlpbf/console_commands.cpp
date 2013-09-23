@@ -334,6 +334,60 @@ class ReloadMapObject : public con::Command
 	}
 };
 
+class Save : public con::Command
+{
+	const std::string name() const
+	{
+		return "save";
+	}
+	
+	unsigned minArgs() const
+	{
+		return 1;
+	}
+	
+	void help( Console & c ) const
+	{
+		c << setcinfo << "Saves data to a save file" << con::endl;
+		c << setcinfo << "save filename" << con::endl;
+	}
+	
+	void execute( Console & c, const std::vector< std::string > & args ) const
+	{
+		FILE * fp = fopen( args[0].c_str(), "wb" );
+		lua::save( fp );
+		fclose( fp );
+	}
+};
+
+class Load : public con::Command
+{
+	const std::string name() const
+	{
+		return "load";
+	}
+	
+	unsigned minArgs() const
+	{
+		return 1;
+	}
+	
+	void help( Console & c ) const
+	{
+		c << setcinfo << "Loads save data from a file" << con::endl;
+		c << setcinfo << "load filename" << con::endl;
+	}
+	
+	void execute( Console & c, const std::vector< std::string > & args ) const
+	{
+		FILE * fp = fopen( args[0].c_str(), "rb" );
+		if ( fp == NULL )
+			throw Exception( "File not found" );
+		lua::load( fp );
+		fclose( fp );
+	}
+};
+
 void defaultCommands( Console & console )
 {
 	console.addCommand( new Help );
@@ -347,6 +401,8 @@ void defaultCommands( Console & console )
 	console.addCommand( new Message );
 	console.addCommand( new Lua );
 	console.addCommand( new ReloadMapObject );
+	console.addCommand( new Save );
+	console.addCommand( new Load );
 }
 
 /***************************************************************************/

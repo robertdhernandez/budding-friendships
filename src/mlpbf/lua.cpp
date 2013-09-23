@@ -1268,7 +1268,7 @@ void save_rec( FILE * fp )
 		{
 			case LUA_TBOOLEAN:
 			{
-				fprintf( stdout, "%s=LUA_TBOOLEAN\n", key );
+				//fprintf( stdout, "%s=LUA_TBOOLEAN\n", key );
 				write_key( fp, key, type );
 				
 				bool b = lua_toboolean( LUA, -1 );
@@ -1277,7 +1277,7 @@ void save_rec( FILE * fp )
 			break;
 			case LUA_TNUMBER:
 			{
-				fprintf( stdout, "%s=LUA_TNUMBER\n", key );
+				//fprintf( stdout, "%s=LUA_TNUMBER\n", key );
 				write_key( fp, key, type );
 				
 				LUA_NUMBER num = lua_tonumber( LUA, -1 );
@@ -1286,7 +1286,7 @@ void save_rec( FILE * fp )
 			break;
 			case LUA_TSTRING:
 			{
-				fprintf( stdout, "%s=LUA_TSTRING\n", key );
+				//fprintf( stdout, "%s=LUA_TSTRING\n", key );
 				write_key( fp, key, type );
 				
 				const char * str = lua_tostring( LUA, -1 );
@@ -1295,7 +1295,7 @@ void save_rec( FILE * fp )
 			break;
 			case LUA_TTABLE:
 			{
-				fprintf( stdout, "%s=LUA_TTABLE\n", key );
+				//fprintf( stdout, "%s=LUA_TTABLE\n", key );
 				write_key( fp, key, type );
 				
 				lua_pushvalue( LUA, -1 );
@@ -1323,20 +1323,32 @@ void save( FILE * fp )
 	fputc( '\0', fp );
 }
 
+inline std::string read_string( FILE * fp )
+{
+	std::string str;
+	for ( char c = fgetc( fp ); c != '\0'; c = fgetc( fp ) )
+		str += c;
+	return str;
+}
+
 void load_rec( FILE * fp )
 {
 	assert( lua_istable( LUA, -1 ) );
-
-	std::uint8_t type;
 	
-	while ( true )
+	char c;
+	for ( c = fgetc( fp ); c != '\0'; c = fgetc( fp ) )
 	{
+		ungetc( c, fp );
+	
 		// get the key name
-		std::string key;
-		for ( char c = fgetc( fp ); c != '\0'; c = fgetc( fp ) )
-			key.append( 1, c );
+		std::string key = read_string( fp );
+		
+		// check if the key is an integer value
+		bool isIntegerKey; int keyInt;
+		isIntegerKey = sscanf( key.c_str(), "%d", &keyInt ) == 1;
 			
 		// get the value type
+		std::uint8_t type;
 		fread( &type, sizeof( std::uint8_t ), 1, fp );
 		
 		// push the key-value pair to the table
@@ -1344,41 +1356,80 @@ void load_rec( FILE * fp )
 		{
 			case LUA_TBOOLEAN:
 			{
-				bool b; fread( &b, sizeof( bool ), 1, fp );
-				lua_pushboolean( LUA, b );
-				lua_setfield( LUA, -2, key.c_str() );
+				//fprintf( stdout, "%s=LUA_TBOOLEAN\n", key.c_str() );
+				
+				bool b; fread( &b, sizeof( bool ), 1, fp );				
+				if ( isIntegerKey )
+				{
+					lua_pushnumber( LUA, keyInt );
+					lua_pushboolean( LUA, b );
+					lua_settable( LUA, -3 );
+				}
+				else
+				{
+					lua_pushboolean( LUA, b );
+					lua_setfield( LUA, -2, key.c_str() );
+				}
 			}
 			break;
 			case LUA_TNUMBER:
 			{
+				//fprintf( stdout, "%s=LUA_TNUMBER\n", key.c_str() );
+				
 				LUA_NUMBER num; fread( &num, sizeof( LUA_NUMBER ), 1, fp );
-				lua_pushnumber( LUA, num );
-				lua_setfield( LUA, -2, key.c_str() );
+				if ( isIntegerKey )
+				{
+					lua_pushnumber( LUA, keyInt );
+					lua_pushnumber( LUA, num );
+					lua_settable( LUA, -3 );
+				}
+				else
+				{
+					lua_pushnumber( LUA, num );
+					lua_setfield( LUA, -2, key.c_str() );
+				}
 			}
 			break;
 			case LUA_TSTRING:
 			{
-				std::string val; 
-				for ( char c = fgetc( fp ); c != '\0'; c = fgetc( fp ) ) 
-					val.append( 1, c );
-				lua_pushstring( LUA, val.c_str() );
-				lua_setfield( LUA, -2, key.c_str() );
+				//fprintf( stdout, "%s=LUA_TSTRING\n", key.c_str() );
+				
+				std::string val = read_string( fp );
+				
+				if ( isIntegerKey )
+				{
+					lua_pushnumber( LUA, keyInt );
+					lua_pushstring( LUA, val.c_str() );
+					lua_settable( LUA, -3 );
+				}
+				else
+				{
+					lua_pushstring( LUA, val.c_str() );
+					lua_setfield( LUA, -2, key.c_str() );
+				}
 			}
 			break;
 			case LUA_TTABLE:
-				fputs( lua_tostring( LUA, -2 ), fp ); fputc( '\0', fp );
-				fwrite( &type, sizeof( std::uint8_t ), 1, fp );
-				save_rec( fp );
+			{
+				//fprintf( stdout, "%s=LUA_TTABLE\n", key.c_str() );
+				
+				if ( isIntegerKey )
+				{
+					lua_pushnumber( LUA, keyInt );
+					lua_newtable( LUA );
+					load_rec( fp );
+					lua_settable( LUA, -3 );
+				}
+				else
+				{
+					lua_newtable( LUA );
+					load_rec( fp );
+					lua_setfield( LUA, -2, key.c_str() );
+				}
+			}
 			break;
 			default: break;
 		}
-		
-		// check if reached end-of-table with null terminator
-		char c = fgetc( fp );
-		if ( c == '\0' ) return;
-		
-		// unget the character and repeat
-		ungetc( c, fp );
 	}
 }
 

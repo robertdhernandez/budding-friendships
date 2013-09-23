@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <cstring>
+#include <cstdio>
 #include <deque>
 #include <iostream>
 #include <unordered_map>
@@ -1229,6 +1230,125 @@ void update( unsigned ms )
 			removeLuaRef( ref.first );
 		}
 	}
+}
+
+void save_rec( FILE * fp )
+{
+	assert( lua_istable( LUA, -1 ) );
+
+	std::uint8_t type;
+	lua_pushnil( LUA );
+	
+	while ( lua_next( LUA, -2 ) )
+	{
+		switch ( type = lua_type( LUA, -1 ) )
+		{
+			case LUA_TBOOLEAN:
+			{
+				fputs( lua_tostring( LUA, -2 ), fp ); fputc( '\0', fp );
+				fwrite( &type, sizeof( std::uint8_t ), 1, fp );
+				bool b = lua_toboolean( LUA, -1 );
+				fwrite( &b, sizeof( bool ), 1, fp );
+			}
+			break;
+			case LUA_TNUMBER:
+			{
+				fputs( lua_tostring( LUA, -2 ), fp ); fputc( '\0', fp );
+				fwrite( &type, sizeof( std::uint8_t ), 1, fp );
+				LUA_NUMBER num = lua_tonumber( LUA, -1 );
+				fwrite( &num, sizeof( LUA_NUMBER ), 1, fp );
+			}
+			break;
+			case LUA_TSTRING:
+				fputs( lua_tostring( LUA, -2 ), fp ); fputc( '\0', fp );
+				fwrite( &type, sizeof( std::uint8_t ), 1, fp );
+				fputs( lua_tostring( LUA, -1 ), fp ); fputc( '\0', fp );
+			break;
+			case LUA_TTABLE:
+				fputs( lua_tostring( LUA, -2 ), fp ); fputc( '\0', fp );
+				fwrite( &type, sizeof( std::uint8_t ), 1, fp );
+				save_rec( fp );
+				fputc( '\0', fp );
+			break;
+			default: break;
+		}
+		lua_pop( LUA, 1 );
+	}
+	
+	lua_pop( LUA, 1 );
+}
+
+void save( FILE * fp )
+{
+	lua_getglobal( LUA, "data" );
+	save_rec( fp );
+	fputc( '\0', fp );
+}
+
+void load_rec( FILE * fp )
+{
+	assert( lua_istable( LUA, -1 ) );
+
+	std::uint8_t type;
+	
+	while ( true )
+	{
+		// get the key name
+		std::string key;
+		for ( char c = fgetc( fp ); c != '\0'; c = fgetc( fp ) )
+			key.append( 1, c );
+			
+		// get the value type
+		fread( &type, sizeof( std::uint8_t ), 1, fp );
+		
+		// push the key-value pair to the table
+		switch ( type )
+		{
+			case LUA_TBOOLEAN:
+			{
+				bool b; fread( &b, sizeof( bool ), 1, fp );
+				lua_pushboolean( LUA, b );
+				lua_setfield( LUA, -2, key.c_str() );
+			}
+			break;
+			case LUA_TNUMBER:
+			{
+				LUA_NUMBER num; fread( &num, sizeof( LUA_NUMBER ), 1, fp );
+				lua_pushnumber( LUA, num );
+				lua_setfield( LUA, -2, key.c_str() );
+			}
+			break;
+			case LUA_TSTRING:
+			{
+				std::string val; 
+				for ( char c = fgetc( fp ); c != '\0'; c = fgetc( fp ) ) 
+					val.append( 1, c );
+				lua_pushstring( LUA, val.c_str() );
+				lua_setfield( LUA, -2, key.c_str() );
+			}
+			break;
+			case LUA_TTABLE:
+				fputs( lua_tostring( LUA, -2 ), fp ); fputc( '\0', fp );
+				fwrite( &type, sizeof( std::uint8_t ), 1, fp );
+				save_rec( fp );
+			break;
+			default: break;
+		}
+		
+		// check if reached end-of-table with null terminator
+		char c = fgetc( fp );
+		if ( c == '\0' ) return;
+		
+		// unget the character and repeat
+		ungetc( c, fp );
+	}
+}
+
+void load( FILE * fp )
+{
+	lua_newtable( LUA );
+	load_rec( fp );
+	lua_setglobal( LUA, "data" );
 }
 
 /***************************************************************************/

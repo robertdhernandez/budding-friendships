@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdio>
 #include <deque>
 #include <lua5.2/lua.hpp>
 #include <SFML/Graphics/Drawable.hpp>
@@ -13,6 +14,9 @@ namespace bf
 		void cleanup();
 		
 		void update( unsigned ms );
+		
+		void load( FILE * fp );
+		void save( FILE * fp );
 	
 		lua_State * state();
 		

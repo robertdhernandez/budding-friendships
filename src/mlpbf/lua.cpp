@@ -1191,6 +1191,10 @@ void init()
 	register_library( l, "player", libplayer );
 	register_library( l, "timer", libtimer );
 	register_library( l, "field", libfield );
+	
+	// create data global table
+	lua_newtable( LUA );
+	lua_setglobal( LUA, "data" );
 }
 
 void cleanup()

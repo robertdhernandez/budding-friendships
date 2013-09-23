@@ -1236,47 +1236,75 @@ void update( unsigned ms )
 	}
 }
 
+/***************************************************************************/
+
+inline void write_key( FILE * fp, const char * key, std::uint8_t type )
+{
+	fputs( key, fp ); fputc( '\0', fp );
+	fwrite( &type, sizeof( std::uint8_t ), 1, fp );	
+}
+
 void save_rec( FILE * fp )
 {
 	assert( lua_istable( LUA, -1 ) );
-
-	std::uint8_t type;
-	lua_pushnil( LUA );
 	
-	while ( lua_next( LUA, -2 ) )
+	for ( lua_pushnil( LUA ); lua_next( LUA, -2 ); lua_pop( LUA, 1 ) )
 	{
+		std::uint8_t type;
+		const char * key;
+		
+		if ( lua_isnumber( LUA, -2 ) )
+		{
+			lua_pushvalue( LUA, -2 );
+			key = lua_tostring( LUA, -1 );
+			lua_pop( LUA, 1 );
+		}
+		else
+			key = lua_tostring( LUA, -2 );
+		
+		if ( key == NULL ) continue;
+	
 		switch ( type = lua_type( LUA, -1 ) )
 		{
 			case LUA_TBOOLEAN:
 			{
-				fputs( lua_tostring( LUA, -2 ), fp ); fputc( '\0', fp );
-				fwrite( &type, sizeof( std::uint8_t ), 1, fp );
+				fprintf( stdout, "%s=LUA_TBOOLEAN\n", key );
+				write_key( fp, key, type );
+				
 				bool b = lua_toboolean( LUA, -1 );
 				fwrite( &b, sizeof( bool ), 1, fp );
 			}
 			break;
 			case LUA_TNUMBER:
 			{
-				fputs( lua_tostring( LUA, -2 ), fp ); fputc( '\0', fp );
-				fwrite( &type, sizeof( std::uint8_t ), 1, fp );
+				fprintf( stdout, "%s=LUA_TNUMBER\n", key );
+				write_key( fp, key, type );
+				
 				LUA_NUMBER num = lua_tonumber( LUA, -1 );
 				fwrite( &num, sizeof( LUA_NUMBER ), 1, fp );
 			}
 			break;
 			case LUA_TSTRING:
-				fputs( lua_tostring( LUA, -2 ), fp ); fputc( '\0', fp );
-				fwrite( &type, sizeof( std::uint8_t ), 1, fp );
-				fputs( lua_tostring( LUA, -1 ), fp ); fputc( '\0', fp );
+			{
+				fprintf( stdout, "%s=LUA_TSTRING\n", key );
+				write_key( fp, key, type );
+				
+				const char * str = lua_tostring( LUA, -1 );
+				fputs( str, fp ); fputc( '\0', fp );
+			}
 			break;
 			case LUA_TTABLE:
-				fputs( lua_tostring( LUA, -2 ), fp ); fputc( '\0', fp );
-				fwrite( &type, sizeof( std::uint8_t ), 1, fp );
+			{
+				fprintf( stdout, "%s=LUA_TTABLE\n", key );
+				write_key( fp, key, type );
+				
+				lua_pushvalue( LUA, -1 );
 				save_rec( fp );
 				fputc( '\0', fp );
+			}
 			break;
 			default: break;
 		}
-		lua_pop( LUA, 1 );
 	}
 	
 	lua_pop( LUA, 1 );
@@ -1285,6 +1313,12 @@ void save_rec( FILE * fp )
 void save( FILE * fp )
 {
 	lua_getglobal( LUA, "data" );
+	if ( !lua_istable( LUA, -1 ) )
+	{
+		lua_pop( LUA, 1 );
+		throw Exception( "Could not find global Lua table \"data\"" );
+	}
+	
 	save_rec( fp );
 	fputc( '\0', fp );
 }

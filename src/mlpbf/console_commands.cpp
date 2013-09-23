@@ -357,6 +357,8 @@ class Save : public con::Command
 		FILE * fp = fopen( args[0].c_str(), "wb" );
 		lua::save( fp );
 		fclose( fp );
+		
+		c << setcinfo << "Saved to " << args[0] << con::endl;
 	}
 };
 

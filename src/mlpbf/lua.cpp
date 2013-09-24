@@ -1195,6 +1195,13 @@ void init()
 	// create data global table
 	lua_newtable( LUA );
 	lua_setglobal( LUA, "data" );
+	
+	// load and execute data/main.lua
+	if ( luaL_loadfile( LUA, "data/main.lua" ) || lua_pcall( LUA, 0, 0, 0 ) )
+	{
+		Console::singleton() << con::setcerr << lua_tostring( LUA, -1 ) << con::endl;
+		lua_pop( LUA, 1 );
+	}
 }
 
 void cleanup()

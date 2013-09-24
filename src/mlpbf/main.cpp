@@ -146,8 +146,8 @@ public:
 
 void init()
 {
-	bf::lua::init(); 	// lua
 	bf::res::init(); 	// resource managers
+	bf::lua::init(); 	// lua
 	bf::db::init(); 	// databases
 	bf::farm::init(); 	// farm 
 	
@@ -164,8 +164,8 @@ void cleanup()
 	
 	bf::farm::cleanup(); 	// farm
 	bf::db::cleanup(); 		// databases
-	bf::res::cleanup(); 	// resource managers
 	bf::lua::cleanup(); 	// lua
+	bf::res::cleanup(); 	// resource managers
 }
 
 /***************************************************************************/

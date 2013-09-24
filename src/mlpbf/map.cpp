@@ -3,7 +3,6 @@
 #include "mlpbf/database.h"
 #include "mlpbf/direction.h"
 #include "mlpbf/exception.h"
-#include "mlpbf/farm.h"
 #include "mlpbf/global.h"
 #include "mlpbf/lua.h"
 #include "mlpbf/map.h"
@@ -586,88 +585,6 @@ void MultiMapViewer::draw( sf::RenderTarget& target, sf::RenderStates states ) c
 
 /***************************************************************************/
 
-class Field : public Map::Object, res::TextureLoader<>
-{
-	static const int FIELD_SIZE = farm::field::WIDTH * farm::field::HEIGHT;
-	std::vector< farm::field::Tile * > highlight;
-
-	void clearHighlighted()
-	{
-		for ( farm::field::Tile * tile : highlight )
-			tile->highlight = false;
-		highlight.clear();
-	}
-	
-	const sf::Vector2i convert( const sf::Vector2f & pos ) const
-	{
-		return sf::Vector2i( (unsigned) pos.x / 32U, (unsigned) pos.y / 32U );
-	}
-
-	void load( const Tmx::Object & )
-	{
-		// texture that contains (watered) tilled graphics
-		loadTexture( "data/tilesets/crops.png" );
-	}
-	
-	void onInteract( const sf::Vector2f & pos )
-	{
-		try
-		{
-			const sf::Vector2i fpos = convert( pos );
-			farm::field::Tile & tile = farm::field::getTile( fpos.x, fpos.y );	
-			
-			if ( tile.water )
-				farm::field::placeStone( fpos.x, fpos.y, 1 );
-			else if ( tile.till > 0 )
-				tile.water = true;
-			else
-				tile.till = 1U;
-		}
-		catch ( std::exception & err )
-		{
-			Console::singleton() << con::setcerr << err.what() << con::endl;
-		}
-	}
-	
-	bool hasCollision( const sf::Vector2f & pos ) const
-	{
-		const sf::Vector2i fpos = convert( pos );
-		const farm::field::Tile & tile = farm::field::getTile( fpos.x, fpos.y );
-		return tile.object != nullptr && tile.object->hasCollision();
-	}
-	
-	void draw( sf::RenderTarget & target, sf::RenderStates states ) const
-	{
-		using namespace bf::farm;
-	
-		states.transform *= getTransform();
-		
-		sf::Sprite sprite( getTexture() );
-		const field::Tile * tiles = field::getTiles();
-		
-		// draw tiles
-		for ( int i = 0; i < FIELD_SIZE; i++ )
-		{
-			const field::Tile & tile = tiles[i];
-			sprite.setPosition( i % field::WIDTH * TILE_WIDTH, i / field::WIDTH * TILE_HEIGHT );
-			
-			// draw till
-			if ( tile.till > 0 )
-			{
-				sprite.setTextureRect( sf::IntRect( tile.water ? 32 : 0, 0, 32, 32 ) );
-				target.draw( sprite, states );
-			}
-		}
-		
-		// draw objects
-		const std::vector< field::Object * > & objects = field::getObjects();
-		for ( field::Object * obj : objects )
-			target.draw( *obj, states );
-	}
-};
-
-/***************************************************************************/
-
 static int lua_addImage( lua_State * l );
 static int lua_addText( lua_State * l );
 static int lua_bounds( lua_State * l );
@@ -966,10 +883,7 @@ Map::Object * generateObject( const Tmx::Object & tmxObject )
 		std::string type = tmxObject.GetType();
 		std::transform( type.begin(), type.end(), type.begin(), ::tolower );
 		
-		if ( type == "field" )
-			object = new Field();
-		else
-			object = new Script();
+		object = new Script();
 	
 		object->setPosition( (float) tmxObject.GetX(), (float) tmxObject.GetY());
 

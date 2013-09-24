@@ -5,7 +5,6 @@
 #include "mlpbf/resource.h"
 
 #include "mlpbf/database.h"
-#include "mlpbf/farm.h"
 
 #include "mlpbf/state/map.h"
 
@@ -149,7 +148,6 @@ void init()
 	bf::res::init(); 	// resource managers
 	bf::lua::init(); 	// lua
 	bf::db::init(); 	// databases
-	bf::farm::init(); 	// farm 
 	
 	FPS.init();
 	
@@ -162,7 +160,6 @@ void cleanup()
 	// clear console commands as some may require lua
 	bf::Console::singleton().clearCommands();
 	
-	bf::farm::cleanup(); 	// farm
 	bf::db::cleanup(); 		// databases
 	bf::lua::cleanup(); 	// lua
 	bf::res::cleanup(); 	// resource managers
